@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Diabetes Risk Predictor</h1>
+        <form id="predictionForm">
+            <div class="form-group">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hypertension">Hypertension:</label>
+                <select id="hypertension" name="hypertension" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="heart_disease">Heart Disease:</label>
+                <select id="heart_disease" name="heart_disease" required>
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="smoking_history">Smoking History:</label>
+                <select id="smoking_history" name="smoking_history" required>
+                    <option value="">Select Smoking History</option>
+                    <option value="never">Never</option>
+                    <option value="No Info">No Info</option>
+                    <option value="current">Current Smoker</option>
+                    <option value="ever">Ever Smoked</option>
+                    <option value="former">Former Smoker</option>
+                    <option value="not current">Not Current Smoker</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bmi">BMI:</label>
+                <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label for="HbA1c_level">HbA1c Level:</label>
+                <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="blood_glucose_level">Blood Glucose Level:</label>
+                <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
+            </div>
+
+            <button type="submit">Predict Diabetes Risk</button>
+        </form>
+
+        <div id="predictionResult" class="result">
+            </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

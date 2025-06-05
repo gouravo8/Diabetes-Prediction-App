@@ -1,0 +1,28 @@
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.ipynb_checkpoints/
+.DS_Store
+
+# Jupyter Notebook files
+.ipynb_checkpoints/
+
+# Model artifacts (if you don't want to track them, though for deployment you might)
+# We'll include these for now, but in very large projects, you might use Git LFS
+# model_artifacts/
+
+# Log files
+*.log
+logs/
+
+# IDE-specific files (e.g., VS Code)
+.vscode/
+
+# Database files
+*.db
+*.sqlite
