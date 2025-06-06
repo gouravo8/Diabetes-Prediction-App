@@ -7,8 +7,41 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- This is the top part of your page. It now has a new section for a logo and your name. -->
+    <header>
+        <div class="logo-container">
+            <!-- This is the new logo. It's built directly into the code using SVG, so you don't need a separate image file for it. -->
+            <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#007bff;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#0056b3;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <!-- This draws the circular background for the logo -->
+                <circle cx="50" cy="50" r="45" fill="url(#gradient)" stroke="#ffffff" stroke-width="2"/>
+                <!-- This draws a stylized 'D' shape inside the circle for the logo -->
+                <path d="M 30 20 L 30 80 Q 70 80 70 50 Q 70 20 30 20 Z" fill="#ffffff"/>
+            </svg>
+            <!-- This is the main title of your app -->
+            <h1 class="app-title">Diabetes Risk Predictor</h1>
+        </div>
+        <!-- This section displays your name "By Gourav Rajput" -->
+        <div class="personal-info">
+            <h2>By Gourav Rajput</h2>
+        </div>
+    </header>
+
+    <!-- This is a section for a large image (like a banner). 
+         It uses a placeholder image from a website. 
+         If you want to use your own image, save it in your 'static' folder and update the 'src' link! -->
+    <div class="hero-image-container">
+        <img src="https://placehold.co/700x200/4CAF50/ffffff?text=Health+Is+Wealth" alt="Health Awareness" class="hero-image">
+    </div>
+
+    <!-- This is the main container for your prediction form -->
     <div class="container">
-        <h1>Diabetes Risk Predictor</h1>
+        <!-- This is your existing form for inputting health data -->
         <form id="predictionForm">
             <div class="form-group">
                 <label for="gender">Gender:</label>
@@ -72,10 +105,12 @@
             <button type="submit">Predict Diabetes Risk</button>
         </form>
 
+        <!-- This is where the prediction result will show up after you click the button -->
         <div id="predictionResult" class="result">
-            </div>
+        </div>
     </div>
 
+    <!-- This links to your JavaScript file, which handles how the form works -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
