@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diabetes Prediction App</title>
+    <title>Health Risk Predictor</title> <!-- Changed title to be more general -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- This is the top part of your page. It now has a new section for a logo and your name. -->
+    <!-- Header Section with SVG Logo and your name -->
     <header>
         <div class="logo-container">
-            <!-- This is the new logo. It's built directly into the code using SVG, so you don't need a separate image file for it. -->
+            <!-- SVG Logo: A stylized 'D' (or general health symbol) -->
             <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -18,99 +18,128 @@
                         <stop offset="100%" style="stop-color:#0056b3;stop-opacity:1" />
                     </linearGradient>
                 </defs>
-                <!-- This draws the circular background for the logo -->
                 <circle cx="50" cy="50" r="45" fill="url(#gradient)" stroke="#ffffff" stroke-width="2"/>
-                <!-- This draws a stylized 'D' shape inside the circle for the logo -->
                 <path d="M 30 20 L 30 80 Q 70 80 70 50 Q 70 20 30 20 Z" fill="#ffffff"/>
             </svg>
-            <!-- This is the main title of your app -->
-            <h1 class="app-title">Diabetes Risk Predictor</h1>
+            <h1 class="app-title">Health Risk Predictor</h1> <!-- Changed title here too -->
         </div>
-        <!-- This section displays your name "By Gourav Rajput" -->
         <div class="personal-info">
             <h2>By Gourav Rajput</h2>
         </div>
     </header>
 
-    <!-- This is a section for a large image (like a banner). 
-         It uses a placeholder image from a website. 
-         If you want to use your own image, save it in your 'static' folder and update the 'src' link! -->
+    <!-- Hero Image Section -->
     <div class="hero-image-container">
-        <img src="https://placehold.co/700x200/4CAF50/ffffff?text=Health+Is+Wealth" alt="Health Awareness" class="hero-image">
+        <!-- Placeholder image from placehold.co. You can replace this URL with your own image if desired. -->
+        <img src="https://placehold.co/700x200/4CAF50/ffffff?text=Your+Health+Matters" alt="Health Awareness" class="hero-image">
     </div>
 
-    <!-- This is the main container for your prediction form -->
     <div class="container">
-        <!-- This is your existing form for inputting health data -->
-        <form id="predictionForm">
-            <div class="form-group">
-                <label for="gender">Gender:</label>
-                <select id="gender" name="gender" required>
-                    <option value="">Select Gender</option>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
+        <!-- New: Disease Selection Dropdown -->
+        <div class="disease-selection-group">
+            <label for="diseaseType">Select Disease for Prediction:</label>
+            <select id="diseaseType" name="diseaseType" required>
+                <option value="">-- Choose a Disease --</option>
+                <option value="diabetes">Diabetes</option>
+                <option value="heart_disease">Heart Disease</option>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label for="age">Age:</label>
-                <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
-            </div>
+        <!-- Diabetes Prediction Form Section (initially visible, will be controlled by JS) -->
+        <div id="diabetesFormSection" class="form-section">
+            <h3 class="section-title">Diabetes Prediction</h3>
+            <form id="diabetesPredictionForm"> <!-- Changed form ID for clarity -->
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="hypertension">Hypertension:</label>
-                <select id="hypertension" name="hypertension" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
+                </div>
 
-            <div class="form-group">
-                <label for="heart_disease">Heart Disease:</label>
-                <select id="heart_disease" name="heart_disease" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="hypertension">Hypertension:</label>
+                    <select id="hypertension" name="hypertension" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="smoking_history">Smoking History:</label>
-                <select id="smoking_history" name="smoking_history" required>
-                    <option value="">Select Smoking History</option>
-                    <option value="never">Never</option>
-                    <option value="No Info">No Info</option>
-                    <option value="current">Current Smoker</option>
-                    <option value="ever">Ever Smoked</option>
-                    <option value="former">Former Smoker</option>
-                    <option value="not current">Not Current Smoker</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="heart_disease">Heart Disease:</label>
+                    <select id="heart_disease" name="heart_disease" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="bmi">BMI:</label>
-                <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
-            </div>
+                <div class="form-group">
+                    <label for="smoking_history">Smoking History:</label>
+                    <select id="smoking_history" name="smoking_history" required>
+                        <option value="">Select Smoking History</option>
+                        <option value="never">Never</option>
+                        <option value="No Info">No Info</option>
+                        <option value="current">Current Smoker</option>
+                        <option value="ever">Ever Smoked</option>
+                        <option value="former">Former Smoker</option>
+                        <option value="not current">Not Current Smoker</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="HbA1c_level">HbA1c Level:</label>
-                <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
-            </div>
+                <div class="form-group">
+                    <label for="bmi">BMI:</label>
+                    <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
+                </div>
 
-            <div class="form-group">
-                <label for="blood_glucose_level">Blood Glucose Level:</label>
-                <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
-            </div>
+                <div class="form-group">
+                    <label for="HbA1c_level">HbA1c Level:</label>
+                    <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
+                </div>
 
-            <button type="submit">Predict Diabetes Risk</button>
-        </form>
+                <div class="form-group">
+                    <label for="blood_glucose_level">Blood Glucose Level:</label>
+                    <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
+                </div>
 
-        <!-- This is where the prediction result will show up after you click the button -->
+                <button type="submit">Predict Diabetes Risk</button>
+            </form>
+        </div>
+
+        <!-- Heart Disease Prediction Form Section (initially hidden, will be controlled by JS) -->
+        <div id="heartDiseaseFormSection" class="form-section hidden">
+            <h3 class="section-title">Heart Disease Prediction</h3>
+            <p>Form fields for Heart Disease will go here, dynamically generated by JavaScript.</p>
+            <form id="heartDiseasePredictionForm">
+                <!-- Example fields (these will be dynamically added later) -->
+                <div class="form-group">
+                    <label for="hd_age">Age:</label>
+                    <input type="number" id="hd_age" name="hd_age" required>
+                </div>
+                <div class="form-group">
+                    <label for="hd_sex">Sex:</label>
+                    <select id="hd_sex" name="hd_sex" required>
+                        <option value="">Select Sex</option>
+                        <option value="1">Male</option>
+                        <option value="0">Female</option>
+                    </select>
+                </div>
+                <!-- ... other heart disease specific fields will be added here later ... -->
+                 <button type="submit">Predict Heart Disease Risk</button>
+            </form>
+        </div>
+
         <div id="predictionResult" class="result">
+            <!-- Prediction result will be displayed here dynamically by JavaScript -->
         </div>
     </div>
 
-    <!-- This links to your JavaScript file, which handles how the form works -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

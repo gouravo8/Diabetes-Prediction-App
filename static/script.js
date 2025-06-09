@@ -1,27 +1,58 @@
-// This code runs automatically once the whole web page has loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Finds your prediction form on the page
-    const predictionForm = document.getElementById('predictionForm');
-    // Finds the special box where the prediction result will be shown
+    const diseaseTypeSelect = document.getElementById('diseaseType');
+    const diabetesFormSection = document.getElementById('diabetesFormSection');
+    const heartDiseaseFormSection = document.getElementById('heartDiseaseFormSection');
     const predictionResultDiv = document.getElementById('predictionResult');
 
-    // Sets up what happens when you click the "Predict Diabetes Risk" button
-    predictionForm.addEventListener('submit', function(event) {
-        event.preventDefault(); // Stops the page from refreshing when you click the button
+    // Get references to both prediction forms
+    const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
+    const heartDiseasePredictionForm = document.getElementById('heartDiseasePredictionForm');
 
-        // Clears any old prediction results and hides the result box
+
+    // Function to show/hide form sections based on selection
+    function showSelectedForm() {
+        const selectedDisease = diseaseTypeSelect.value;
+        predictionResultDiv.classList.remove('show'); // Hide result when changing form
+
+        if (selectedDisease === 'diabetes') {
+            diabetesFormSection.classList.remove('hidden');
+            heartDiseaseFormSection.classList.add('hidden');
+            // Ensure the correct form's submit event listener is active if needed
+            // (Currently, only diabetes form is fully functional)
+        } else if (selectedDisease === 'heart_disease') {
+            diabetesFormSection.classList.add('hidden');
+            heartDiseaseFormSection.classList.remove('hidden');
+            // Here you would typically populate the heart disease form fields dynamically
+            // For now, it just shows the placeholder text
+        } else {
+            // No disease selected or invalid
+            diabetesFormSection.classList.add('hidden');
+            heartDiseaseFormSection.classList.add('hidden');
+        }
+    }
+
+    // Initial display based on default selection
+    showSelectedForm();
+
+    // Event listener for disease type change
+    diseaseTypeSelect.addEventListener('change', showSelectedForm);
+
+    // Event listener for Diabetes Prediction Form submission
+    diabetesPredictionForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission (page reload)
+
+        // Clear previous results and hide if visible
         predictionResultDiv.innerHTML = '';
         predictionResultDiv.classList.remove('show');
 
-        // Gathers all the information you typed into the form
-        const formData = new FormData(predictionForm);
+        // Gather form data
+        const formData = new FormData(diabetesPredictionForm); // Use diabetesPredictionForm here
         const data = {};
         formData.forEach((value, key) => {
             data[key] = value;
         });
 
-        // Converts specific inputs (like age, BMI) from text to numbers, 
-        // because your prediction model needs numbers.
+        // Convert certain values to numbers as needed by your model
         data.age = parseFloat(data.age);
         data.bmi = parseFloat(data.bmi);
         data.HbA1c_level = parseFloat(data.HbA1c_level);
@@ -29,12 +60,11 @@ document.addEventListener('DOMContentLoaded', function() {
         data.hypertension = parseInt(data.hypertension);
         data.heart_disease = parseInt(data.heart_disease);
 
-        // A quick check to see if important number fields are actually numbers, 
-        // and if gender/smoking history are selected.
+        // Simple input validation (optional, but good practice)
         if (isNaN(data.age) || isNaN(data.bmi) || isNaN(data.HbA1c_level) || isNaN(data.blood_glucose_level)) {
             predictionResultDiv.innerHTML = '<p style="color: red;">Please enter valid numbers for Age, BMI, HbA1c Level, and Blood Glucose Level.</p>';
             predictionResultDiv.classList.add('show');
-            return; // Stops here if validation fails
+            return;
         }
         if (!data.gender || !data.smoking_history) {
              predictionResultDiv.innerHTML = '<p style="color: red;">Please select options for Gender and Smoking History.</p>';
@@ -42,35 +72,38 @@ document.addEventListener('DOMContentLoaded', function() {
              return;
         }
 
-        // Sends your collected data to your Flask app on the server
-        fetch('/predict_diabetes', { // This talks to the '/predict_diabetes' part of your app.py
-            method: 'POST', // Sends the data as a POST request
+        // Send data to your Flask backend
+        fetch('/predict_diabetes', { // This route is specific to diabetes prediction
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/json' // Tells the server the data is in JSON format
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data) // Converts your form data into a JSON string
+            body: JSON.stringify(data)
         })
         .then(response => {
-            // Checks if the server responded correctly (status 200 OK)
             if (!response.ok) {
-                // If there's an error from the server (like a 400 or 500 code)
                 return response.json().then(errorData => {
                     throw new Error(errorData.error || `Server error: ${response.status}`);
                 });
             }
-            // If the response is good, it converts the server's answer (which is JSON) into a JavaScript object
             return response.json();
         })
         .then(result => {
-            // Once we get the result, this updates the prediction box on your page
             predictionResultDiv.innerHTML = `<p>${result.prediction_text}</p>`;
-            predictionResultDiv.classList.add('show'); // Makes the prediction box smoothly appear
+            predictionResultDiv.classList.add('show');
         })
         .catch(error => {
-            // If anything goes wrong during the sending or receiving, this shows an error message
-            console.error('Error during prediction:', error); // Logs the error for debugging
+            console.error('Error during Diabetes prediction:', error);
             predictionResultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}. Please check your inputs.</p>`;
-            predictionResultDiv.classList.add('show'); // Makes the error message appear
+            predictionResultDiv.classList.add('show');
         });
     });
+
+    // Event listener for Heart Disease Prediction Form submission (Currently just a placeholder)
+    heartDiseasePredictionForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        predictionResultDiv.innerHTML = '<p>Heart Disease prediction functionality coming soon!</p>';
+        predictionResultDiv.classList.add('show');
+    });
+
 });
