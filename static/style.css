@@ -37,7 +37,7 @@ body::before {
     max-width: 700px;
     margin-top: 20px;
     position: relative;
-    z-index: 1;
+    z-index: 1; /* Ensure container is above the background overlay */
     border: 1px solid #e0e0e0; /* Subtle border */
 }
 

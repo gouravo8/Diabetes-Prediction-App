@@ -6,7 +6,7 @@
     <title>Health Risk Predictor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     
-    <!-- Firebase SDK Imports -->
+    <!-- Firebase SDK Imports and Initialization -->
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -23,7 +23,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Export Firebase instances to the global window object for script.js
+        // Export Firebase instances and functions to the global window object for script.js
         window.firebaseApp = app;
         window.firebaseAuth = auth;
         window.firebaseDb = db;
@@ -38,7 +38,7 @@
         window.onSnapshot = onSnapshot;
         window.addDoc = addDoc;
         window.serverTimestamp = serverTimestamp;
-        window.doc = doc; // Export doc for potential future use (e.g., specific document reference)
+        window.doc = doc;
     </script>
 </head>
 <body>
@@ -75,7 +75,7 @@
     </div>
 
     <div class="container">
-        <!-- New: Disease Selection Dropdown -->
+        <!-- Disease Selection Dropdown -->
         <div class="disease-selection-group">
             <label for="diseaseType">Select Disease for Prediction:</label>
             <select id="diseaseType" name="diseaseType" required>
@@ -185,6 +185,7 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- The script.js file is now loaded as a module -->
+    <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
