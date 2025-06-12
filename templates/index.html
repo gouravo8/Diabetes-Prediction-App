@@ -3,14 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Risk Predictor</title> <!-- Changed title to be more general -->
+    <title>Health Risk Predictor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration (will be provided by Canvas runtime)
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Export Firebase instances to the global window object for script.js
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.initialAuthToken = initialAuthToken;
+        window.appId = appId;
+        window.onAuthStateChanged = onAuthStateChanged; // Export for external use
+        window.signInAnonymously = signInAnonymously; // Export for external use
+        window.signInWithCustomToken = signInWithCustomToken; // Export for external use
+        window.collection = collection; // Export for external use
+        window.query = query; // Export for external use
+        window.where = where; // Export for external use
+        window.onSnapshot = onSnapshot; // Export for external use
+        window.addDoc = addDoc; // Export for external use
+        window.serverTimestamp = serverTimestamp; // Export for external use
+    </script>
 </head>
 <body>
     <!-- Header Section with SVG Logo and your name -->
     <header>
         <div class="logo-container">
-            <!-- SVG Logo: A stylized 'D' (or general health symbol) -->
             <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -21,16 +54,22 @@
                 <circle cx="50" cy="50" r="45" fill="url(#gradient)" stroke="#ffffff" stroke-width="2"/>
                 <path d="M 30 20 L 30 80 Q 70 80 70 50 Q 70 20 30 20 Z" fill="#ffffff"/>
             </svg>
-            <h1 class="app-title">Health Risk Predictor</h1> <!-- Changed title here too -->
+            <h1 class="app-title">Health Risk Predictor</h1>
         </div>
         <div class="personal-info">
             <h2>By Gourav Rajput</h2>
         </div>
     </header>
 
+    <!-- User Information Section -->
+    <div class="user-info-container container">
+        <p>Welcome! Your User ID: <span id="userIdDisplay">Loading...</span></p>
+        <button id="signInButton" class="auth-button">Sign In / Register</button>
+        <div id="authMessage" class="auth-message"></div>
+    </div>
+
     <!-- Hero Image Section -->
     <div class="hero-image-container">
-        <!-- Placeholder image from placehold.co. You can replace this URL with your own image if desired. -->
         <img src="https://placehold.co/700x200/4CAF50/ffffff?text=Your+Health+Matters" alt="Health Awareness" class="hero-image">
     </div>
 
@@ -45,10 +84,10 @@
             </select>
         </div>
 
-        <!-- Diabetes Prediction Form Section (initially visible, will be controlled by JS) -->
+        <!-- Diabetes Prediction Form Section -->
         <div id="diabetesFormSection" class="form-section">
             <h3 class="section-title">Diabetes Prediction</h3>
-            <form id="diabetesPredictionForm"> <!-- Changed form ID for clarity -->
+            <form id="diabetesPredictionForm">
                 <div class="form-group">
                     <label for="gender">Gender:</label>
                     <select id="gender" name="gender" required>
@@ -112,10 +151,10 @@
             </form>
         </div>
 
-        <!-- Heart Disease Prediction Form Section (initially hidden, will be controlled by JS) -->
+        <!-- Heart Disease Prediction Form Section (initially hidden) -->
         <div id="heartDiseaseFormSection" class="form-section hidden">
             <h3 class="section-title">Heart Disease Prediction</h3>
-            <p>Form fields for Heart Disease will go here, dynamically generated by JavaScript.</p>
+            <!-- Heart Disease form fields will be dynamically generated here by JavaScript -->
             <form id="heartDiseasePredictionForm">
                 <!-- Example fields (these will be dynamically added later) -->
                 <div class="form-group">
@@ -130,13 +169,20 @@
                         <option value="0">Female</option>
                     </select>
                 </div>
-                <!-- ... other heart disease specific fields will be added here later ... -->
                  <button type="submit">Predict Heart Disease Risk</button>
             </form>
         </div>
 
         <div id="predictionResult" class="result">
             <!-- Prediction result will be displayed here dynamically by JavaScript -->
+        </div>
+
+        <!-- Section for Past Predictions -->
+        <div class="past-predictions-section container">
+            <h3 class="section-title">Your Past Predictions</h3>
+            <div id="pastPredictionsList">
+                <p>No past predictions found. Make a prediction to save it here!</p>
+            </div>
         </div>
     </div>
 

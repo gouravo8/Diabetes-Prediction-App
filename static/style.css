@@ -243,6 +243,77 @@ button[type="submit"]:hover {
     display: none;
 }
 
+/* New: User Info Section */
+.user-info-container {
+    text-align: center;
+    margin-bottom: 20px;
+    background-color: #e6f7ff; /* Light blue background */
+    border: 1px solid #b3e0ff;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    color: #0056b3;
+}
+
+#userIdDisplay {
+    font-weight: bold;
+    color: #007bff;
+    word-wrap: break-word; /* Ensure long IDs wrap */
+}
+
+.auth-button {
+    background-color: #6c757d; /* Grey button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.auth-button:hover {
+    background-color: #5a6268;
+}
+
+.auth-message {
+    margin-top: 10px;
+    font-size: 0.85em;
+    color: #dc3545; /* Red for error/info messages */
+}
+
+/* New: Past Predictions Section */
+.past-predictions-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa; /* Lighter background for this section */
+    border: 1px solid #e2e6ea;
+    border-radius: 10px;
+}
+
+.past-predictions-list-item {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.past-predictions-list-item p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+.past-predictions-list-item .date-time {
+    font-size: 0.8em;
+    color: #6c757d;
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
