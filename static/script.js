@@ -10,11 +10,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const authMessage = document.getElementById('authMessage');
     const pastPredictionsList = document.getElementById('pastPredictionsList');
 
-    let heartDiseasePredictionForm = null; // Will be initialized when form is generated
-    let currentUserId = null; // Stores the current user's ID
+    let heartDiseasePredictionForm = null;
+    let currentUserId = null;
     let authReady = false; // Flag to indicate if Firebase Auth is ready
 
     // --- Firebase Initialization (from window object, exported by index.html) ---
+    // Check if Firebase modules are available from the global window object
+    if (!window.firebaseApp || !window.firebaseAuth || !window.firebaseDb) {
+        console.error("Firebase SDK not loaded correctly. Check index.html imports.");
+        userIdDisplay.textContent = 'Firebase Error';
+        authMessage.textContent = 'Firebase modules failed to load.';
+        authMessage.style.color = 'red';
+        return; // Stop execution if Firebase isn't initialized
+    }
+
     const app = window.firebaseApp;
     const auth = window.firebaseAuth;
     const db = window.firebaseDb;
@@ -29,44 +38,66 @@ document.addEventListener('DOMContentLoaded', function() {
     const where = window.where;
     const onSnapshot = window.onSnapshot;
     const addDoc = window.addDoc;
-    const serverTimestamp = window.serverTimestamp; // Used for timestamping entries
+    const serverTimestamp = window.serverTimestamp;
+
+    console.log("Firebase initialized successfully. Setting up auth listener.");
 
     // --- Firebase Authentication Setup ---
     onAuthStateChanged(auth, async (user) => {
+        console.log("onAuthStateChanged triggered. User:", user);
         if (user) {
             currentUserId = user.uid;
             userIdDisplay.textContent = currentUserId;
-            signInButton.style.display = 'none'; // Hide sign-in button
+            signInButton.style.display = 'none'; // Hide sign-in button after successful auth
             authMessage.textContent = 'Signed in successfully!';
             authMessage.style.color = 'green';
             authReady = true;
             console.log("Firebase Auth Ready. User ID:", currentUserId);
             fetchPastPredictions(currentUserId); // Fetch past predictions for this user
         } else {
+            console.log("No user found. Attempting anonymous sign-in or showing button.");
             currentUserId = null;
             userIdDisplay.textContent = 'Not signed in';
-            signInButton.style.display = 'block'; // Show sign-in button
-            authMessage.textContent = 'Please sign in to save your predictions.';
-            authMessage.style.color = 'orange';
-            authReady = true; // Auth system is ready, even if not signed in
+            signInButton.style.display = 'block'; // Ensure sign-in button is visible
+
+            // Automatically try to sign in anonymously if not already trying or authenticated
+            // This is crucial for environments where no custom token is provided (like Render)
+            if (!authReady) { // Only attempt this if auth hasn't been initialized yet
+                authMessage.textContent = 'Signing in anonymously...';
+                authMessage.style.color = 'gray';
+                try {
+                    await signInAnonymously(auth); // Attempt anonymous sign-in
+                    // The onAuthStateChanged will trigger again with the anonymous user
+                } catch (error) {
+                    console.error("Error with anonymous sign-in:", error);
+                    authMessage.textContent = `Auto sign-in failed: ${error.message}. Please click 'Sign In'.`;
+                    authMessage.style.color = 'red';
+                    authReady = true; // Still mark as ready, even with auto-sign-in error
+                }
+            } else {
+                authMessage.textContent = 'Please sign in to save your predictions.';
+                authMessage.style.color = 'orange';
+            }
             pastPredictionsList.innerHTML = '<p>Sign in to view your past predictions.</p>';
-            console.log("Firebase Auth Ready. User not signed in.");
+            console.log("Firebase Auth Ready. User not signed in initially.");
+            authReady = true; // Mark auth system as ready to prevent infinite loops of anonymous sign-in attempts
         }
     });
 
     signInButton.addEventListener('click', async () => {
-        authMessage.textContent = 'Signing in...';
+        authMessage.textContent = 'Attempting sign in...';
+        authMessage.style.color = 'gray';
         try {
-            if (initialAuthToken) {
-                // Use custom token if provided by the Canvas environment
+            if (initialAuthToken && initialAuthToken !== 'null') { // Check for actual token string
+                console.log("Attempting sign in with custom token.");
                 await signInWithCustomToken(auth, initialAuthToken);
             } else {
-                // Otherwise, sign in anonymously (no persistent account, but provides a UID)
+                console.log("No custom token found, attempting anonymous sign in via button.");
                 await signInAnonymously(auth);
             }
-            // onAuthStateChanged listener will handle UI update
+            // onAuthStateChanged listener will handle UI update if successful
         } catch (error) {
-            console.error("Error signing in:", error);
+            console.error("Error during manual sign-in:", error);
             authMessage.textContent = `Sign in failed: ${error.message}`;
             authMessage.style.color = 'red';
         }
@@ -208,30 +239,29 @@ document.addEventListener('DOMContentLoaded', function() {
             predictionResultDiv.classList.add('show');
 
             // --- Save Prediction to Firestore ---
-            if (auth.currentUser && currentUserId) {
+            if (auth.currentUser && currentUserId && authReady) { // Ensure auth is ready and user is logged in
                 try {
-                    // Create a record of the prediction and input data
                     const predictionRecord = {
                         userId: currentUserId,
                         diseaseType: diseaseType,
                         predictionText: result.prediction_text,
                         probability: result.probability,
-                        inputData: data, // Save the raw input data
-                        timestamp: serverTimestamp() // Firestore server timestamp
+                        inputData: data,
+                        timestamp: serverTimestamp()
                     };
 
-                    // Firestore path for private user data: /artifacts/{appId}/users/{userId}/predictions
                     const collectionPath = `artifacts/${appId}/users/${currentUserId}/predictions`;
                     await addDoc(collection(db, collectionPath), predictionRecord);
                     console.log("Prediction saved to Firestore successfully!");
-                    authMessage.textContent = "Prediction saved!";
-                    authMessage.style.color = 'green';
+                    // authMessage.textContent = "Prediction saved!"; // Don't overwrite prediction result msg
+                    // authMessage.style.color = 'green';
                 } catch (saveError) {
                     console.error("Error saving prediction to Firestore:", saveError);
-                    authMessage.textContent = "Error saving prediction.";
+                    authMessage.textContent = "Error saving prediction to history.";
                     authMessage.style.color = 'red';
                 }
             } else {
+                console.warn("User not signed in or Auth not ready. Skipping Firestore save.");
                 authMessage.textContent = "Sign in to save your predictions!";
                 authMessage.style.color = 'orange';
             }
@@ -245,69 +275,64 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Fetch and Display Past Predictions from Firestore ---
     function fetchPastPredictions(userId) {
-        if (!userId) {
+        if (!userId || !authReady) { // Ensure userId and auth are ready
             pastPredictionsList.innerHTML = '<p>Sign in to view your past predictions.</p>';
             return;
         }
 
+        console.log("Fetching past predictions for user:", userId);
         pastPredictionsList.innerHTML = '<p>Loading past predictions...</p>';
 
-        // Firestore path for private user data: /artifacts/{appId}/users/{userId}/predictions
         const userPredictionsRef = collection(db, `artifacts/${appId}/users/${userId}/predictions`);
         
-        // Order by timestamp in descending order
+        // Order by timestamp in descending order, limit to a reasonable number if desired
         const q = query(userPredictionsRef, where("userId", "==", userId)); // Ensure we only get current user's data
 
+        // Use onSnapshot for real-time updates
         onSnapshot(q, (snapshot) => {
             if (snapshot.empty) {
                 pastPredictionsList.innerHTML = '<p>No past predictions found. Make a prediction to save it here!</p>';
                 return;
             }
 
+            // Collect all docs to sort before rendering
+            const predictions = [];
+            snapshot.forEach(doc => {
+                predictions.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Sort by timestamp in descending order (most recent first)
+            predictions.sort((a, b) => {
+                const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
+                const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+                return timeB - timeA; // Descending
+            });
+
             pastPredictionsList.innerHTML = ''; // Clear previous list
 
-            snapshot.docChanges().forEach(change => {
-                const data = change.doc.data();
-                const predictionId = change.doc.id;
-                
+            predictions.forEach(data => {
                 let timestampText = 'N/A';
-                if (data.timestamp && data.timestamp.toDate) { // Convert Firestore Timestamp to Date object
+                if (data.timestamp && data.timestamp.toDate) {
                     const date = data.timestamp.toDate();
-                    timestampText = date.toLocaleString(); // Format date and time
+                    timestampText = date.toLocaleString();
                 }
 
                 const predictionItem = document.createElement('div');
                 predictionItem.classList.add('past-predictions-list-item');
+                predictionItem.setAttribute('data-id', data.id); // Set data-id for easy lookup
                 predictionItem.innerHTML = `
                     <p><strong>${data.diseaseType.replace('_', ' ').toUpperCase()} Prediction:</strong> ${data.predictionText}</p>
                     <p><strong>Probability:</strong> ${data.probability}</p>
                     <p class="date-time">On: ${timestampText}</p>
                 `;
-                
-                // Add the item based on change type (for real-time updates)
-                if (change.type === "added") {
-                    pastPredictionsList.prepend(predictionItem); // Add new items at the top
-                } else if (change.type === "modified") {
-                    // Find and replace the modified item
-                    const existingItem = pastPredictionsList.querySelector(`[data-id="${predictionId}"]`);
-                    if (existingItem) {
-                        existingItem.replaceWith(predictionItem);
-                    }
-                } else if (change.type === "removed") {
-                    // Remove the deleted item
-                    const existingItem = pastPredictionsList.querySelector(`[data-id="${predictionId}"]`);
-                    if (existingItem) {
-                        existingItem.remove();
-                    }
-                }
-                predictionItem.setAttribute('data-id', predictionId); // Set data-id for easy lookup
+                pastPredictionsList.appendChild(predictionItem); // Append in sorted order
             });
+            console.log("Past predictions fetched and displayed.");
         }, (error) => {
             console.error("Error fetching past predictions:", error);
             pastPredictionsList.innerHTML = '<p style="color: red;">Error loading past predictions.</p>';
         });
     }
-
 
     // --- Initial Setup ---
     showSelectedForm(); // Display initial form (Diabetes by default)
@@ -316,8 +341,6 @@ document.addEventListener('DOMContentLoaded', function() {
     diseaseTypeSelect.addEventListener('change', showSelectedForm);
     diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
 
-    // Initial sign-in attempt (Firebase Auth state listener will handle UI)
-    // The onAuthStateChanged listener at the top will trigger the signInAnonymously or signInWithCustomToken
-    // when auth is ready (authReady becomes true).
-    // The current setup signs in automatically via onAuthStateChanged or button click.
+    // Initial sign-in logic is handled by onAuthStateChanged directly.
+    // fetchPastPredictions will be called once auth is ready.
 });

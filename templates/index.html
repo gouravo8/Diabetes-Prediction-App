@@ -29,15 +29,16 @@
         window.firebaseDb = db;
         window.initialAuthToken = initialAuthToken;
         window.appId = appId;
-        window.onAuthStateChanged = onAuthStateChanged; // Export for external use
-        window.signInAnonymously = signInAnonymously; // Export for external use
-        window.signInWithCustomToken = signInWithCustomToken; // Export for external use
-        window.collection = collection; // Export for external use
-        window.query = query; // Export for external use
-        window.where = where; // Export for external use
-        window.onSnapshot = onSnapshot; // Export for external use
-        window.addDoc = addDoc; // Export for external use
-        window.serverTimestamp = serverTimestamp; // Export for external use
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signInAnonymously = signInAnonymously;
+        window.signInWithCustomToken = signInWithCustomToken;
+        window.collection = collection;
+        window.query = query;
+        window.where = where;
+        window.onSnapshot = onSnapshot;
+        window.addDoc = addDoc;
+        window.serverTimestamp = serverTimestamp;
+        window.doc = doc; // Export doc for potential future use (e.g., specific document reference)
     </script>
 </head>
 <body>
@@ -154,9 +155,7 @@
         <!-- Heart Disease Prediction Form Section (initially hidden) -->
         <div id="heartDiseaseFormSection" class="form-section hidden">
             <h3 class="section-title">Heart Disease Prediction</h3>
-            <!-- Heart Disease form fields will be dynamically generated here by JavaScript -->
             <form id="heartDiseasePredictionForm">
-                <!-- Example fields (these will be dynamically added later) -->
                 <div class="form-group">
                     <label for="hd_age">Age:</label>
                     <input type="number" id="hd_age" name="hd_age" required>
