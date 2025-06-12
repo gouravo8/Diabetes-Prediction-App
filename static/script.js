@@ -4,112 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const heartDiseaseFormSection = document.getElementById('heartDiseaseFormSection');
     const predictionResultDiv = document.getElementById('predictionResult');
 
-    // Get references to both prediction forms
-    const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
-    const heartDiseasePredictionForm = document.getElementById('heartDiseasePredictionForm');
-
-
-    // Function to show/hide form sections based on selection
-    function showSelectedForm() {
-        const selectedDisease = diseaseTypeSelect.value;
-        predictionResultDiv.classList.remove('show'); // Hide result when changing form
-
-        if (selectedDisease === 'diabetes') {
-            diabetesFormSection.classList.remove('hidden');
-            heartDiseaseFormSection.classList.add('hidden');
-            // Ensure the correct form's submit event listener is active if needed
-            // (Currently, only diabetes form is fully functional)
-        } else if (selectedDisease === 'heart_disease') {
-            diabetesFormSection.classList.add('hidden');
-            heartDiseaseFormSection.classList.remove('hidden');
-            // Here you would typically populate the heart disease form fields dynamically
-            // For now, it just shows the placeholder text
-        } else {
-            // No disease selected or invalid
-            diabetesFormSection.classList.add('hidden');
-            heartDiseaseFormSection.classList.add('hidden');
-        }
-    }
-
-    // Initial display based on default selection
-    showSelectedForm();
-
-    // Event listener for disease type change
-    diseaseTypeSelect.addEventListener('change', showSelectedForm);
-
-    // Event listener for Diabetes Prediction Form submission
-    diabetesPredictionForm.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission (page reload)
-
-        // Clear previous results and hide if visible
-        predictionResultDiv.innerHTML = '';
-        predictionResultDiv.classList.remove('show');
-
-        // Gather form data
-        const formData = new FormData(diabetesPredictionForm); // Use diabetesPredictionForm here
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        // Convert certain values to numbers as needed by your model
-        data.age = parseFloat(data.age);
-        data.bmi = parseFloat(data.bmi);
-        data.HbA1c_level = parseFloat(data.HbA1c_level);
-        data.blood_glucose_level = parseFloat(data.blood_glucose_level);
-        data.hypertension = parseInt(data.hypertension);
-        data.heart_disease = parseInt(data.heart_disease);
-
-        // Simple input validation (optional, but good practice)
-        if (isNaN(data.age) || isNaN(data.bmi) || isNaN(data.HbA1c_level) || isNaN(data.blood_glucose_level)) {
-            predictionResultDiv.innerHTML = '<p style="color: red;">Please enter valid numbers for Age, BMI, HbA1c Level, and Blood Glucose Level.</p>';
-            predictionResultDiv.classList.add('show');
-            return;
-        }
-        if (!data.gender || !data.smoking_history) {
-             predictionResultDiv.innerHTML = '<p style="color: red;">Please select options for Gender and Smoking History.</p>';
-             predictionResultDiv.classList.add('show');
-             return;
-        }
-
-        // Send data to your Flask backend
-        fetch('/predict_diabetes', { // This route is specific to diabetes prediction
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(errorData => {
-                    throw new Error(errorData.error || `Server error: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(result => {
-            predictionResultDiv.innerHTML = `<p>${result.prediction_text}</p>`;
-            predictionResultDiv.classList.add('show');
-        })
-        .catch(error => {
-            console.error('Error during Diabetes prediction:', error);
-            predictionResultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}. Please check your inputs.</p>`;
-            predictionResultDiv.classList.add('show');
-        });
-    });
-
-    // Event listener for Heart Disease Prediction Form submission (Currently just a placeholder)
-    heartDiseasePredictionForm.addEventListener('submit', function(event) {document.addEventListener('DOMContentLoaded', function() {
-    const diseaseTypeSelect = document.getElementById('diseaseType');
-    const diabetesFormSection = document.getElementById('diabetesFormSection');
-    const heartDiseaseFormSection = document.getElementById('heartDiseaseFormSection');
-    const predictionResultDiv = document.getElementById('predictionResult');
-
     const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
     let heartDiseasePredictionForm = null; // Will be initialized when form is generated
 
     // Define Heart Disease fields and their properties for dynamic generation
+    // These fields must match the features expected by your heart disease model
     const heartDiseaseFields = [
         { id: 'hd_age', label: 'Age:', type: 'number', min: 0, max: 120, step: 1, required: true },
         { id: 'hd_sex', label: 'Sex:', type: 'select', options: [{value: '1', text: 'Male'}, {value: '0', text: 'Female'}], required: true },
@@ -122,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { id: 'hd_exang', label: 'Exercise Induced Angina:', type: 'select', options: [{value: '0', text: 'No'}, {value: '1', text: 'Yes'}], required: true },
         { id: 'hd_oldpeak', label: 'ST Depression Induced by Exercise:', type: 'number', min: 0, max: 7, step: 0.1, required: true },
         { id: 'hd_slope', label: 'Slope of the Peak Exercise ST Segment:', type: 'select', options: [{value: '0', text: 'Upsloping'}, {value: '1', text: 'Flat'}, {value: '2', text: 'Downsloping'}], required: true },
-        { id: 'hd_ca', label: 'Number of Major Vessels (0-3):', type: 'select', options: [{value: '0', text: '0'}, {value: '1', text: '1'}, {value: '2', text: '2'}, {value: '3', text: '3'}, {value: '4', text: '4 (Unknown/Error)'}], required: true }, // ca can be 0-4
+        { id: 'hd_ca', label: 'Number of Major Vessels (0-3):', type: 'select', options: [{value: '0', text: '0'}, {value: '1', text: '1'}, {value: '2', text: '2'}, {value: '3', text: '3'}, {value: '4', text: '4 (Unknown/Error)'}], required: true }, // ca can be 0-4 based on dataset
         { id: 'hd_thal', label: 'Thalassemia:', type: 'select', options: [{value: '0', text: 'Unknown'}, {value: '1', text: 'Normal'}, {value: '2', text: 'Fixed Defect'}, {value: '3', text: 'Reversable Defect'}], required: true } // thal values adjusted for dataset
     ];
 
@@ -139,10 +38,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${optionsHtml}
                                 </select>`;
             } else {
-                inputElement = `<input type="${field.type}" id="${field.id}" name="${field.id}" 
-                                   ${field.min ? `min="${field.min}"` : ''} 
-                                   ${field.max ? `max="${field.max}"` : ''} 
-                                   ${field.step ? `step="${field.step}"` : ''} 
+                inputElement = `<input type="${field.type}" id="${field.id}" name="${field.id}"
+                                   ${field.min !== undefined ? `min="${field.min}"` : ''}
+                                   ${field.max !== undefined ? `max="${field.max}"` : ''}
+                                   ${field.step !== undefined ? `step="${field.step}"` : ''}
                                    ${field.required ? 'required' : ''}>`;
             }
             return `
@@ -163,7 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Re-assign the form reference after generating HTML
         heartDiseasePredictionForm = document.getElementById('heartDiseasePredictionForm');
         // Add event listener to the newly created form
-        heartDiseasePredictionForm.addEventListener('submit', handlePredictionFormSubmit);
+        if (heartDiseasePredictionForm) { // Ensure form exists before adding listener
+            heartDiseasePredictionForm.addEventListener('submit', handlePredictionFormSubmit);
+        }
     }
 
     // Function to show/hide form sections based on selection
@@ -179,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
             diabetesFormSection.classList.add('hidden');
             heartDiseaseFormSection.classList.remove('hidden');
             // Generate heart disease form dynamically if not already generated or if empty
+            // We check for heartDiseasePredictionForm and if its innerHTML is largely empty
+            // to avoid regenerating it unnecessarily if it's already there
             if (!heartDiseasePredictionForm || heartDiseasePredictionForm.innerHTML.trim() === '') {
                 generateHeartDiseaseForm();
             }
@@ -271,10 +174,4 @@ document.addEventListener('DOMContentLoaded', function() {
     diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
 
     // Note: heartDiseasePredictionForm listener is attached dynamically in generateHeartDiseaseForm
-});
-        event.preventDefault();
-        predictionResultDiv.innerHTML = '<p>Heart Disease prediction functionality coming soon!</p>';
-        predictionResultDiv.classList.add('show');
-    });
-
 });
