@@ -151,7 +151,58 @@
         </div>
     </div>
 
-    <!-- The script.js file MUST be loaded as a module and placed at the end of the body -->
+    <!-- Firebase SDK Imports and Initialization - MUST be type="module" -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Directly assign global variables if they exist, otherwise default to empty/null
+        let firebaseConfig = {};
+        if (typeof __firebase_config !== 'undefined') {
+            try {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } catch (e) {
+                console.error("Error parsing __firebase_config:", e);
+            }
+        }
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Create a promise that resolves when Firebase is fully initialized and globals are set
+        window.firebaseInitializedPromise = new Promise((resolve, reject) => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+
+                // Attach Firebase instances and functions to the global window object.
+                // This makes them accessible from other scripts (like script.js) loaded as modules later.
+                window.firebaseApp = app;
+                window.firebaseAuth = auth;
+                window.firebaseDb = db;
+                window.initialAuthToken = initialAuthToken;
+                window.appId = appId;
+                window.onAuthStateChanged = onAuthStateChanged;
+                window.signInAnonymously = signInAnonymously;
+                window.signInWithCustomToken = signInWithCustomToken;
+                window.collection = collection;
+                window.query = query;
+                window.where = where;
+                window.onSnapshot = onSnapshot;
+                window.addDoc = addDoc;
+                window.serverTimestamp = serverTimestamp;
+                window.doc = doc; 
+                console.log("Firebase SDK initialization complete and globals exposed.");
+                resolve(); // Resolve the promise once everything is set up
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                reject(error); // Reject the promise if initialization fails
+            }
+        });
+    </script>
+    
+    <!-- The script.js file MUST be loaded as a module and AFTER the Firebase init script -->
     <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

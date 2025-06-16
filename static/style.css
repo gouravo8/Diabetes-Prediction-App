@@ -1,11 +1,7 @@
 /* General body styling */
 body {
-    font-family: 'Inter', sans-serif; /* Changed to Inter for a modern look */
-    background-color: #f4f7f6; /* Fallback background color */
-    background-image: url('https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'); /* Background image */
-    background-size: cover; /* Cover the entire page */
-    background-position: center; /* Center the image */
-    background-attachment: fixed; /* Keep image fixed when scrolling */
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f6; /* Light background */
     color: #333;
     margin: 0;
     padding: 20px;
@@ -13,32 +9,16 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    box-sizing: border-box; /* Include padding in total width/height */
-}
-
-/* Add a semi-transparent overlay for better readability on top of background image */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7); /* White overlay with 70% opacity */
-    z-index: -1; /* Place behind content but above background image */
 }
 
 .container {
-    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background for the main content */
+    background-color: #ffffff; /* White background for the main content */
     padding: 30px 40px;
-    border-radius: 12px; /* Slightly more rounded */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 700px;
-    margin-top: 20px;
-    position: relative;
-    z-index: 1; /* Ensure container is above the background overlay */
-    border: 1px solid #e0e0e0; /* Subtle border */
+    margin-top: 20px; /* Space from the hero image */
 }
 
 /* Header Styling */
@@ -50,13 +30,8 @@ header {
     align-items: center;
     padding-bottom: 20px;
     border-bottom: 1px solid #eee;
-    margin-bottom: 30px;
-    margin-top: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    z-index: 1;
+    margin-bottom: 30px; /* Space between header and form */
+    margin-top: 20px; /* Space from top of the page */
 }
 
 .logo-container {
@@ -65,24 +40,21 @@ header {
 }
 
 .app-logo-svg {
-    height: 60px;
+    height: 60px; /* Make the SVG logo slightly larger */
     width: 60px;
     margin-right: 15px;
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .app-logo-svg:hover {
     transform: rotate(5deg) scale(1.05);
-    filter: drop-shadow(0 0 5px rgba(0, 123, 255, 0.5));
 }
 
 .app-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 2.3em;
-    color: #007bff;
+    font-size: 2.2em;
+    color: #007bff; /* Primary blue color */
     margin: 0;
-    line-height: 1;
-    font-weight: 700; /* Bolder font */
+    line-height: 1; /* Align text with logo */
 }
 
 .personal-info {
@@ -90,11 +62,17 @@ header {
 }
 
 .personal-info h2 {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.4em;
+    font-size: 1.3em; /* Slightly larger for emphasis */
     color: #333;
     margin: 0;
-    font-weight: 500;
+}
+
+.profile-pic { /* If you add a profile picture in index.html */
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    margin-left: 10px;
+    object-fit: cover;
 }
 
 /* Hero Image Styling */
@@ -102,323 +80,86 @@ header {
     width: 100%;
     max-width: 700px;
     margin-bottom: 30px;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    background-color: #e0f7fa;
+    border-radius: 10px;
+    overflow: hidden; /* Ensures image corners are rounded */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #e0f7fa; /* Light blue background for the banner area */
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
-    z-index: 1;
+    padding: 10px; /* Add some padding around the image */
 }
 
 .hero-image {
-    max-width: 100%;
+    max-width: 100%; /* Ensure it's responsive */
     height: auto;
-    display: block;
-    border-radius: 10px; /* More rounded corners */
+    display: block; /* Removes extra space below image */
+    border-radius: 8px; /* Slightly more rounded corners */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Disease Selection Dropdown Styling */
-.disease-selection-group {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.disease-selection-group label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 600; /* Bolder */
-    font-size: 1.15em;
-    color: #0056b3;
-}
-
-#diseaseType {
-    width: calc(100% - 40px);
-    max-width: 320px; /* Slightly wider */
-    padding: 14px 22px; /* More padding */
-    border: 2px solid #007bff;
-    border-radius: 10px; /* More rounded */
-    background-color: #ffffff;
-    font-size: 1.1em;
-    color: #333;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%23007bff" d="M9.293 12.95l.707.707 4.243-4.243-1.414-1.414L10 11.536 6.707 8.243 5.293 9.657 9.293 13.65z"/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: right 12px center; /* Adjusted position */
-    background-size: 18px; /* Slightly larger arrow */
-    cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Stronger shadow */
-    transition: all 0.3s ease;
-}
-
-#diseaseType:hover {
-    border-color: #0056b3;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-#diseaseType:focus {
-    outline: none;
-    border-color: #0056b3;
-    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3); /* Stronger focus glow */
-}
-
-/* Form Section Titles */
-.section-title {
-    font-family: 'Inter', sans-serif;
-    color: #007bff;
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 25px;
-    font-size: 2em; /* Slightly larger */
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-    font-weight: 700;
-}
-
-
 /* Form Styling (Refinements) */
 .form-group {
-    margin-bottom: 20px; /* More space */
+    margin-bottom: 18px;
 }
 
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 600; /* Bolder */
+    font-weight: bold;
     color: #444;
-    font-size: 1.05em;
 }
 
 .form-group input[type="number"],
 .form-group select {
-    width: calc(100% - 24px); /* Account for more padding */
-    padding: 14px; /* More padding */
-    border: 1px solid #ccc;
-    border-radius: 8px; /* More rounded */
-    font-size: 1.05em;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.form-group input[type="number"]:focus,
-.form-group select:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    width: calc(100% - 20px); /* Account for padding */
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box; /* Include padding in width calculation */
 }
 
 button[type="submit"] {
-    background: linear-gradient(45deg, #28a745, #218838); /* Green gradient */
+    background-color: #28a745; /* Green for submit button */
     color: white;
-    padding: 16px 30px; /* More padding */
+    padding: 15px 25px;
     border: none;
-    border-radius: 10px; /* More rounded */
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1.2em; /* Larger font */
+    font-size: 1.1em;
     font-weight: bold;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
     width: 100%;
-    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); /* Shadow for pop */
-    letter-spacing: 0.5px;
 }
 
 button[type="submit"]:hover {
-    background: linear-gradient(45deg, #218838, #1e7e34); /* Darker gradient on hover */
-    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
-    transform: translateY(-2px); /* Slight lift */
+    background-color: #218838; /* Darker green on hover */
 }
-
-button[type="submit"]:active {
-    transform: translateY(0); /* Press effect */
-    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
-}
-
 
 .result {
-    margin-top: 30px; /* More space */
-    padding: 20px; /* More padding */
-    border-radius: 10px; /* More rounded */
-    background-color: #e6f7ff; /* Lighter blue for results */
+    margin-top: 25px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #e9ecef; /* Light grey for result background */
     text-align: center;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #0056b3; /* Darker blue */
-    box-shadow: inset 0 1px 5px rgba(0,0,0,0.1);
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    border: 1px solid #b3e0ff;
-}
-.result.show {
-    opacity: 1;
-}
-
-/* Hide/Show form sections */
-.form-section {
-    transition: opacity 0.5s ease-in-out, max-height 0.7s ease-in-out;
-    opacity: 1;
-    max-height: 2000px;
-    overflow: hidden;
-}
-
-.form-section.hidden {
-    opacity: 0;
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    display: none;
-}
-
-/* User Info Section Aesthetics */
-.user-info-container {
-    text-align: center;
-    margin-bottom: 25px; /* More margin */
-    background: linear-gradient(135deg, #e0f7fa, #b2ebf2); /* Light blue gradient */
-    border: 1px solid #80deea;
-    padding: 20px;
-    border-radius: 12px;
-    font-size: 1em;
-    color: #006064; /* Darker teal color */
-    box-shadow: 0 4px 15px rgba(0, 150, 136, 0.1); /* Subtle teal shadow */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.user-info-container::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-    animation: pulse 10s infinite alternate;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.8); opacity: 0.5; }
-    100% { transform: scale(1.2); opacity: 0.8; }
-}
-
-
-#userIdDisplay {
-    font-weight: 700; /* Extra bold */
-    color: #007bff;
-    word-wrap: break-word;
     font-size: 1.1em;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    padding: 8px 15px;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 6px;
-    border: 1px dashed #007bff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    font-weight: bold;
+    color: #007bff;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    opacity: 0; /* Initially hidden */
+    transition: opacity 0.5s ease-in-out; /* Fade in animation */
 }
-
-.auth-button {
-    background: linear-gradient(45deg, #007bff, #0056b3); /* Blue gradient */
-    color: white;
-    padding: 12px 25px; /* More padding */
-    border: none;
-    border-radius: 8px; /* More rounded */
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3); /* Blue shadow */
-    letter-spacing: 0.5px;
-    min-width: 180px; /* Ensure consistent width */
+.result.show { /* Class added by JS to make it visible */
+    opacity: 1;
 }
-
-.auth-button:hover {
-    background: linear-gradient(45deg, #0056b3, #004085); /* Darker gradient on hover */
-    box-shadow: 0 5px 12px rgba(0, 123, 255, 0.4);
-    transform: translateY(-2px);
-}
-
-.auth-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
-}
-
-.auth-message {
-    margin-top: 15px;
-    font-size: 0.9em;
-    font-weight: 500;
-    color: #dc3545; /* Red for error/info messages */
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Past Predictions Section */
-.past-predictions-section {
-    margin-top: 30px;
-    padding: 25px; /* More padding */
-    background-color: #f0f8ff; /* Very light blue background */
-    border: 1px solid #cceeff;
-    border-radius: 12px; /* More rounded */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.past-predictions-list-item {
-    background-color: #ffffff;
-    border: 1px solid #e0f0ff;
-    padding: 18px; /* More padding */
-    margin-bottom: 12px; /* More margin */
-    border-radius: 10px; /* More rounded */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08); /* Subtle shadow */
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* More space between items */
-    transition: transform 0.2s ease;
-}
-
-.past-predictions-list-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-}
-
-.past-predictions-list-item p {
-    margin: 0;
-    font-size: 0.95em; /* Slightly larger */
-}
-
-.past-predictions-list-item strong {
-    color: #0056b3; /* Darker blue for emphasis */
-}
-
-.past-predictions-list-item .date-time {
-    font-size: 0.85em; /* Slightly larger */
-    color: #6c757d;
-    font-style: italic;
-    text-align: right;
-}
-
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-    .container, header, .hero-image-container, .user-info-container, .past-predictions-section {
-        padding: 15px;
+    .container, header, .hero-image-container {
+        padding: 15px; /* Slightly less padding on small screens */
         margin-top: 10px;
-        margin-bottom: 15px;
-        border-radius: 10px;
+        margin-bottom: 20px;
     }
     header {
         flex-direction: column;
@@ -427,11 +168,11 @@ button[type="submit"]:active {
         margin-bottom: 20px;
     }
     .logo-container {
-        margin-bottom: 10px;
+        margin-bottom: 10px; /* Space between logo/title and personal info on small screens */
     }
     .personal-info {
         margin-top: 5px;
-        text-align: left;
+        text-align: left; /* Align personal info to left on small screens */
     }
     .app-title {
         font-size: 1.8em;
@@ -445,19 +186,7 @@ button[type="submit"]:active {
     }
     .form-group input[type="number"],
     .form-group select,
-    button[type="submit"],
-    .auth-button {
+    button[type="submit"] {
         padding: 10px;
-        font-size: 0.95em;
-    }
-    #diseaseType {
-        padding: 10px 15px;
-        font-size: 1em;
-        background-position: right 8px center;
-        background-size: 14px;
-    }
-    .result, .past-predictions-list-item {
-        padding: 15px;
-        font-size: 1em;
     }
 }
