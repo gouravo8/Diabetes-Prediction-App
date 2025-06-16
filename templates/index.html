@@ -151,49 +151,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Imports and Initialization -->
-    <!-- Moved to end of body, BEFORE script.js, to ensure all HTML elements are loaded before script execution -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Directly assign global variables if they exist, otherwise default to empty/null
-        let firebaseConfig = {};
-        if (typeof __firebase_config !== 'undefined') {
-            try {
-                firebaseConfig = JSON.parse(__firebase_config);
-            } catch (e) {
-                console.error("Error parsing __firebase_config:", e);
-            }
-        }
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        window.firebaseApp = app;
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.initialAuthToken = initialAuthToken;
-        window.appId = appId;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
-        window.collection = collection;
-        window.query = query;
-        window.where = where;
-        window.onSnapshot = onSnapshot;
-        window.addDoc = addDoc;
-        window.serverTimestamp = serverTimestamp;
-        window.doc = doc; 
-        console.log("Firebase SDK initialized and exposed to window object.");
-    </script>
-    
-    <!-- The script.js file MUST be loaded as a module and preferably at the end of the body, AFTER Firebase init -->
+    <!-- The script.js file MUST be loaded as a module and placed at the end of the body -->
     <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

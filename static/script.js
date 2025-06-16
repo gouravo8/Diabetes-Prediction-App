@@ -1,3 +1,9 @@
+// Import the functions you need from the Firebase SDKs
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
 document.addEventListener('DOMContentLoaded', function() {
     // --- UI Element References ---
     const diseaseTypeSelect = document.getElementById('diseaseType');
@@ -14,33 +20,35 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentUserId = null;
     let authReady = false; // Flag to indicate if Firebase Auth is ready
 
-    // --- Firebase Initialization (from window object, exported by index.html) ---
-    // Check if Firebase modules are available from the global window object
-    if (!window.firebaseApp || !window.firebaseAuth || !window.firebaseDb) {
-        console.error("Firebase SDK not loaded correctly. Check index.html imports.");
+    // --- Firebase Configuration and Initialization ---
+    // Safely access global variables provided by the Canvas environment
+    let firebaseConfig = {};
+    if (typeof globalThis.__firebase_config !== 'undefined') {
+        try {
+            firebaseConfig = JSON.parse(globalThis.__firebase_config);
+        } catch (e) {
+            console.error("Error parsing __firebase_config:", e);
+        }
+    }
+    const initialAuthToken = typeof globalThis.__initial_auth_token !== 'undefined' ? globalThis.__initial_auth_token : null;
+    const appId = typeof globalThis.__app_id !== 'undefined' ? globalThis.__app_id : 'default-app-id';
+
+    let app, auth, db;
+
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        console.log("Firebase initialized successfully within script.js.");
+        userIdDisplay.textContent = 'Initializing...'; // Indicate Firebase is attempting to sign in
+    } catch (e) {
+        console.error("Failed to initialize Firebase:", e);
         userIdDisplay.textContent = 'Firebase Error';
-        authMessage.textContent = 'Firebase modules failed to load.';
+        authMessage.textContent = `Firebase initialization failed: ${e.message}.`;
         authMessage.style.color = 'red';
-        return; // Stop execution if Firebase isn't initialized
+        return; // Stop further execution if Firebase init fails
     }
 
-    const app = window.firebaseApp;
-    const auth = window.firebaseAuth;
-    const db = window.firebaseDb;
-    const initialAuthToken = window.initialAuthToken;
-    const appId = window.appId;
-
-    const onAuthStateChanged = window.onAuthStateChanged;
-    const signInAnonymously = window.signInAnonymously;
-    const signInWithCustomToken = window.signInWithCustomToken;
-    const collection = window.collection;
-    const query = window.query;
-    const where = window.where;
-    const onSnapshot = window.onSnapshot;
-    const addDoc = window.addDoc;
-    const serverTimestamp = window.serverTimestamp;
-
-    console.log("Firebase initialized successfully. Setting up auth listener.");
 
     // --- Firebase Authentication Setup ---
     onAuthStateChanged(auth, async (user) => {
@@ -60,9 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
             userIdDisplay.textContent = 'Not signed in';
             signInButton.style.display = 'block'; // Ensure sign-in button is visible
 
-            // Automatically try to sign in anonymously if not already trying or authenticated
-            // This is crucial for environments where no custom token is provided (like Render)
-            if (!authReady) { // Only attempt this if auth hasn't been initialized yet
+            if (!authReady) { // Only attempt auto sign-in if auth hasn't been ready before
                 authMessage.textContent = 'Signing in anonymously...';
                 authMessage.style.color = 'gray';
                 try {
@@ -72,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error("Error with anonymous sign-in:", error);
                     authMessage.textContent = `Auto sign-in failed: ${error.message}. Please click 'Sign In'.`;
                     authMessage.style.color = 'red';
-                    authReady = true; // Still mark as ready, even with auto-sign-in error
+                    authReady = true; // Still mark as ready even if auto sign-in had an issue
                 }
             } else {
                 authMessage.textContent = 'Please sign in to save your predictions.';
@@ -80,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             pastPredictionsList.innerHTML = '<p>Sign in to view your past predictions.</p>';
             console.log("Firebase Auth Ready. User not signed in initially.");
-            authReady = true; // Mark auth system as ready to prevent infinite loops of anonymous sign-in attempts
+            authReady = true; // Mark auth system as ready
         }
     });
 
@@ -239,7 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
             predictionResultDiv.classList.add('show');
 
             // --- Save Prediction to Firestore ---
-            if (auth.currentUser && currentUserId && authReady) { // Ensure auth is ready and user is logged in
+            // Ensure auth, currentUserId, and db are initialized and authReady is true
+            if (auth && auth.currentUser && currentUserId && authReady) {
                 try {
                     const predictionRecord = {
                         userId: currentUserId,
@@ -253,15 +260,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const collectionPath = `artifacts/${appId}/users/${currentUserId}/predictions`;
                     await addDoc(collection(db, collectionPath), predictionRecord);
                     console.log("Prediction saved to Firestore successfully!");
-                    // authMessage.textContent = "Prediction saved!"; // Don't overwrite prediction result msg
-                    // authMessage.style.color = 'green';
                 } catch (saveError) {
                     console.error("Error saving prediction to Firestore:", saveError);
                     authMessage.textContent = "Error saving prediction to history.";
                     authMessage.style.color = 'red';
                 }
             } else {
-                console.warn("User not signed in or Auth not ready. Skipping Firestore save.");
+                console.warn("User not signed in or Firebase not fully ready. Skipping Firestore save.");
                 authMessage.textContent = "Sign in to save your predictions!";
                 authMessage.style.color = 'orange';
             }
@@ -275,8 +280,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Fetch and Display Past Predictions from Firestore ---
     function fetchPastPredictions(userId) {
-        if (!userId || !authReady) { // Ensure userId and auth are ready
+        // Ensure db and userId are initialized before attempting to fetch
+        if (!db || !userId || !authReady) {
             pastPredictionsList.innerHTML = '<p>Sign in to view your past predictions.</p>';
+            console.warn("Firestore not ready or userId not available. Cannot fetch past predictions.");
             return;
         }
 
@@ -285,27 +292,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const userPredictionsRef = collection(db, `artifacts/${appId}/users/${userId}/predictions`);
         
-        // Order by timestamp in descending order, limit to a reasonable number if desired
-        const q = query(userPredictionsRef, where("userId", "==", userId)); // Ensure we only get current user's data
+        const q = query(userPredictionsRef, where("userId", "==", userId));
 
-        // Use onSnapshot for real-time updates
         onSnapshot(q, (snapshot) => {
             if (snapshot.empty) {
                 pastPredictionsList.innerHTML = '<p>No past predictions found. Make a prediction to save it here!</p>';
                 return;
             }
 
-            // Collect all docs to sort before rendering
             const predictions = [];
             snapshot.forEach(doc => {
                 predictions.push({ id: doc.id, ...doc.data() });
             });
 
-            // Sort by timestamp in descending order (most recent first)
             predictions.sort((a, b) => {
                 const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
                 const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
-                return timeB - timeA; // Descending
+                return timeB - timeA; // Descending order (most recent first)
             });
 
             pastPredictionsList.innerHTML = ''; // Clear previous list
@@ -319,13 +322,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const predictionItem = document.createElement('div');
                 predictionItem.classList.add('past-predictions-list-item');
-                predictionItem.setAttribute('data-id', data.id); // Set data-id for easy lookup
+                predictionItem.setAttribute('data-id', data.id);
                 predictionItem.innerHTML = `
                     <p><strong>${data.diseaseType.replace('_', ' ').toUpperCase()} Prediction:</strong> ${data.predictionText}</p>
                     <p><strong>Probability:</strong> ${data.probability}</p>
                     <p class="date-time">On: ${timestampText}</p>
                 `;
-                pastPredictionsList.appendChild(predictionItem); // Append in sorted order
+                pastPredictionsList.appendChild(predictionItem);
             });
             console.log("Past predictions fetched and displayed.");
         }, (error) => {
