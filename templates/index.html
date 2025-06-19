@@ -12,7 +12,7 @@
     <header>
         <div class="header-left">
             <div class="logo-container">
-                <!-- Health-related SVG Logo (ECG / Heart Beat Line) -->
+                <!-- Health-related SVG Logo (Continuous Heart Beat Line) -->
                 <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -20,12 +20,12 @@
                             <stop offset="100%" stop-color="#ffa07a" />
                         </linearGradient>
                     </defs>
-                    <path d="M10 50 Q 20 20 30 50 T 50 50 Q 60 80 70 50 T 90 50"
+                    <path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50"
                           stroke="url(#logoGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="10" cy="50" r="5" fill="#ff7043"/>
-                    <circle cx="90" cy="50" r="5" fill="#ffa07a"/>
+                    <circle cx="5" cy="50" r="4" fill="#ff7043"/>
+                    <circle cx="95" cy="50" r="4" fill="#ffa07a"/>
                 </svg>
-                <h1 class="app-title">Predictive Health Hub</h1> <!-- NEW CAPTION HERE -->
+                <h1 class="app-title">Precision Health, Simplified.</h1> <!-- NEW CAPTION HERE -->
             </div>
             <div class="personal-info">
                 <h2>By Gourav Rajput</h2>
@@ -34,12 +34,7 @@
         <a href="/login_coming_soon" class="login-button">Login</a>
     </header>
 
-    <!-- Hero Image Section (Custom placeholder for the requested visual) -->
-    <div class="hero-image-container">
-        <!-- Using placehold.co to represent the image requested by the user -->
-        <!-- "a man and a woman, with the woman being a doctor holding an injection and stethoscope, all against a black background" -->
-        <img src="https://placehold.co/700x200/000000/ff7043?text=Precision+Health%0A%0ADoctor+with+Injection+and+Stethoscope,+Man+and+Woman" alt="Health Awareness" class="hero-image">
-    </div>
+    <!-- Removed Hero Image Section as background pattern will be applied to body -->
 
     <div class="container">
         <!-- Disease Selection Dropdown -->
@@ -132,7 +127,7 @@
             <!-- Prediction result will be displayed here dynamically by JavaScript -->
         </div>
 
-        <!-- New: Health Insights Section with Gemini API Integration -->
+        <!-- Health Insights Section with Gemini API Integration -->
         <div class="health-insights-section">
             <h3 class="section-title">Health Insights (Powered by Gemini AI)</h3>
             <div class="form-group">
