@@ -1,13 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // --- UI Element References ---
     const diseaseTypeSelect = document.getElementById('diseaseType');
     const diabetesFormSection = document.getElementById('diabetesFormSection');
     const heartDiseaseFormSection = document.getElementById('heartDiseaseFormSection');
     const predictionResultDiv = document.getElementById('predictionResult');
-
     const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
+    
+    // New elements for Health Insights (Gemini API)
+    const healthQuestionInput = document.getElementById('healthQuestion');
+    const getInsightButton = document.getElementById('getInsightButton');
+    const insightResultDiv = document.getElementById('insightResult');
+
     let heartDiseasePredictionForm = null;
 
     // Define Heart Disease fields and their properties for dynamic generation
+    // These fields must match the features expected by your heart disease model
     const heartDiseaseFields = [
         { id: 'hd_age', label: 'Age:', type: 'number', min: 0, max: 120, step: 1, required: true },
         { id: 'hd_sex', label: 'Sex:', type: 'select', options: [{value: '1', text: 'Male'}, {value: '0', text: 'Female'}], required: true },
@@ -69,6 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedDisease = diseaseTypeSelect.value;
         predictionResultDiv.classList.remove('show');
         predictionResultDiv.innerHTML = '';
+        insightResultDiv.classList.remove('show'); // Hide insight result too
+        insightResultDiv.innerHTML = ''; // Clear insight result
 
         if (selectedDisease === 'diabetes') {
             diabetesFormSection.classList.remove('hidden');
@@ -85,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Unified function to handle form submissions
+    // --- Unified Function to Handle Form Submissions (Prediction) ---
     async function handlePredictionFormSubmit(event) {
         event.preventDefault();
 
@@ -122,14 +131,12 @@ document.addEventListener('DOMContentLoaded', function() {
             data.hd_exang = parseInt(data.hd_exang);
             data.hd_oldpeak = parseFloat(data.hd_oldpeak);
             data.hd_slope = parseInt(data.hd_slope);
-            data.hd_ca = parseInt(data.hd_ca);
-            data.hd_thal = parseInt(data.hd_thal);
+            data.hd_ca = parseInt(data.hd_ca); // Ensure this matches ID in HTML
+            data.hd_thal = parseInt(data.hd_thal); // Ensure this matches ID in HTML
         }
 
         try {
-            // Note: We are using a relative path '/predict' here.
-            // When deployed on Render, the frontend (served by Flask) will automatically
-            // send this request to its own backend server.
+            // Call your Flask backend's /predict endpoint
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -152,6 +159,46 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // --- Gemini API Integration for Health Insights ---
+    getInsightButton.addEventListener('click', async () => {
+        const prompt = healthQuestionInput.value.trim();
+        if (!prompt) {
+            insightResultDiv.innerHTML = '<p style="color: orange;">Please enter a question to get health insights.</p>';
+            insightResultDiv.classList.add('show');
+            return;
+        }
+
+        insightResultDiv.innerHTML = '<p>Generating insight...</p>';
+        insightResultDiv.classList.add('show');
+
+        try {
+            // Call your Flask backend's /generate_insight endpoint
+            const response = await fetch('/generate_insight', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Server error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.insight) {
+                insightResultDiv.innerHTML = `<p>${result.insight}</p>`;
+            } else {
+                insightResultDiv.innerHTML = '<p style="color: red;">Could not get a valid insight from AI. Please try again.</p>';
+            }
+        } catch (error) {
+            console.error("Error calling backend for Gemini API:", error);
+            insightResultDiv.innerHTML = `<p style="color: red;">Error fetching insight: ${error.message}.</p>`;
+        } finally {
+            insightResultDiv.classList.add('show');
+        }
+    });
+
+
     // --- Initial Setup ---
     showSelectedForm(); // Display initial form (Diabetes by default)
 
@@ -159,5 +206,5 @@ document.addEventListener('DOMContentLoaded', function() {
     diseaseTypeSelect.addEventListener('change', showSelectedForm);
     diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
 
-    // Heart disease form listener is attached dynamically in generateHeartDiseaseForm
+    // Note: heartDiseasePredictionForm listener is attached dynamically in generateHeartDiseaseForm
 });
