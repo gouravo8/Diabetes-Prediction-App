@@ -1,18 +1,17 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template # Ensure render_template is imported
 import joblib
 import numpy as np
 import pandas as pd
-from flask_cors import CORS # Import CORS
+from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app) # Enable CORS for all routes globally. This is crucial for cross-origin requests from Firebase Hosting.
+app = Flask(__name__, template_folder='templates', static_folder='static') # Ensure template_folder and static_folder are defined
+CORS(app)
 
 # Define paths to model artifacts
-# These paths are relative to the root of your application in the Docker container.
 DIABETES_MODEL_PATH = 'model_artifacts/diabetes_rf_model_smote.joblib'
 DIABETES_SCALER_PATH = 'model_artifacts/diabetes_scaler.joblib'
-DIABETES_FEATURE_COLUMNS_PATH = 'model_artifacts/feature_columns.joblib' # Path for feature columns list
+DIABETES_FEATURE_COLUMNS_PATH = 'model_artifacts/feature_columns.joblib'
 
 HEART_MODEL_PATH = 'model_artifacts/heart_disease_model.joblib'
 HEART_SCALER_PATH = 'model_artifacts/heart_disease_scaler.joblib'
@@ -46,20 +45,19 @@ try:
 
 except Exception as e:
     print(f"Error loading model artifacts: {e}")
-    # Handle the error, maybe exit if critical or disable prediction until fixed
-
-# IMPORTANT: We are REMOVING the home route ('/') from app.py.
-# The frontend (index.html, style.css, script.js) will now be hosted by Firebase Hosting.
-# app.py should ONLY handle API requests like /predict.
-# @app.route('/')
-# def home():
-#     """
-#     Renders the main page of the Health Risk Predictor App.
-#     This route is now OBSOLETE as index.html will be served by Firebase Hosting.
-#     """
-#     return render_template('index.html')
 
 
+# --- Frontend Route ---
+@app.route('/')
+def home():
+    """
+    Renders the main page of the Health Risk Predictor App.
+    This route serves index.html for the web application.
+    """
+    return render_template('index.html')
+
+
+# --- Prediction API Endpoint ---
 @app.route('/predict', methods=['POST'])
 def predict():
     """
@@ -114,7 +112,8 @@ def predict():
 
             # Scale the numerical features
             numerical_cols_to_scale = [col for col in numerical_features if col in diabetes_feature_columns]
-            input_df[numerical_cols_to_scale] = diabetes_scaler.transform(input_df[numerical_cols_to_scale])
+            if numerical_cols_to_scale: # Only scale if there are columns to scale
+                input_df[numerical_cols_to_scale] = diabetes_scaler.transform(input_df[numerical_cols_to_scale])
 
             prediction_proba = diabetes_model.predict_proba(input_df)[:, 1][0]
             prediction_class = (prediction_proba >= 0.5).astype(int)
@@ -162,12 +161,13 @@ def predict():
                     if col_name in input_df.columns:
                         input_df[col_name] = 1
 
-            # Ensure the order of columns matches the training data used by the scaler and model
+            # Ensure all columns are in the correct order for the model
             input_df = input_df[heart_feature_columns]
 
             # Scale numerical features for heart disease model
             hd_numerical_cols_to_scale = [col.replace('hd_', '') for col in hd_numerical_features if col.replace('hd_', '') in heart_feature_columns]
-            input_df[hd_numerical_cols_to_scale] = heart_scaler.transform(input_df[hd_numerical_cols_to_scale])
+            if hd_numerical_cols_to_scale: # Only scale if there are columns to scale
+                input_df[hd_numerical_cols_to_scale] = heart_scaler.transform(input_df[hd_numerical_cols_to_scale])
 
             prediction_proba = heart_model.predict_proba(input_df)[:, 1][0]
             prediction_class = (prediction_proba >= 0.5).astype(int)
@@ -189,7 +189,6 @@ def predict():
         return jsonify({"error": f"An unexpected error occurred during prediction: {str(e)}."}), 400
 
 if __name__ == '__main__':
-    # Cloud Run will set the PORT environment variable
-    # We use 8080 as a common default for containerized web services
+    # Render will set the PORT environment variable
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
