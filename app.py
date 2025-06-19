@@ -1,13 +1,15 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 import joblib
 import numpy as np
 import pandas as pd
+from flask_cors import CORS # Import CORS
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes globally. This is crucial for cross-origin requests from Firebase Hosting.
 
 # Define paths to model artifacts
-# Ensure these paths are correct relative to your app.py in the Render environment
+# These paths are relative to the root of your application in the Docker container.
 DIABETES_MODEL_PATH = 'model_artifacts/diabetes_rf_model_smote.joblib'
 DIABETES_SCALER_PATH = 'model_artifacts/diabetes_scaler.joblib'
 DIABETES_FEATURE_COLUMNS_PATH = 'model_artifacts/feature_columns.joblib' # Path for feature columns list
@@ -46,12 +48,17 @@ except Exception as e:
     print(f"Error loading model artifacts: {e}")
     # Handle the error, maybe exit if critical or disable prediction until fixed
 
-@app.route('/')
-def home():
-    """
-    Renders the main page of the Health Risk Predictor App.
-    """
-    return render_template('index.html')
+# IMPORTANT: We are REMOVING the home route ('/') from app.py.
+# The frontend (index.html, style.css, script.js) will now be hosted by Firebase Hosting.
+# app.py should ONLY handle API requests like /predict.
+# @app.route('/')
+# def home():
+#     """
+#     Renders the main page of the Health Risk Predictor App.
+#     This route is now OBSOLETE as index.html will be served by Firebase Hosting.
+#     """
+#     return render_template('index.html')
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -182,6 +189,7 @@ def predict():
         return jsonify({"error": f"An unexpected error occurred during prediction: {str(e)}."}), 400
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
+    # Cloud Run will set the PORT environment variable
+    # We use 8080 as a common default for containerized web services
+    port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port, debug=True)
-

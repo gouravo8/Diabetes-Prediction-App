@@ -1,363 +1,343 @@
-document.addEventListener('DOMContentLoaded', async function() {
-    // --- UI Element References ---
-    const diseaseTypeSelect = document.getElementById('diseaseType');
-    const diabetesFormSection = document.getElementById('diabetesFormSection');
-    const heartDiseaseFormSection = document.getElementById('heartDiseaseFormSection');
-    const predictionResultDiv = document.getElementById('predictionResult');
-    const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
-    const userIdDisplay = document.getElementById('userIdDisplay');
-    const signInButton = document.getElementById('signInButton');
-    const authMessage = document.getElementById('authMessage');
-    const pastPredictionsList = document.getElementById('pastPredictionsList');
+// Firebase SDK Imports (No change here, they are loaded in index.html)
 
-    let heartDiseasePredictionForm = null;
-    let currentUserId = null;
-    let authReady = false; // Flag to indicate if Firebase Auth is ready
+// --- IMPORTANT: YOUR FIREBASE CONFIGURATION ---
+// This configuration is directly embedded here to ensure it's always available,
+// especially for deployment environments like Render where dynamic injection
+// can be tricky with free tiers.
+const firebaseConfig = {
+    apiKey: "AIzaSyCcz13-1CVY06btvApVADmTuV4t_plBj44",
+    authDomain: "diabetes-prediction-app-b722d.firebaseapp.com",
+    projectId: "diabetes-prediction-app-b722d",
+    storageBucket: "diabetes-prediction-app-b722d.firebasestorage.app",
+    messagingSenderId: "557388270196",
+    appId: "1:557388270196:web:69e3aef92fba2abac01f21",
+    measurementId: "G-8WPLPNTYLD"
+};
 
-    // --- Firebase Initialization - Await the promise from index.html ---
-    // This ensures script.js only proceeds once Firebase is fully set up on `window`
-    console.log("script.js: Waiting for Firebase to initialize...");
+// Initialize Firebase (This part remains the same, assuming imports are in index.html)
+// Note: We are no longer using __firebase_config from the environment for Render
+// as it caused issues. The config is now directly above.
+let app;
+let auth;
+let db;
+let userId = 'loading...'; // Default loading state for user ID
+
+// Function to initialize Firebase services safely
+function initializeFirebaseServices() {
     try {
-        if (typeof window.firebaseInitializedPromise === 'undefined') {
-            throw new Error("window.firebaseInitializedPromise is not defined. Check index.html Firebase init script.");
+        // Only initialize if not already initialized
+        if (!app) {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth.getAuth(app);
+            db = firebase.firestore.getFirestore(app);
+            console.log("Firebase services initialized.");
         }
-        await window.firebaseInitializedPromise;
-        console.log("script.js: Firebase promise resolved. Proceeding with script setup.");
-    } catch (error) {
-        console.error("script.js: Error during Firebase initialization setup:", error);
-        userIdDisplay.textContent = 'Firebase Error';
-        authMessage.textContent = `Critical error initializing Firebase: ${error.message}`;
-        authMessage.style.color = 'red';
-        return; // Stop script execution if Firebase fails to initialize
-    }
 
-    // Now, Firebase globals should be available
-    const app = window.firebaseApp;
-    const auth = window.firebaseAuth;
-    const db = window.firebaseDb;
-    const initialAuthToken = window.initialAuthToken;
-    const appId = window.appId;
+        // UI Elements
+        const userIdSpan = document.getElementById('user-id');
+        const signInOutButton = document.getElementById('sign-in-out-button');
+        const firebaseErrorDisplay = document.getElementById('firebase-error');
+        const pastPredictionsList = document.getElementById('past-predictions-list');
+        const noPredictionsMessage = document.getElementById('no-predictions-message');
 
-    const onAuthStateChanged = window.onAuthStateChanged;
-    const signInAnonymously = window.signInAnonymously;
-    const signInWithCustomToken = window.signInWithCustomToken;
-    const collection = window.collection;
-    const query = window.query;
-    const where = window.where;
-    const onSnapshot = window.onSnapshot;
-    const addDoc = window.addDoc;
-    const serverTimestamp = window.serverTimestamp;
+        // --- Firebase Authentication ---
+        firebase.auth.onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in.
+                userId = user.uid;
+                userIdSpan.textContent = userId;
+                signInOutButton.textContent = 'Sign Out';
+                firebaseErrorDisplay.classList.add('hidden'); // Hide error if user is signed in
 
-    // Double check if core Firebase objects are indeed present
-    if (!app || !auth || !db) {
-        console.error("script.js: Firebase core objects (app, auth, db) are still undefined after promise resolve. Unexpected.");
-        userIdDisplay.textContent = 'Firebase Error';
-        authMessage.textContent = 'Firebase core objects missing after init.';
-        authMessage.style.color = 'red';
-        return;
-    }
-
-    console.log("script.js: Firebase modules successfully loaded and confirmed.");
-
-    // --- Firebase Authentication Setup ---
-    onAuthStateChanged(auth, async (user) => {
-        console.log("onAuthStateChanged triggered. User:", user);
-        if (user) {
-            currentUserId = user.uid;
-            userIdDisplay.textContent = currentUserId;
-            signInButton.style.display = 'none'; // Hide sign-in button after successful auth
-            authMessage.textContent = 'Signed in successfully!';
-            authMessage.style.color = 'green';
-            authReady = true;
-            console.log("Firebase Auth Ready. User ID:", currentUserId);
-            fetchPastPredictions(currentUserId); // Fetch past predictions for this user
-        } else {
-            console.log("No user found. Attempting anonymous sign-in or showing button.");
-            currentUserId = null;
-            userIdDisplay.textContent = 'Not signed in';
-            signInButton.style.display = 'block'; // Ensure sign-in button is visible
-
-            // Automatically try to sign in anonymously if not already trying or authenticated
-            // This is crucial for environments where no custom token is provided (like Render)
-            if (!authReady) { // Only attempt this if auth hasn't been initialized yet
-                authMessage.textContent = 'Signing in anonymously...';
-                authMessage.style.color = 'gray';
-                try {
-                    await signInAnonymously(auth); // Attempt anonymous sign-in
-                    // The onAuthStateChanged will trigger again with the anonymous user
-                } catch (error) {
-                    console.error("Error with anonymous sign-in:", error);
-                    authMessage.textContent = `Auto sign-in failed: ${error.message}. Please click 'Sign In'.`;
-                    authMessage.style.color = 'red';
-                    authReady = true; // Still mark as ready, even with auto-sign-in error
-                }
+                // Start listening for past predictions
+                setupPastPredictionsListener(userId);
             } else {
-                authMessage.textContent = 'Please sign in to save your predictions.';
-                authMessage.style.color = 'orange';
+                // User is signed out.
+                userId = 'Not signed in';
+                userIdSpan.textContent = userId;
+                signInOutButton.textContent = 'Sign In / Register';
+                pastPredictionsList.innerHTML = ''; // Clear past predictions
+                noPredictionsMessage.classList.remove('hidden'); // Show no predictions message
+                // Try to sign in anonymously if not already
+                firebase.auth.signInAnonymously(auth).catch((error) => {
+                    console.error("Error signing in anonymously:", error);
+                    firebaseErrorDisplay.textContent = `Firebase Error: ${error.message}`;
+                    firebaseErrorDisplay.classList.remove('hidden');
+                });
             }
-            pastPredictionsList.innerHTML = '<p>Sign in to view your past predictions.</p>';
-            console.log("Firebase Auth Ready. User not signed in initially.");
-            authReady = true; // Mark auth system as ready to prevent infinite loops of anonymous sign-in attempts
-        }
-    });
-
-    signInButton.addEventListener('click', async () => {
-        authMessage.textContent = 'Attempting sign in...';
-        authMessage.style.color = 'gray';
-        try {
-            if (initialAuthToken && initialAuthToken !== 'null') { // Check for actual token string
-                console.log("Attempting sign in with custom token.");
-                await signInWithCustomToken(auth, initialAuthToken);
-            } else {
-                console.log("No custom token found, attempting anonymous sign in via button.");
-                await signInAnonymously(auth);
-            }
-            // onAuthStateChanged listener will handle UI update if successful
-        } catch (error) {
-            console.error("Error during manual sign-in:", error);
-            authMessage.textContent = `Sign in failed: ${error.message}`;
-            authMessage.style.color = 'red';
-        }
-    });
-
-    // --- Heart Disease Form Field Definitions ---
-    const heartDiseaseFields = [
-        { id: 'hd_age', label: 'Age:', type: 'number', min: 0, max: 120, step: 1, required: true },
-        { id: 'hd_sex', label: 'Sex:', type: 'select', options: [{value: '1', text: 'Male'}, {value: '0', text: 'Female'}], required: true },
-        { id: 'hd_cp', label: 'Chest Pain Type:', type: 'select', options: [{value: '0', text: 'Typical Angina'}, {value: '1', text: 'Atypical Angina'}, {value: '2', text: 'Non-anginal Pain'}, {value: '3', text: 'Asymptomatic'}], required: true },
-        { id: 'hd_trestbps', label: 'Resting Blood Pressure (mm Hg):', type: 'number', min: 80, max: 200, step: 1, required: true },
-        { id: 'hd_chol', label: 'Serum Cholesterol (mg/dl):', type: 'number', min: 100, max: 600, step: 1, required: true },
-        { id: 'hd_fbs', label: 'Fasting Blood Sugar (>120 mg/dl):', type: 'select', options: [{value: '0', text: 'No'}, {value: '1', text: 'Yes'}], required: true },
-        { id: 'hd_restecg', label: 'Resting Electrocardiographic Results:', type: 'select', options: [{value: '0', text: 'Normal'}, {value: '1', text: 'ST-T Wave Abnormality'}, {value: '2', text: 'Left Ventricular Hypertrophy'}], required: true },
-        { id: 'hd_thalach', label: 'Maximum Heart Rate Achieved:', type: 'number', min: 70, max: 220, step: 1, required: true },
-        { id: 'hd_exang', label: 'Exercise Induced Angina:', type: 'select', options: [{value: '0', text: 'No'}, {value: '1', text: 'Yes'}], required: true },
-        { id: 'hd_oldpeak', label: 'ST Depression Induced by Exercise:', type: 'number', min: 0, max: 7, step: 0.1, required: true },
-        { id: 'hd_slope', label: 'Slope of the Peak Exercise ST Segment:', type: 'select', options: [{value: '0', text: 'Upsloping'}, {value: '1', text: 'Flat'}, {value: '2', text: 'Downsloping'}], required: true },
-        { id: 'hd_ca', label: 'Number of Major Vessels (0-3):', type: 'select', options: [{value: '0', text: '0'}, {value: '1', text: '1'}, {value: '2', text: '2'}, {value: '3', text: '3'}, {value: '4', text: '4 (Unknown/Error)'}], required: true },
-        { id: 'hd_thal', label: 'Thalassemia:', type: 'select', options: [{value: '0', text: 'Unknown'}, {value: '1', text: 'Normal'}, {value: '2', text: 'Fixed Defect'}, {value: '3', text: 'Reversable Defect'}], required: true }
-    ];
-
-    // Function to dynamically generate Heart Disease form fields
-    function generateHeartDiseaseForm() {
-        const formInnerHtml = heartDiseaseFields.map(field => {
-            let inputElement;
-            if (field.type === 'select') {
-                const optionsHtml = field.options.map(option =>
-                    `<option value="${option.value}">${option.text}</option>`
-                ).join('');
-                inputElement = `<select id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>
-                                    <option value="">Select ${field.label.replace(':', '')}</option>
-                                    ${optionsHtml}
-                                </select>`;
-            } else {
-                inputElement = `<input type="${field.type}" id="${field.id}" name="${field.id}"
-                                   ${field.min !== undefined ? `min="${field.min}"` : ''}
-                                   ${field.max !== undefined ? `max="${field.max}"` : ''}
-                                   ${field.step !== undefined ? `step="${field.step}"` : ''}
-                                   ${field.required ? 'required' : ''}>`;
-            }
-            return `
-                <div class="form-group">
-                    <label for="${field.id}">${field.label}</label>
-                    ${inputElement}
-                </div>
-            `;
-        }).join('');
-
-        heartDiseaseFormSection.innerHTML = `
-            <h3 class="section-title">Heart Disease Prediction</h3>
-            <form id="heartDiseasePredictionForm">
-                ${formInnerHtml}
-                <button type="submit">Predict Heart Disease Risk</button>
-            </form>
-        `;
-        heartDiseasePredictionForm = document.getElementById('heartDiseasePredictionForm');
-        if (heartDiseasePredictionForm) {
-            heartDiseasePredictionForm.addEventListener('submit', handlePredictionFormSubmit);
-        }
-    }
-
-    // Function to show/hide form sections based on selection
-    function showSelectedForm() {
-        const selectedDisease = diseaseTypeSelect.value;
-        predictionResultDiv.classList.remove('show');
-        predictionResultDiv.innerHTML = '';
-
-        if (selectedDisease === 'diabetes') {
-            diabetesFormSection.classList.remove('hidden');
-            heartDiseaseFormSection.classList.add('hidden');
-        } else if (selectedDisease === 'heart_disease') {
-            diabetesFormSection.classList.add('hidden');
-            heartDiseaseFormSection.classList.remove('hidden');
-            if (!heartDiseasePredictionForm || heartDiseasePredictionForm.innerHTML.trim() === '') {
-                generateHeartDiseaseForm();
-            }
-        } else {
-            diabetesFormSection.classList.add('hidden');
-            heartDiseaseFormSection.classList.add('hidden');
-        }
-    }
-
-    // --- Unified Function to Handle Form Submissions and Save Data ---
-    async function handlePredictionFormSubmit(event) {
-        event.preventDefault();
-
-        predictionResultDiv.innerHTML = 'Predicting...';
-        predictionResultDiv.classList.add('show');
-
-        const form = event.target;
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
         });
 
-        const diseaseType = diseaseTypeSelect.value;
-        data['disease_type'] = diseaseType;
-
-        // Convert specific values to numbers based on disease type and expected features
-        if (diseaseType === 'diabetes') {
-            data.age = parseFloat(data.age);
-            data.bmi = parseFloat(data.bmi);
-            data.HbA1c_level = parseFloat(data.HbA1c_level);
-            data.blood_glucose_level = parseFloat(data.blood_glucose_level);
-            data.hypertension = parseInt(data.hypertension);
-            data.heart_disease = parseInt(data.heart_disease);
-        } else if (diseaseType === 'heart_disease') {
-            data.hd_age = parseFloat(data.hd_age);
-            data.hd_sex = parseInt(data.hd_sex);
-            data.hd_cp = parseInt(data.hd_cp);
-            data.hd_trestbps = parseFloat(data.hd_trestbps);
-            data.hd_chol = parseFloat(data.hd_chol);
-            data.hd_fbs = parseInt(data.hd_fbs);
-            data.hd_restecg = parseInt(data.hd_restecg);
-            data.hd_thalach = parseFloat(data.hd_thalach);
-            data.hd_exang = parseInt(data.hd_exang);
-            data.hd_oldpeak = parseFloat(data.hd_oldpeak);
-            data.hd_slope = parseInt(data.hd_slope);
-            data.hd_ca = parseInt(data.hd_ca);
-            data.hd_thal = parseInt(data.hd_thal);
-        }
-
-        try {
-            const response = await fetch('/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Server error: ${response.status}`);
-            }
-
-            const result = await response.json();
-            predictionResultDiv.innerHTML = `<p>${result.prediction_text} <br> ${result.probability}</p>`;
-            predictionResultDiv.classList.add('show');
-
-            // --- Save Prediction to Firestore ---
-            if (auth.currentUser && currentUserId && authReady) { // Ensure auth is ready and user is logged in
-                try {
-                    const predictionRecord = {
-                        userId: currentUserId,
-                        diseaseType: diseaseType,
-                        predictionText: result.prediction_text,
-                        probability: result.probability,
-                        inputData: data,
-                        timestamp: serverTimestamp()
-                    };
-
-                    const collectionPath = `artifacts/${appId}/users/${currentUserId}/predictions`;
-                    await addDoc(collection(db, collectionPath), predictionRecord);
-                    console.log("Prediction saved to Firestore successfully!");
-                    // authMessage.textContent = "Prediction saved!"; // Don't overwrite prediction result msg
-                    // authMessage.style.color = 'green';
-                } catch (saveError) {
-                    console.error("Error saving prediction to Firestore:", saveError);
-                    authMessage.textContent = "Error saving prediction to history.";
-                    authMessage.style.color = 'red';
-                }
+        signInOutButton.addEventListener('click', () => {
+            if (auth.currentUser) {
+                // User is signed in, so sign them out
+                firebase.auth.signOut(auth).catch((error) => {
+                    console.error("Error signing out:", error);
+                    firebaseErrorDisplay.textContent = `Firebase Error: ${error.message}`;
+                    firebaseErrorDisplay.classList.remove('hidden');
+                });
             } else {
-                console.warn("User not signed in or Auth not ready. Skipping Firestore save.");
-                authMessage.textContent = "Sign in to save your predictions!";
-                authMessage.style.color = 'orange';
+                // User is signed out, so sign them in anonymously
+                firebase.auth.signInAnonymously(auth).catch((error) => {
+                    console.error("Error signing in anonymously:", error);
+                    firebaseErrorDisplay.textContent = `Firebase Error: ${error.message}`;
+                    firebaseErrorDisplay.classList.remove('hidden');
+                });
             }
+        });
 
-        } catch (error) {
-            console.error(`Error during ${diseaseType} prediction:`, error);
-            predictionResultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}. Please check your inputs.</p>`;
-            predictionResultDiv.classList.add('show');
+        // --- Firestore Data Operations ---
+        function setupPastPredictionsListener(currentUserId) {
+            // Firestore security rules will ensure only the correct user can read/write their data.
+            // Using a subcollection under the user's document for private data.
+            const userPredictionsRef = firebase.firestore.collection(db, 'users', currentUserId, 'predictions');
+            // IMPORTANT: Firebase orderBy can cause issues if not indexed.
+            // For simplicity and to avoid indexing headaches on free tier,
+            // we will fetch all and sort in memory if needed.
+            const q = firebase.firestore.query(userPredictionsRef); // Removed orderBy
+
+            firebase.firestore.onSnapshot(q, (snapshot) => {
+                pastPredictionsList.innerHTML = ''; // Clear existing predictions
+                let predictionsArray = [];
+                snapshot.forEach((doc) => {
+                    predictionsArray.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort in memory by timestamp descending, as orderBy was removed from query
+                predictionsArray.sort((a, b) => {
+                    if (a.timestamp && b.timestamp) {
+                        return b.timestamp.toDate().getTime() - a.timestamp.toDate().getTime();
+                    }
+                    return 0; // Handle cases where timestamp might be missing
+                });
+
+                if (predictionsArray.length === 0) {
+                    noPredictionsMessage.classList.remove('hidden');
+                } else {
+                    noPredictionsMessage.classList.add('hidden');
+                    predictionsArray.forEach((predictionData) => {
+                        const predictionItem = document.createElement('div');
+                        predictionItem.className = 'bg-gray-50 p-3 rounded-md shadow-sm border border-gray-200';
+                        const date = predictionData.timestamp ? new Date(predictionData.timestamp.toDate()).toLocaleString() : 'N/A';
+                        predictionItem.innerHTML = `
+                            <p class="font-semibold text-gray-800">${predictionData.predictionText}</p>
+                            <p class="text-gray-600 text-sm">Probability: ${predictionData.probability}</p>
+                            <p class="text-gray-500 text-xs">Type: ${predictionData.diseaseType}</p>
+                            <p class="text-gray-500 text-xs">Date: ${date}</p>
+                        `;
+                        pastPredictionsList.appendChild(predictionItem);
+                    });
+                }
+            }, (error) => {
+                console.error("Error listening to past predictions:", error);
+                firebaseErrorDisplay.textContent = `Firestore Error: ${error.message}`;
+                firebaseErrorDisplay.classList.remove('hidden');
+            });
         }
-    }
 
-    // --- Fetch and Display Past Predictions from Firestore ---
-    function fetchPastPredictions(userId) {
-        if (!userId || !authReady) { // Ensure userId and auth are ready
-            pastPredictionsList.innerHTML = '<p>Sign in to view your past predictions.</p>';
-            return;
-        }
-
-        console.log("Fetching past predictions for user:", userId);
-        pastPredictionsList.innerHTML = '<p>Loading past predictions...</p>';
-
-        const userPredictionsRef = collection(db, `artifacts/${appId}/users/${userId}/predictions`);
-        
-        // Order by timestamp in descending order, limit to a reasonable number if desired
-        const q = query(userPredictionsRef, where("userId", "==", userId)); // Ensure we only get current user's data
-
-        // Use onSnapshot for real-time updates
-        onSnapshot(q, (snapshot) => {
-            if (snapshot.empty) {
-                pastPredictionsList.innerHTML = '<p>No past predictions found. Make a prediction to save it here!</p>';
+        async function savePredictionToFirestore(prediction) {
+            if (!userId || userId === 'loading...' || userId === 'Not signed in') {
+                console.warn("Cannot save prediction: User not authenticated.");
                 return;
             }
+            try {
+                // Save to private collection for the authenticated user
+                await firebase.firestore.addDoc(firebase.firestore.collection(db, 'users', userId, 'predictions'), {
+                    ...prediction,
+                    timestamp: firebase.firestore.serverTimestamp() // Use server timestamp
+                });
+                console.log("Prediction saved to Firestore successfully!");
+            } catch (error) {
+                console.error("Error saving prediction to Firestore:", error);
+                firebaseErrorDisplay.textContent = `Firestore Save Error: ${error.message}`;
+                firebaseErrorDisplay.classList.remove('hidden');
+            }
+        }
 
-            // Collect all docs to sort before rendering
-            const predictions = [];
-            snapshot.forEach(doc => {
-                predictions.push({ id: doc.id, ...doc.data() });
-            });
+    } catch (error) {
+        console.error("Error initializing Firebase:", error);
+        document.getElementById('firebase-error').textContent = `Critical Firebase Initialization Error: ${error.message}. Please check console.`;
+        document.getElementById('firebase-error').classList.remove('hidden');
+    }
+}
 
-            // Sort by timestamp in descending order (most recent first)
-            predictions.sort((a, b) => {
-                const timeA = a.timestamp ? a.timestamp.toMillis() : 0;
-                const timeB = b.timestamp ? b.timestamp.toMillis() : 0;
-                return timeB - timeA; // Descending
-            });
+// Call the initialization function when the window loads
+window.addEventListener('load', initializeFirebaseServices);
 
-            pastPredictionsList.innerHTML = ''; // Clear previous list
 
-            predictions.forEach(data => {
-                let timestampText = 'N/A';
-                if (data.timestamp && data.timestamp.toDate) {
-                    const date = data.timestamp.toDate();
-                    timestampText = date.toLocaleString();
-                }
+// --- Prediction Form Logic (Mostly same as before, with API URL change) ---
+const diseaseSelect = document.getElementById('diseaseSelect');
+const diabetesForm = document.getElementById('diabetesForm');
+const heartDiseaseForm = document.getElementById('heartDiseaseForm');
+const predictDiabetesBtn = document.getElementById('predictDiabetesBtn');
+const predictHeartDiseaseBtn = document.getElementById('predictHeartDiseaseBtn');
+const resultDiv = document.getElementById('result');
+const predictionText = document.getElementById('predictionText');
+const probabilityText = document.getElementById('probabilityText');
 
-                const predictionItem = document.createElement('div');
-                predictionItem.classList.add('past-predictions-list-item');
-                predictionItem.setAttribute('data-id', data.id); // Set data-id for easy lookup
-                predictionItem.innerHTML = `
-                    <p><strong>${data.diseaseType.replace('_', ' ').toUpperCase()} Prediction:</strong> ${data.predictionText}</p>
-                    <p><strong>Probability:</strong> ${data.probability}</p>
-                    <p class="date-time">On: ${timestampText}</p>
-                `;
-                pastPredictionsList.appendChild(predictionItem); // Append in sorted order
-            });
-            console.log("Past predictions fetched and displayed.");
-        }, (error) => {
-            console.error("Error fetching past predictions:", error);
-            pastPredictionsList.innerHTML = '<p style="color: red;">Error loading past predictions.</p>';
-        });
+// IMPORTANT: Replace this with your actual Render backend service URL.
+// This will be provided by Render after your backend is deployed.
+const RENDER_BACKEND_URL = 'YOUR_RENDER_BACKEND_SERVICE_URL'; // THIS WILL BE REPLACED LATER
+
+function toggleForms() {
+    if (diseaseSelect.value === 'diabetes') {
+        diabetesForm.classList.remove('hidden');
+        heartDiseaseForm.classList.add('hidden');
+    } else {
+        diabetesForm.classList.add('hidden');
+        heartDiseaseForm.classList.remove('hidden');
+    }
+    resultDiv.classList.add('hidden'); // Hide result when switching forms
+}
+
+diseaseSelect.addEventListener('change', toggleForms);
+toggleForms(); // Initial call to set the correct form on load
+
+predictDiabetesBtn.addEventListener('click', async () => {
+    const data = {
+        disease_type: 'diabetes',
+        gender: document.getElementById('gender').value,
+        age: document.getElementById('age').value,
+        hypertension: document.getElementById('hypertension').value,
+        heart_disease: document.getElementById('heart_disease').value,
+        smoking_history: document.getElementById('smoking_history').value,
+        bmi: document.getElementById('bmi').value,
+        HbA1c_level: document.getElementById('HbA1c_level').value,
+        blood_glucose_level: document.getElementById('blood_glucose_level').value
+    };
+
+    // Basic validation
+    for (const key in data) {
+        if (key !== 'disease_type' && (data[key] === '' || data[key] === null)) {
+            // Using a simple message box instead of alert()
+            showCustomMessage(`Please fill in the "${key.replace('_', ' ').replace('HbA1c', 'HbA1c')}" field.`, 'error');
+            return;
+        }
     }
 
-    // --- Initial Setup ---
-    showSelectedForm(); // Display initial form (Diabetes by default)
+    try {
+        const response = await fetch(`${RENDER_BACKEND_URL}/predict`, { // Use full URL here
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 
-    // Event listeners
-    diseaseTypeSelect.addEventListener('change', showSelectedForm);
-    diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
+        const result = await response.json();
 
-    // Initial sign-in logic is handled by onAuthStateChanged directly.
-    // fetchPastPredictions will be called once auth is ready.
+        if (response.ok) {
+            predictionText.textContent = result.prediction_text;
+            probabilityText.textContent = result.probability;
+            resultDiv.classList.remove('hidden');
+
+            // Save prediction to Firestore
+            await savePredictionToFirestore({
+                diseaseType: 'Diabetes',
+                predictionText: result.prediction_text,
+                probability: result.probability,
+                inputData: data // Save the input data for reference
+            });
+
+        } else {
+            predictionText.textContent = `Error: ${result.error || 'Unknown error'}`;
+            probabilityText.textContent = '';
+            resultDiv.classList.remove('hidden');
+            console.error("Prediction API error:", result);
+            showCustomMessage(`Error from API: ${result.error || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        predictionText.textContent = `Error: ${error.message}`;
+        probabilityText.textContent = '';
+        resultDiv.classList.remove('hidden');
+        console.error("Network or API call error:", error);
+        showCustomMessage(`Network Error: ${error.message}. Make sure the backend is running.`, 'error');
+    }
 });
+
+predictHeartDiseaseBtn.addEventListener('click', async () => {
+    const data = {
+        disease_type: 'heart_disease',
+        hd_age: document.getElementById('hd_age').value,
+        hd_sex: document.getElementById('hd_sex').value,
+        hd_cp: document.getElementById('hd_cp').value,
+        hd_trestbps: document.getElementById('hd_trestbps').value,
+        hd_chol: document.getElementById('hd_chol').value,
+        hd_fbs: document.getElementById('hd_fbs').value,
+        hd_restecg: document.getElementById('hd_restecg').value,
+        hd_thalach: document.getElementById('hd_thalach').value,
+        hd_exang: document.getElementById('hd_exang').value,
+        hd_oldpeak: document.getElementById('hd_oldpeak').value,
+        hd_slope: document.getElementById('hd_slope').value,
+        hd_ca: document.getElementById('hd_ca').value,
+        hd_thal: document.getElementById('hd_thal').value
+    };
+
+    // Basic validation
+    for (const key in data) {
+        if (key !== 'disease_type' && (data[key] === '' || data[key] === null)) {
+            // Using a simple message box instead of alert()
+            showCustomMessage(`Please fill in the "${key.replace('hd_', '').replace('_', ' ')}" field.`, 'error');
+            return;
+        }
+    }
+
+    try {
+        const response = await fetch(`${RENDER_BACKEND_URL}/predict`, { // Use full URL here
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            predictionText.textContent = result.prediction_text;
+            probabilityText.textContent = result.probability;
+            resultDiv.classList.remove('hidden');
+
+            // Save prediction to Firestore
+            await savePredictionToFirestore({
+                diseaseType: 'Heart Disease',
+                predictionText: result.prediction_text,
+                probability: result.probability,
+                inputData: data // Save the input data for reference
+            });
+
+        } else {
+            predictionText.textContent = `Error: ${result.error || 'Unknown error'}`;
+            probabilityText.textContent = '';
+            resultDiv.classList.remove('hidden');
+            console.error("Prediction API error:", result);
+            showCustomMessage(`Error from API: ${result.error || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        predictionText.textContent = `Error: ${error.message}`;
+        probabilityText.textContent = '';
+        resultDiv.classList.remove('hidden');
+        console.error("Network or API call error:", error);
+        showCustomMessage(`Network Error: ${error.message}. Make sure the backend is running.`, 'error');
+    }
+});
+
+// Custom message box function (replaces alert)
+function showCustomMessage(message, type = 'info') {
+    const messageBox = document.createElement('div');
+    messageBox.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg text-white z-50 transition-all duration-300 transform ${type === 'error' ? 'bg-red-500' : 'bg-blue-500'} translate-x-full opacity-0`;
+    messageBox.textContent = message;
+    document.body.appendChild(messageBox);
+
+    // Animate in
+    setTimeout(() => {
+        messageBox.classList.remove('translate-x-full', 'opacity-0');
+        messageBox.classList.add('translate-x-0', 'opacity-100');
+    }, 100);
+
+    // Animate out and remove after 5 seconds
+    setTimeout(() => {
+        messageBox.classList.remove('translate-x-0', 'opacity-100');
+        messageBox.classList.add('translate-x-full', 'opacity-0');
+        messageBox.addEventListener('transitionend', () => messageBox.remove());
+    }, 5000);
+}
