@@ -1,44 +1,31 @@
-/* General body styling */
+/* General body styling for dark theme */
 body {
-    font-family: 'Inter', sans-serif; /* Changed to Inter for a modern look */
-    background-color: #f4f7f6; /* Fallback background color */
-    background-image: url('https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940'); /* Background image */
-    background-size: cover; /* Cover the entire page */
-    background-position: center; /* Center the image */
-    background-attachment: fixed; /* Keep image fixed when scrolling */
-    color: #333;
+    font-family: 'Inter', sans-serif;
+    background-color: #000000; /* Pure black background as requested */
+    color: #e0e0e0; /* Light gray text for contrast */
     margin: 0;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    box-sizing: border-box; /* Include padding in total width/height */
+    box-sizing: border-box;
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Add a semi-transparent overlay for better readability on top of background image */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7); /* White overlay with 70% opacity */
-    z-index: -1; /* Place behind content but above background image */
-}
+/* No overlay needed with solid dark background */
 
 .container {
-    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white background for the main content */
+    background-color: #1a1a1a; /* Dark background for content area */
     padding: 30px 40px;
-    border-radius: 12px; /* Slightly more rounded */
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); /* Stronger dark shadow */
     width: 100%;
     max-width: 700px;
     margin-top: 20px;
     position: relative;
-    z-index: 1; /* Ensure container is above the background overlay */
-    border: 1px solid #e0e0e0; /* Subtle border */
+    z-index: 1;
+    border: 1px solid #333333; /* Subtle border for separation */
 }
 
 /* Header Styling */
@@ -49,19 +36,26 @@ header {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333333; /* Darker border */
     margin-bottom: 30px;
     margin-top: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: #1a1a1a; /* Match container background */
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); /* Darker shadow */
     z-index: 1;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .logo-container {
     display: flex;
     align-items: center;
+    margin-bottom: 5px; /* Space between logo/title and personal info */
 }
 
 .app-logo-svg {
@@ -73,29 +67,58 @@ header {
 
 .app-logo-svg:hover {
     transform: rotate(5deg) scale(1.05);
-    filter: drop-shadow(0 0 5px rgba(0, 123, 255, 0.5));
+    filter: drop-shadow(0 0 8px rgba(255, 112, 67, 0.7)); /* Glow with accent color */
 }
 
 .app-title {
     font-family: 'Inter', sans-serif;
     font-size: 2.3em;
-    color: #007bff;
+    color: #ff7043; /* Vibrant orange accent color */
     margin: 0;
     line-height: 1;
     font-weight: 700;
 }
 
 .personal-info {
-    text-align: right;
+    text-align: left; /* Align to left under title */
+    width: 100%; /* Take full width */
 }
 
 .personal-info h2 {
     font-family: 'Inter', sans-serif;
-    font-size: 1.4em;
-    color: #333;
+    font-size: 1.2em; /* Slightly smaller for name */
+    color: #bbbbbb; /* Lighter gray for personal info */
     margin: 0;
     font-weight: 500;
 }
+
+/* Login Button in Header */
+.login-button {
+    background: linear-gradient(45deg, #007bff, #0056b3); /* Blue gradient for login */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none; /* Remove underline for link */
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+    white-space: nowrap; /* Prevent button text from wrapping */
+}
+
+.login-button:hover {
+    background: linear-gradient(45deg, #0056b3, #004085);
+    box-shadow: 0 5px 12px rgba(0, 123, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.login-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
 
 /* Hero Image Styling */
 .hero-image-container {
@@ -104,8 +127,8 @@ header {
     margin-bottom: 30px;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    background-color: #e0f7fa;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    background-color: #0d0d0d; /* Even darker background for image container */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -118,7 +141,7 @@ header {
     height: auto;
     display: block;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Disease Selection Dropdown Styling */
@@ -132,50 +155,55 @@ header {
     margin-bottom: 10px;
     font-weight: 600;
     font-size: 1.15em;
-    color: #0056b3;
+    color: #ff7043; /* Accent color */
 }
 
 #diseaseType {
     width: calc(100% - 40px);
     max-width: 320px;
     padding: 14px 22px;
-    border: 2px solid #007bff;
+    border: 2px solid #ff7043; /* Accent border */
     border-radius: 10px;
-    background-color: #ffffff;
+    background-color: #333333; /* Darker background for select */
     font-size: 1.1em;
-    color: #333;
+    color: #e0e0e0; /* Light text */
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%23007bff" d="M9.293 12.95l.707.707 4.243-4.243-1.414-1.414L10 11.536 6.707 8.243 5.293 9.657 9.293 13.65z"/%3E%3C/svg%3E');
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%23ff7043" d="M9.293 12.95l.707.707 4.243-4.243-1.414-1.414L10 11.536 6.707 8.243 5.293 9.657 9.293 13.65z"/%3E%3C/svg%3E'); /* Accent color arrow */
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 18px;
     cursor: pointer;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
     transition: all 0.3s ease;
 }
 
+#diseaseType option {
+    background-color: #333333; /* Darker background for options */
+    color: #e0e0e0; /* Light text for options */
+}
+
 #diseaseType:hover {
-    border-color: #0056b3;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-color: #ffa07a; /* Lighter accent on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 #diseaseType:focus {
     outline: none;
-    border-color: #0056b3;
-    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3);
+    border-color: #ffa07a;
+    box-shadow: 0 0 0 4px rgba(255, 112, 67, 0.3); /* Accent glow on focus */
 }
 
 /* Form Section Titles */
 .section-title {
     font-family: 'Inter', sans-serif;
-    color: #007bff;
+    color: #ff7043; /* Accent color */
     text-align: center;
     margin-top: 0;
     margin-bottom: 25px;
     font-size: 2em;
-    border-bottom: 2px solid #007bff;
+    border-bottom: 2px solid #ff7043; /* Accent border */
     padding-bottom: 10px;
     font-weight: 700;
 }
@@ -190,30 +218,35 @@ header {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #444;
+    color: #c0c0c0; /* Light gray for labels */
     font-size: 1.05em;
 }
 
 .form-group input[type="number"],
-.form-group select {
+.form-group select,
+.form-group textarea { /* Added textarea */
     width: calc(100% - 24px);
     padding: 14px;
-    border: 1px solid #ccc;
+    border: 1px solid #555; /* Darker border */
     border-radius: 8px;
     font-size: 1.05em;
     box-sizing: border-box;
+    background-color: #333333; /* Darker background for inputs */
+    color: #e0e0e0; /* Light text for inputs */
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    resize: vertical; /* Allow vertical resizing for textarea */
 }
 
 .form-group input[type="number"]:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus { /* Added textarea */
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    border-color: #ff7043; /* Accent border on focus */
+    box-shadow: 0 0 0 3px rgba(255, 112, 67, 0.2); /* Accent glow on focus */
 }
 
-button[type="submit"] {
-    background: linear-gradient(45deg, #28a745, #218838);
+button { /* General button styling */
+    background: linear-gradient(45deg, #28a745, #218838); /* Green gradient */
     color: white;
     padding: 16px 30px;
     border: none;
@@ -227,13 +260,13 @@ button[type="submit"] {
     letter-spacing: 0.5px;
 }
 
-button[type="submit"]:hover {
+button:hover {
     background: linear-gradient(45deg, #218838, #1e7e34);
     box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
     transform: translateY(-2px);
 }
 
-button[type="submit"]:active {
+button:active {
     transform: translateY(0);
     box-shadow: 0 2px 5px rgba(40, 167, 69, 0.2);
 }
@@ -243,25 +276,29 @@ button[type="submit"]:active {
     margin-top: 30px;
     padding: 20px;
     border-radius: 10px;
-    background-color: #e6f7ff;
+    background-color: #333333; /* Darker background for result */
     text-align: center;
     font-size: 1.2em;
     font-weight: bold;
-    color: #0056b3;
-    box-shadow: inset 0 1px 5px rgba(0,0,0,0.1);
+    color: #ff7043; /* Accent color for result text */
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.3);
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    border: 1px solid #b3e0ff;
+    border: 1px solid #555; /* Darker border */
 }
 .result.show {
     opacity: 1;
 }
+.result.hidden { /* To ensure proper hiding */
+    display: none;
+}
+
 
 /* Hide/Show form sections */
 .form-section {
     transition: opacity 0.5s ease-in-out, max-height 0.7s ease-in-out;
     opacity: 1;
-    max-height: 2000px;
+    max-height: 2000px; /* Large enough for content */
     overflow: hidden;
 }
 
@@ -272,15 +309,71 @@ button[type="submit"]:active {
     padding-bottom: 0;
     margin-top: 0;
     margin-bottom: 0;
-    display: none;
+    display: none; /* Crucial for hiding fully */
 }
+
+/* New: Health Insights Section */
+.health-insights-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #333333; /* Separator from prediction forms */
+}
+
+#insightResult {
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+    text-align: left; /* Align insight text to left */
+    font-size: 1em; /* Smaller font for insights */
+    color: #e0e0e0; /* Light text color */
+}
+
+/* Login Coming Soon Page Styling */
+.coming-soon-container {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 50px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    margin: 50px auto;
+}
+
+.coming-soon-container h1 {
+    color: #ff7043;
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+.coming-soon-container p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+.coming-soon-container .back-home-button {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.coming-soon-container .back-home-button:hover {
+    background: linear-gradient(45deg, #0056b3, #004085);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+    transform: translateY(-2px);
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
     body {
         padding: 10px;
     }
-    .container, header, .hero-image-container {
+    .container, header, .hero-image-container, .coming-soon-container {
         padding: 15px;
         margin-top: 10px;
         margin-bottom: 15px;
@@ -292,15 +385,21 @@ button[type="submit"]:active {
         padding-bottom: 15px;
         margin-bottom: 20px;
     }
+    .header-left {
+        width: 100%;
+        align-items: center;
+        margin-bottom: 15px;
+    }
     .logo-container {
         margin-bottom: 10px;
     }
     .personal-info {
         margin-top: 5px;
-        text-align: left;
+        text-align: center; /* Center name on small screens */
     }
     .app-title {
         font-size: 1.8em;
+        text-align: center;
     }
     .personal-info h2 {
         font-size: 1em;
@@ -311,9 +410,16 @@ button[type="submit"]:active {
     }
     .form-group input[type="number"],
     .form-group select,
-    button[type="submit"] {
+    .form-group textarea, /* Added textarea */
+    button {
         padding: 10px;
         font-size: 0.95em;
+    }
+    .login-button {
+        padding: 8px 15px;
+        font-size: 0.9em;
+        margin-top: 15px; /* Add margin to separate from header-left */
+        width: auto;
     }
     #diseaseType {
         padding: 10px 15px;
@@ -321,8 +427,14 @@ button[type="submit"]:active {
         background-position: right 8px center;
         background-size: 14px;
     }
-    .result {
+    .result, #insightResult { /* Added insightResult */
         padding: 15px;
+        font-size: 1em;
+    }
+    .coming-soon-container h1 {
+        font-size: 2em;
+    }
+    .coming-soon-container p {
         font-size: 1em;
     }
 }
