@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header Section with SVG Logo, App Title, Your Name, and Login Button -->
+    <!-- Header Section with SVG Logo and App Title -->
     <header>
         <div class="header-left">
             <div class="logo-container">
@@ -25,16 +25,16 @@
                     <circle cx="5" cy="50" r="4" fill="#ff7043"/>
                     <circle cx="95" cy="50" r="4" fill="#ffa07a"/>
                 </svg>
-                <h1 class="app-title">Precision Health, Simplified.</h1> <!-- NEW CAPTION HERE -->
+                <h1 class="app-title">Precision Health, Simplified.</h1>
             </div>
             <div class="personal-info">
                 <h2>By Gourav Rajput</h2>
             </div>
         </div>
-        <a href="/login_coming_soon" class="login-button">Login</a>
+        <!-- Removed Login Button -->
     </header>
 
-    <!-- Removed Hero Image Section as background pattern will be applied to body -->
+    <!-- Hero Image Section (Removed to use background pattern from style.css) -->
 
     <div class="container">
         <!-- Disease Selection Dropdown -->
@@ -127,18 +127,8 @@
             <!-- Prediction result will be displayed here dynamically by JavaScript -->
         </div>
 
-        <!-- Health Insights Section with Gemini API Integration -->
-        <div class="health-insights-section">
-            <h3 class="section-title">Health Insights (Powered by Gemini AI)</h3>
-            <div class="form-group">
-                <label for="healthQuestion">Ask a health-related question:</label>
-                <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="4"></textarea>
-            </div>
-            <button id="getInsightButton">Get Insight</button>
-            <div id="insightResult" class="result hidden">
-                <!-- AI-generated insight will be displayed here -->
-            </div>
-        </div>
+        <!-- Removed Health Insights Section -->
+        <!-- Removed Past Predictions Section -->
     </div>
 
     <!-- The script.js file -->

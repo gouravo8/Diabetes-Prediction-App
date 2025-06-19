@@ -3,11 +3,10 @@ from flask import Flask, request, jsonify, render_template
 import joblib
 import numpy as np
 import pandas as pd
-from flask_cors import CORS
-import requests # Import the requests library for making HTTP calls
+from flask_cors import CORS # Keep CORS for local development or if still needed on Render
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-CORS(app)
+CORS(app) # Enable CORS for all origins, adjust if needed for production
 
 # Define paths to model artifacts
 DIABETES_MODEL_PATH = 'model_artifacts/diabetes_rf_model_smote.joblib'
@@ -46,7 +45,8 @@ try:
 
 except Exception as e:
     print(f"Error loading model artifacts: {e}")
-
+    # It's crucial to ensure these models are actually loaded.
+    # For a production app, you might want to exit if models can't be loaded.
 
 # --- Frontend Route for Main App ---
 @app.route('/')
@@ -56,16 +56,7 @@ def home():
     """
     return render_template('index.html')
 
-# --- Login Coming Soon Route ---
-@app.route('/login_coming_soon')
-def login_coming_soon():
-    """
-    Renders the login coming soon page.
-    """
-    return render_template('login_coming_soon.html')
-
-
-# --- Prediction API Endpoint ---
+# --- Prediction API Endpoint (Unified for both diseases) ---
 @app.route('/predict', methods=['POST'])
 def predict():
     """
@@ -120,7 +111,7 @@ def predict():
 
             # Scale the numerical features
             numerical_cols_to_scale = [col for col in numerical_features if col in diabetes_feature_columns]
-            if numerical_cols_to_scale:
+            if numerical_cols_to_scale: # Only scale if there are numerical columns to scale
                 input_df[numerical_cols_to_scale] = diabetes_scaler.transform(input_df[numerical_cols_to_scale])
 
             prediction_proba = diabetes_model.predict_proba(input_df)[:, 1][0]
@@ -145,35 +136,39 @@ def predict():
             # Populate with received data for heart disease
             hd_numerical_features = ['age', 'trestbps', 'chol', 'thalach', 'oldpeak']
             for feature_name in hd_numerical_features:
+                # Note: Assuming incoming data keys match expected column names after processing, e.g., 'hd_age' maps to 'age' in model's features
+                # The frontend sends 'hd_age', 'hd_sex' etc., which will be processed to 'age', 'sex_1'
                 if f"hd_{feature_name}" in data and feature_name in input_df.columns:
                     input_df[feature_name] = float(data[f"hd_{feature_name}"])
             
             # Handle categorical features for heart disease (e.g., sex, cp, fbs, restecg, exang, slope, ca, thal)
             hd_categorical_inputs = {
-                'sex': {0: 'sex_0', 1: 'sex_1'},
-                'cp': {0: 'cp_0', 1: 'cp_1', 2: 'cp_2', 3: 'cp_3'},
-                'fbs': {0: 'fbs_0', 1: 'fbs_1'},
-                'restecg': {0: 'restecg_0', 1: 'restecg_1', 2: 'restecg_2'},
-                'exang': {0: 'exang_0', 1: 'exang_1'},
-                'slope': {0: 'slope_0', 1: 'slope_1', 2: 'slope_2'},
-                'ca': {0: 'ca_0', 1: 'ca_1', 2: 'ca_2', 3: 'ca_3', 4: 'ca_4'},
-                'thal': {0: 'thal_0', 1: 'thal_1', 2: 'thal_2', 3: 'thal_3'}
+                'hd_sex': {0: 'sex_0', 1: 'sex_1'},
+                'hd_cp': {0: 'cp_0', 1: 'cp_1', 2: 'cp_2', 3: 'cp_3'},
+                'hd_fbs': {0: 'fbs_0', 1: 'fbs_1'},
+                'hd_restecg': {0: 'restecg_0', 1: 'restecg_1', 2: 'restecg_2'},
+                'hd_exang': {0: 'exang_0', 1: 'exang_1'},
+                'hd_slope': {0: 'slope_0', 1: 'slope_1', 2: 'slope_2'},
+                'hd_ca': {0: 'ca_0', 1: 'ca_1', 2: 'ca_2', 3: 'ca_3', 4: 'ca_4'},
+                'hd_thal': {0: 'thal_0', 1: 'thal_1', 2: 'thal_2', 3: 'thal_3'}
             }
 
-            for feature_name, value_map in hd_categorical_inputs.items():
-                input_key_with_prefix = f"hd_{feature_name}"
-                if input_key_with_prefix in data and int(data[input_key_with_prefix]) in value_map:
-                    col_name = value_map[int(data[input_key_with_prefix])]
-                    if col_name in input_df.columns:
-                        input_df[col_name] = 1
+            for feature_name_with_prefix, value_map in hd_categorical_inputs.items():
+                if feature_name_with_prefix in data and int(data[feature_name_with_prefix]) in value_map:
+                    col_name_in_model = value_map[int(data[feature_name_with_prefix])]
+                    if col_name_in_model in input_df.columns:
+                        input_df[col_name_in_model] = 1
 
             # Ensure all columns are in the correct order for the model
             input_df = input_df[heart_feature_columns]
 
             # Scale numerical features for heart disease model
-            heart_numerical_cols_to_scale = [col for col in hd_numerical_features if col in heart_feature_columns]
-            if heart_numerical_cols_to_scale:
-                input_df[heart_numerical_cols_to_scale] = heart_scaler.transform(input_df[heart_numerical_cols_to_scale])
+            heart_numerical_cols_to_scale = [col for col in hd_numerical_features if col.replace('hd_', '') in heart_feature_columns]
+            if heart_numerical_cols_to_scale: # Only scale if there are numerical columns to scale
+                # The scaler expects column names as they were during training ('age', 'trestbps', etc.)
+                # not with the 'hd_' prefix.
+                cols_for_scaler = [col.replace('hd_', '') for col in heart_numerical_cols_to_scale]
+                input_df[cols_for_scaler] = heart_scaler.transform(input_df[cols_for_scaler])
 
             prediction_proba = heart_model.predict_proba(input_df)[:, 1][0]
             prediction_class = (prediction_proba >= 0.5).astype(int)
@@ -195,65 +190,8 @@ def predict():
         return jsonify({"error": f"An unexpected error occurred during prediction: {str(e)}."}), 400
 
 
-# --- New: Gemini API Proxy Endpoint ---
-@app.route('/generate_insight', methods=['POST'])
-def generate_insight():
-    """
-    Proxies requests to the Gemini API to generate health insights.
-    The Gemini API key is loaded from environment variables for security.
-    """
-    gemini_api_key = os.environ.get("GEMINI_API_KEY") # Get API key from environment variable
-
-    if not gemini_api_key:
-        print("GEMINI_API_KEY environment variable not set.")
-        return jsonify({"error": "Server configuration error: Gemini API Key missing."}), 500
-
-    try:
-        data = request.get_json(force=True)
-        user_prompt = data.get('prompt')
-
-        if not user_prompt:
-            return jsonify({"error": "No prompt provided for health insight."}), 400
-
-        # Construct the payload for the Gemini API
-        payload = {
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": user_prompt}]
-                }
-            ],
-            # Optional: Add generationConfig if you want structured output or specific settings
-            # "generationConfig": {
-            #     "responseMimeType": "application/json",
-            #     "responseSchema": { ... }
-            # }
-        }
-
-        # Make the API call to Gemini
-        gemini_api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_api_key}"
-        
-        response = requests.post(gemini_api_url, json=payload, headers={'Content-Type': 'application/json'})
-        response.raise_for_status() # Raise HTTPError for bad responses (4xx or 5xx)
-
-        gemini_result = response.json()
-
-        if gemini_result.get('candidates') and gemini_result['candidates'][0].get('content') and gemini_result['candidates'][0]['content'].get('parts'):
-            generated_text = gemini_result['candidates'][0]['content']['parts'][0]['text']
-            return jsonify({"insight": generated_text})
-        else:
-            print(f"Unexpected Gemini response structure: {gemini_result}")
-            return jsonify({"error": "Failed to get insight from AI. Unexpected response format."}), 500
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error making request to Gemini API: {e}")
-        return jsonify({"error": f"Error contacting AI service: {str(e)}."}), 500
-    except Exception as e:
-        print(f"An unexpected error occurred in generate_insight: {e}")
-        return jsonify({"error": f"An unexpected server error occurred: {str(e)}."}), 500
-
-
 if __name__ == '__main__':
-    # Render will set the PORT environment variable
-    port = int(os.environ.get("PORT", 5000))
+    # Render will set the PORT environment variable.
+    # Set default to 10000 based on Render logs for consistent behavior.
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=True)

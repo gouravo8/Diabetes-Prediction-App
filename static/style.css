@@ -99,38 +99,6 @@ header {
     font-weight: 500;
 }
 
-/* Login Button in Header */
-.login-button {
-    background: linear-gradient(45deg, #007bff, #0056b3); /* Blue gradient for login */
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    text-decoration: none; /* Remove underline for link */
-    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
-    white-space: nowrap; /* Prevent button text from wrapping */
-}
-
-.login-button:hover {
-    background: linear-gradient(45deg, #0056b3, #004085);
-    box-shadow: 0 5px 12px rgba(0, 123, 255, 0.4);
-    transform: translateY(-2px);
-}
-
-.login-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
-}
-
-
-/* No Hero Image section in this version of design */
-/* Previous .hero-image-container and .hero-image rules are removed */
-
-
 /* Disease Selection Dropdown Styling */
 .disease-selection-group {
     margin-bottom: 30px;
@@ -211,7 +179,7 @@ header {
 
 .form-group input[type="number"],
 .form-group select,
-.form-group textarea { /* Added textarea */
+.form-group textarea { /* Added textarea for previous Gemini part */
     width: calc(100% - 24px);
     padding: 14px;
     border: 1px solid #555; /* Darker border */
@@ -299,68 +267,12 @@ button:active {
     display: none; /* Crucial for hiding fully */
 }
 
-/* New: Health Insights Section */
-.health-insights-section {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #333333; /* Separator from prediction forms */
-}
-
-#insightResult {
-    white-space: pre-wrap; /* Preserve whitespace and line breaks */
-    text-align: left; /* Align insight text to left */
-    font-size: 1em; /* Smaller font for insights */
-    color: #e0e0e0; /* Light text color */
-}
-
-/* Login Coming Soon Page Styling */
-.coming-soon-container {
-    background-color: #1a1a1a;
-    color: #e0e0e0;
-    padding: 50px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    max-width: 600px;
-    width: 100%;
-    margin: 50px auto;
-}
-
-.coming-soon-container h1 {
-    color: #ff7043;
-    font-size: 3em;
-    margin-bottom: 20px;
-}
-
-.coming-soon-container p {
-    font-size: 1.2em;
-    margin-bottom: 30px;
-}
-
-.coming-soon-container .back-home-button {
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    color: white;
-    padding: 15px 30px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
-}
-
-.coming-soon-container .back-home-button:hover {
-    background: linear-gradient(45deg, #0056b3, #004085);
-    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
-    transform: translateY(-2px);
-}
-
-
 /* Responsive adjustments */
 @media (max-width: 600px) {
     body {
         padding: 10px;
     }
-    .container, header, .coming-soon-container { /* Removed .hero-image-container */
+    .container, header { /* Removed .hero-image-container, .coming-soon-container */
         padding: 15px;
         margin-top: 10px;
         margin-bottom: 15px;
@@ -402,26 +314,14 @@ button:active {
         padding: 10px;
         font-size: 0.95em;
     }
-    .login-button {
-        padding: 8px 15px;
-        font-size: 0.9em;
-        margin-top: 15px; /* Add margin to separate from header-left */
-        width: auto;
-    }
     #diseaseType {
         padding: 10px 15px;
         font-size: 1em;
         background-position: right 8px center;
         background-size: 14px;
     }
-    .result, #insightResult { /* Added insightResult */
+    .result {
         padding: 15px;
-        font-size: 1em;
-    }
-    .coming-soon-container h1 {
-        font-size: 2em;
-    }
-    .coming-soon-container p {
         font-size: 1em;
     }
 }
