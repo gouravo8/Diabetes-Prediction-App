@@ -707,6 +707,7 @@ h1, h2, h3, .app-title, .card-title {
     margin-bottom: 25px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
+    gap: 5px; /* Added gap for better spacing */
 }
 
 .auth-tab {
@@ -720,7 +721,7 @@ h1, h2, h3, .app-title, .card-title {
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.3s ease;
-    margin: 0 5px;
+    margin: 0 5px; /* Adjusted margin */
 }
 
 .auth-tab:hover {
