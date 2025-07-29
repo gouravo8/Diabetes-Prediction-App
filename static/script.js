@@ -6,10 +6,83 @@ document.addEventListener('DOMContentLoaded', function() {
     const predictionResultDiv = document.getElementById('predictionResult');
     const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
     
+    // Elements for Health Insights (Gemini API)
+    const healthQuestionInput = document.getElementById('healthQuestion');
+    const getInsightButton = document.getElementById('getInsightButton');
+    const insightResultDiv = document.getElementById('insightResult');
+
+    // Elements for Prediction History (Firebase)
+    const loginPromptDiv = document.getElementById('loginPrompt');
+    const anonLoginBtn = document.getElementById('anonLoginBtn');
+    const historyListDiv = document.getElementById('historyList');
+    const noHistoryMessage = document.querySelector('.no-history-message');
+
     let heartDiseasePredictionForm = null; // This will hold the reference to the dynamically created form
 
+    // --- Firebase Configuration (IMPORTANT: Replace with your actual Firebase config) ---
+    // You need to get your Firebase project's config from your Firebase console.
+    // Go to Project settings -> Your apps -> Web app -> Firebase SDK snippet -> Config
+    const firebaseConfig = {
+        apiKey: "YOUR_FIREBASE_API_KEY", // Replace with your actual API Key
+        authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual Auth Domain
+        projectId: "YOUR_PROJECT_ID", // Replace with your actual Project ID
+        storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual Storage Bucket
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual Sender ID
+        appId: "YOUR_APP_ID" // Replace with your actual App ID
+    };
+
+    // Initialize Firebase
+    let app, auth, db, userId;
+    let isFirebaseReady = false;
+
+    try {
+        app = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                userId = user.uid;
+                console.log("Firebase User ID:", userId);
+                loginPromptDiv.classList.add('hidden');
+                historyListDiv.classList.remove('hidden');
+                isFirebaseReady = true;
+                fetchPredictionHistory(); // Fetch history once logged in
+            } else {
+                console.log("No Firebase user logged in.");
+                userId = null;
+                loginPromptDiv.classList.remove('hidden');
+                historyListDiv.classList.add('hidden');
+                isFirebaseReady = false;
+            }
+        });
+    } catch (error) {
+        console.error("Firebase initialization error:", error);
+        loginPromptDiv.innerHTML = `<p style="color: red;">Error initializing Firebase. History feature unavailable.</p>`;
+        loginPromptDiv.classList.remove('hidden');
+        historyListDiv.classList.add('hidden');
+    }
+
+    // --- Helper Functions for UI ---
+
+    function showSpinner(element) {
+        const spinner = element.querySelector('.loading-spinner');
+        if (spinner) {
+            spinner.style.display = 'block';
+            element.classList.add('loading-state'); // Optional: add a class for styling
+        }
+    }
+
+    function hideSpinner(element) {
+        const spinner = element.querySelector('.loading-spinner');
+        if (spinner) {
+            spinner.style.display = 'none';
+            element.classList.remove('loading-state');
+        }
+    }
+
     // Define Heart Disease fields and their properties for dynamic generation
-    // These fields must match the features expected by your heart disease model
     const heartDiseaseFields = [
         { id: 'hd_age', label: 'Age:', type: 'number', min: 0, max: 120, step: 1, required: true },
         { id: 'hd_sex', label: 'Sex:', type: 'select', options: [{value: '1', text: 'Male'}, {value: '0', text: 'Female'}], required: true },
@@ -54,15 +127,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
 
         heartDiseaseFormSection.innerHTML = `
-            <h3 class="section-title">Heart Disease Prediction</h3>
+            <h3 class="card-title">Heart Disease Prediction</h3>
             <form id="heartDiseasePredictionForm">
                 ${formInnerHtml}
-                <button type="submit">Predict Heart Disease Risk</button>
+                <button type="submit" class="submit-btn">Predict Heart Disease Risk</button>
             </form>
         `;
-        // Re-assign the form reference after generating HTML
         heartDiseasePredictionForm = document.getElementById('heartDiseasePredictionForm');
-        // Add event listener to the newly created form
         if (heartDiseasePredictionForm) {
             heartDiseasePredictionForm.addEventListener('submit', handlePredictionFormSubmit);
         }
@@ -72,7 +143,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function showSelectedForm() {
         const selectedDisease = diseaseTypeSelect.value;
         predictionResultDiv.classList.remove('show');
+        predictionResultDiv.classList.add('hidden'); // Ensure it's truly hidden
         predictionResultDiv.innerHTML = '';
+        insightResultDiv.classList.remove('show');
+        insightResultDiv.classList.add('hidden'); // Ensure it's truly hidden
+        insightResultDiv.innerHTML = '';
 
         if (selectedDisease === 'diabetes') {
             diabetesFormSection.classList.remove('hidden');
@@ -80,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (selectedDisease === 'heart_disease') {
             diabetesFormSection.classList.add('hidden');
             heartDiseaseFormSection.classList.remove('hidden');
-            // Generate heart disease form dynamically if not already generated or if empty
             if (!heartDiseasePredictionForm || heartDiseasePredictionForm.innerHTML.trim() === '') {
                 generateHeartDiseaseForm();
             }
@@ -94,8 +168,9 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handlePredictionFormSubmit(event) {
         event.preventDefault();
 
-        predictionResultDiv.innerHTML = 'Predicting...';
-        predictionResultDiv.classList.add('show');
+        predictionResultDiv.classList.remove('hidden'); // Show result container
+        predictionResultDiv.innerHTML = '<p>Predicting...</p>';
+        showSpinner(predictionResultDiv);
 
         const form = event.target;
         const formData = new FormData(form);
@@ -105,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const diseaseType = diseaseTypeSelect.value;
-        data['disease_type'] = diseaseType; // Send the selected disease type to backend
+        data['disease_type'] = diseaseType;
 
         // Convert specific values to numbers based on disease type and expected features
         if (diseaseType === 'diabetes') {
@@ -116,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function() {
             data.hypertension = parseInt(data.hypertension);
             data.heart_disease = parseInt(data.heart_disease);
         } else if (diseaseType === 'heart_disease') {
-            // Convert heart disease specific values, ensuring keys match backend's expectations
             data.hd_age = parseFloat(data.hd_age);
             data.hd_sex = parseInt(data.hd_sex);
             data.hd_cp = parseInt(data.hd_cp);
@@ -133,7 +207,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Call your Flask backend's /predict endpoint
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -149,19 +222,217 @@ document.addEventListener('DOMContentLoaded', function() {
             predictionResultDiv.innerHTML = `<p>${result.prediction_text} <br> ${result.probability}</p>`;
             predictionResultDiv.classList.add('show');
 
+            // Save prediction to Firebase if logged in
+            if (isFirebaseReady && userId) {
+                savePredictionHistory(diseaseType, data, result.prediction_text, result.probability);
+            }
+
         } catch (error) {
             console.error(`Error during ${diseaseType} prediction:`, error);
             predictionResultDiv.innerHTML = `<p style="color: red;">An error occurred: ${error.message}. Please check your inputs.</p>`;
             predictionResultDiv.classList.add('show');
+        } finally {
+            hideSpinner(predictionResultDiv);
         }
     }
+
+    // --- Gemini API Integration for Health Insights (via backend proxy) ---
+    getInsightButton.addEventListener('click', async () => {
+        const prompt = healthQuestionInput.value.trim();
+        if (!prompt) {
+            insightResultDiv.classList.remove('hidden');
+            insightResultDiv.innerHTML = '<p style="color: orange;">Please enter a question to get health insights.</p>';
+            insightResultDiv.classList.add('show');
+            return;
+        }
+
+        insightResultDiv.classList.remove('hidden');
+        insightResultDiv.innerHTML = '<p>Generating insight...</p>';
+        showSpinner(insightResultDiv);
+
+        try {
+            const response = await fetch('/generate_insight', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Server error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.insight) {
+                insightResultDiv.innerHTML = `<p>${result.insight}</p>`;
+            } else {
+                insightResultDiv.innerHTML = '<p style="color: red;">Could not get a valid insight from AI. Please try again.</p>';
+            }
+        } catch (error) {
+            console.error("Error calling backend for Gemini API:", error);
+            insightResultDiv.innerHTML = `<p style="color: red;">Error fetching insight: ${error.message}.</p>`;
+        } finally {
+            hideSpinner(insightResultDiv);
+            insightResultDiv.classList.add('show');
+        }
+    });
+
+    // --- Firebase History Functions ---
+
+    // Function to save prediction history
+    async function savePredictionHistory(diseaseType, inputs, predictionText, probability) {
+        if (!isFirebaseReady || !userId) {
+            console.warn("Firebase not ready or user not logged in. Cannot save history.");
+            return;
+        }
+
+        try {
+            // Use a generic app ID for the collection path for user deployment
+            const appUniqueId = "health-predictor-app"; // Hardcoded unique ID for this app's data
+            const userPredictionsRef = db.collection('artifacts').doc(appUniqueId).collection('users').doc(userId).collection('predictions');
+
+            await userPredictionsRef.add({
+                diseaseType: diseaseType,
+                inputs: inputs,
+                prediction: predictionText,
+                probability: probability,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log("Prediction saved to Firestore!");
+            fetchPredictionHistory(); // Refresh history after saving
+        } catch (error) {
+            console.error("Error saving prediction to Firestore:", error);
+        }
+    }
+
+    // Function to fetch and display prediction history
+    async function fetchPredictionHistory() {
+        if (!isFirebaseReady || !userId) {
+            console.warn("Firebase not ready or user not logged in. Cannot fetch history.");
+            return;
+        }
+
+        historyListDiv.innerHTML = '<div class="loading-spinner" style="display: block;"></div>';
+        noHistoryMessage.classList.add('hidden');
+
+        try {
+            const appUniqueId = "health-predictor-app"; // Hardcoded unique ID for this app's data
+            const userPredictionsRef = db.collection('artifacts').doc(appUniqueId).collection('users').doc(userId).collection('predictions');
+            
+            // Fetch documents, ordered by timestamp descending
+            const snapshot = await userPredictionsRef.orderBy('timestamp', 'desc').get();
+            
+            historyListDiv.innerHTML = ''; // Clear previous history
+            if (snapshot.empty) {
+                noHistoryMessage.classList.remove('hidden');
+            } else {
+                noHistoryMessage.classList.add('hidden');
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'N/A';
+                    
+                    const inputsHtml = Object.entries(data.inputs).map(([key, value]) => {
+                        return `<p><strong>${key.replace('hd_', '').replace(/([A-Z])/g, ' $1').trim()}:</strong> ${value}</p>`;
+                    }).join('');
+
+                    const historyCard = `
+                        <details class="history-card" data-aos="fade-up" data-aos-delay="50">
+                            <summary>
+                                <span>${data.diseaseType.toUpperCase()} Prediction - ${timestamp}</span>
+                            </summary>
+                            <div class="history-card-content">
+                                <p><strong>Result:</strong> ${data.prediction}</p>
+                                <p><strong>Probability:</strong> ${data.probability}</p>
+                                <p><strong>Inputs:</strong></p>
+                                <div class="input-details">
+                                    ${inputsHtml}
+                                </div>
+                            </div>
+                        </details>
+                    `;
+                    historyListDiv.innerHTML += historyCard;
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching prediction history:", error);
+            historyListDiv.innerHTML = `<p style="color: red;">Error loading history: ${error.message}</p>`;
+        } finally {
+            hideSpinner(historyListDiv);
+        }
+    }
+
+    // --- Event Listeners ---
+
+    // Navbar toggle for mobile
+    const hamburgerMenu = document.querySelector('.hamburger-menu');
+    const navLinks = document.querySelector('.nav-links');
+    hamburgerMenu.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+    });
+
+    // Close mobile menu when a link is clicked
+    navLinks.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (navLinks.classList.contains('active')) {
+                navLinks.classList.remove('active');
+            }
+        });
+    });
+
+    // Anonymous Login for Firebase
+    anonLoginBtn.addEventListener('click', async () => {
+        try {
+            await auth.signInAnonymously();
+            console.log("Signed in anonymously");
+        } catch (error) {
+            console.error("Error signing in anonymously:", error);
+            alert("Error signing in: " + error.message); // Using alert for critical Firebase error
+        }
+    });
 
     // --- Initial Setup ---
     showSelectedForm(); // Display initial form (Diabetes by default)
 
-    // Event listeners
+    // Event listeners for prediction forms
     diseaseTypeSelect.addEventListener('change', showSelectedForm);
     diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
 
-    // heartDiseasePredictionForm listener is attached dynamically in generateHeartDiseaseForm
+    // AOS Initialization
+    AOS.init({
+        duration: 1000, // values from 0 to 3000, with step 50ms
+        once: true,     // whether animation should happen only once - while scrolling down
+    });
+
+    // Hero Section Animated Text (Typewriter effect)
+    const heroHeading = document.getElementById('hero-heading');
+    const heroSubheading = document.getElementById('hero-subheading');
+
+    const typeWriterEffect = (element, text, delay = 50) => {
+        let i = 0;
+        element.innerHTML = ''; // Clear content
+        element.style.opacity = 1; // Make visible
+        const interval = setInterval(() => {
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(interval);
+            }
+        }, delay);
+    };
+
+    const originalHeadingText = heroHeading.textContent;
+    const originalSubheadingText = heroSubheading.textContent;
+
+    // Clear and re-animate on load
+    heroHeading.textContent = '';
+    heroSubheading.textContent = '';
+
+    setTimeout(() => {
+        typeWriterEffect(heroHeading, originalHeadingText, 70);
+    }, 500); // Start heading after 0.5s
+
+    setTimeout(() => {
+        typeWriterEffect(heroSubheading, originalSubheadingText, 40);
+    }, 2000); // Start subheading after 2s
 });

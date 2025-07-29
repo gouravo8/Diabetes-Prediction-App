@@ -3,135 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Risk Predictor</title>
+    <title>Precision Health Hub</title>
+    <!-- Google Fonts: Poppins for headings, Roboto for body -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Link to your custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AOS (Animate On Scroll) Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Font Awesome for Icons (e.g., hamburger, user) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Favicon placeholder (you can replace this with a real favicon later) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
 </head>
 <body>
-    <!-- Header Section with SVG Logo and App Title -->
-    <header>
-        <div class="header-left">
-            <div class="logo-container">
-                <!-- Health-related SVG Logo (Continuous Heart Beat Line) -->
+    <!-- Responsive Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="/" class="logo-link">
+                <!-- NEW SVG Logo: Stylized Heartbeat + Plus Sign -->
                 <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#ff7043" />
-                            <stop offset="100%" stop-color="#ffa07a" />
+                            <stop offset="0%" stop-color="#8A2BE2" /> <!-- Lavender -->
+                            <stop offset="100%" stop-color="#ADD8E6" /> <!-- Soft Blue -->
                         </linearGradient>
                     </defs>
+                    <!-- Heartbeat line -->
                     <path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50"
                           stroke="url(#logoGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="5" cy="50" r="4" fill="#ff7043"/>
-                    <circle cx="95" cy="50" r="4" fill="#ffa07a"/>
+                    <!-- Plus sign for health/medical -->
+                    <line x1="45" y1="40" x2="55" y2="60" stroke="#00CED1" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="55" y1="40" x2="45" y2="60" stroke="#00CED1" stroke-width="8" stroke-linecap="round"/>
                 </svg>
-                <h1 class="app-title">Precision Health, Simplified.</h1>
-            </div>
-            <div class="personal-info">
-                <h2>By Gourav Rajput</h2>
-            </div>
+                <span class="app-title">Precision Health Hub</span>
+            </a>
         </div>
-        <!-- Removed Login Button -->
-    </header>
+        <button class="hamburger-menu" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="nav-links">
+            <li><a href="#prediction-section" class="nav-link active">Predictions</a></li>
+            <li><a href="#insights-section" class="nav-link">AI Insights</a></li>
+            <li><a href="#history-section" class="nav-link">History</a></li>
+            <li><a href="/login_coming_soon" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
+        </ul>
+    </nav>
 
-    <!-- Hero Image Section (Removed to use background pattern from style.css) -->
+    <!-- Hero Section with Animated Text -->
+    <section class="hero-section">
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
+            <h1 class="animated-text" id="hero-heading">Empowering Your Health Journey</h1>
+            <p class="animated-text-sub" id="hero-subheading">Data-driven insights for a healthier future.</p>
+        </div>
+    </section>
 
     <div class="container">
-        <!-- Disease Selection Dropdown -->
-        <div class="disease-selection-group">
-            <label for="diseaseType">Select Disease for Prediction:</label>
-            <select id="diseaseType" name="diseaseType" required>
-                <option value="">-- Choose a Disease --</option>
-                <option value="diabetes">Diabetes</option>
-                <option value="heart_disease">Heart Disease</option>
-            </select>
-        </div>
+        <!-- Prediction Section -->
+        <section id="prediction-section" class="card-section" data-aos="fade-up" data-aos-delay="200">
+            <h2 class="section-title">Predict Your Health Risk</h2>
+            <div class="disease-selection-group">
+                <label for="diseaseType">Select Disease:</label>
+                <select id="diseaseType" name="diseaseType" required>
+                    <option value="">-- Choose a Disease --</option>
+                    <option value="diabetes">Diabetes</option>
+                    <option value="heart_disease">Heart Disease</option>
+                </select>
+            </div>
 
-        <!-- Diabetes Prediction Form Section -->
-        <div id="diabetesFormSection" class="form-section">
-            <h3 class="section-title">Diabetes Prediction</h3>
-            <form id="diabetesPredictionForm">
+            <!-- Diabetes Prediction Form Section -->
+            <div id="diabetesFormSection" class="form-section card-layout">
+                <h3 class="card-title">Diabetes Prediction</h3>
+                <form id="diabetesPredictionForm">
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="hypertension">Hypertension:</label>
+                        <select id="hypertension" name="hypertension" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="heart_disease">Heart Disease:</label>
+                        <select id="heart_disease" name="heart_disease" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smoking_history">Smoking History:</label>
+                        <select id="smoking_history" name="smoking_history" required>
+                            <option value="">Select Smoking History</option>
+                            <option value="never">Never</option>
+                            <option value="No Info">No Info</option>
+                            <option value="current">Current Smoker</option>
+                            <option value="ever">Ever Smoked</option>
+                            <option value="former">Former Smoker</option>
+                            <option value="not current">Not Current Smoker</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bmi">BMI:</label>
+                        <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="HbA1c_level">HbA1c Level:</label>
+                        <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blood_glucose_level">Blood Glucose Level:</label>
+                        <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Predict Diabetes Risk</button>
+                </form>
+            </div>
+
+            <!-- Heart Disease Prediction Form Section (initially hidden) -->
+            <div id="heartDiseaseFormSection" class="form-section card-layout hidden">
+                <h3 class="card-title">Heart Disease Prediction</h3>
+                <form id="heartDiseasePredictionForm">
+                    <!-- Fields will be dynamically generated by script.js -->
+                    <button type="submit" class="submit-btn">Predict Heart Disease Risk</button>
+                </form>
+            </div>
+
+            <div id="predictionResult" class="result-card hidden" data-aos="fade-up" data-aos-delay="300">
+                <!-- Prediction result will be displayed here dynamically by JavaScript -->
+                <div class="loading-spinner" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- Health Insights Section (Powered by Gemini AI) -->
+        <section id="insights-section" class="card-section" data-aos="fade-up" data-aos-delay="400">
+            <h2 class="section-title">Health Insights (Powered by Gemini AI)</h2>
+            <div class="form-section card-layout">
+                <h3 class="card-title">Ask a Question</h3>
                 <div class="form-group">
-                    <label for="gender">Gender:</label>
-                    <select id="gender" name="gender" required>
-                        <option value="">Select Gender</option>
-                        <option value="Female">Female</option>
-                        <option value="Male">Male</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <label for="healthQuestion">Your Health Query:</label>
+                    <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
                 </div>
-
-                <div class="form-group">
-                    <label for="age">Age:</label>
-                    <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
+                <button id="getInsightButton" class="submit-btn">Get Insight</button>
+                <div id="insightResult" class="result-card hidden" data-aos="fade-up" data-aos-delay="100">
+                    <div class="loading-spinner" style="display: none;"></div>
                 </div>
+            </div>
+        </section>
 
-                <div class="form-group">
-                    <label for="hypertension">Hypertension:</label>
-                    <select id="hypertension" name="hypertension" required>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
+        <!-- Prediction History Section (Firebase Integration) -->
+        <section id="history-section" class="card-section" data-aos="fade-up" data-aos-delay="500">
+            <h2 class="section-title">Your Prediction History</h2>
+            <div id="loginPrompt" class="info-card">
+                <p>Please log in to view your prediction history.</p>
+                <button id="anonLoginBtn" class="submit-btn">Login Anonymously</button>
+            </div>
+            <div id="historyList" class="history-list hidden">
+                <!-- Prediction history cards will be dynamically loaded here -->
+                <p class="no-history-message hidden">No prediction history found. Make a prediction to save it!</p>
+            </div>
+        </section>
 
-                <div class="form-group">
-                    <label for="heart_disease">Heart Disease:</label>
-                    <select id="heart_disease" name="heart_disease" required>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
+    </div> <!-- /container -->
 
-                <div class="form-group">
-                    <label for="smoking_history">Smoking History:</label>
-                    <select id="smoking_history" name="smoking_history" required>
-                        <option value="">Select Smoking History</option>
-                        <option value="never">Never</option>
-                        <option value="No Info">No Info</option>
-                        <option value="current">Current Smoker</option>
-                        <option value="ever">Ever Smoked</option>
-                        <option value="former">Former Smoker</option>
-                        <option value="not current">Not Current Smoker</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="bmi">BMI:</label>
-                    <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="HbA1c_level">HbA1c Level:</label>
-                    <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="blood_glucose_level">Blood Glucose Level:</label>
-                    <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
-                </div>
-
-                <button type="submit">Predict Diabetes Risk</button>
-            </form>
-        </div>
-
-        <!-- Heart Disease Prediction Form Section (initially hidden) -->
-        <div id="heartDiseaseFormSection" class="form-section hidden">
-            <h3 class="section-title">Heart Disease Prediction</h3>
-            <form id="heartDiseasePredictionForm">
-                <!-- Fields will be dynamically generated by script.js -->
-                <button type="submit">Predict Heart Disease Risk</button>
-            </form>
-        </div>
-
-        <div id="predictionResult" class="result">
-            <!-- Prediction result will be displayed here dynamically by JavaScript -->
-        </div>
-
-        <!-- Removed Health Insights Section -->
-        <!-- Removed Past Predictions Section -->
-    </div>
-
-    <!-- The script.js file -->
+    <!-- AOS JavaScript -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Your custom JavaScript -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
