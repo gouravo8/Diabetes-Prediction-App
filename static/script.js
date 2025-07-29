@@ -35,10 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Firebase Configuration (IMPORTANT: These are your confirmed values) ---
     const firebaseConfig = {
-        apiKey: "ATzaSyCowxZFfngcDkHNwnnahw4Tvat0IgAyQ-Y",
+        apiKey: "AIzaSyCowxZFnmgcDkHNwwnahw4Tvat0IgAyQ-Y",
         authDomain: "diabetes-prediction-f0a3b.firebaseapp.com",
         projectId: "diabetes-prediction-f0a3b",
-        storageBucket: "diabetes-prediction-f0a3b.appspot.com",
+        storageBucket: "diabetes-prediction-f0a3b.firebasestorage.app",
         messagingSenderId: "717769556705",
         appId: "1:717769556705:web:990820cd33dd6feae92da0"
     };
