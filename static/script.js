@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Elements for Health Insights (Gemini API)
     const healthQuestionInput = document.getElementById('healthQuestion');
     const getInsightButton = document.getElementById('getInsightButton');
-    const insightResultDiv = document.getElementById('insightResult');
+    const insightResultContainer = document.getElementById('insightResultContainer');
 
     // Elements for Prediction History (Firebase)
     const loginPromptDiv = document.getElementById('loginPrompt');
@@ -17,44 +17,66 @@ document.addEventListener('DOMContentLoaded', function() {
     const historyListDiv = document.getElementById('historyList');
     const noHistoryMessage = document.querySelector('.no-history-message');
 
+    // Elements for Authentication Modal
+    const loginNavLink = document.getElementById('loginNavLink');
+    const logoutNavLink = document.getElementById('logoutNavLink');
+    const authModal = document.getElementById('authModal');
+    const closeAuthModalBtn = document.querySelector('.close-auth-modal');
+    const showLoginTabBtn = document.getElementById('showLoginTab');
+    const showSignupTabBtn = document.getElementById('showSignupTab');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const loginEmailInput = document.getElementById('loginEmail');
+    const loginPasswordInput = document.getElementById('loginPassword');
+    const signupEmailInput = document.getElementById('signupEmail');
+    const signupPasswordInput = document.getElementById('signupPassword');
+
     let heartDiseasePredictionForm = null; // This will hold the reference to the dynamically created form
 
     // --- Firebase Configuration (IMPORTANT: Replace with your actual Firebase config) ---
     // You need to get your Firebase project's config from your Firebase console.
     // Go to Project settings -> Your apps -> Web app -> Firebase SDK snippet -> Config
     const firebaseConfig = {
-        apiKey: "YOUR_FIREBASE_API_KEY", // Replace with your actual API Key
-        authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual Auth Domain
-        projectId: "YOUR_PROJECT_ID", // Replace with your actual Project ID
-        storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual Storage Bucket
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual Sender ID
+        apiKey: "YOUR_API_KEY", // Replace with your actual API Key
+        authDomain: "your-project-id.firebaseapp.com", // Replace with your actual Auth Domain
+        projectId: "your-project-id", // Replace with your actual Project ID
+        storageBucket: "your-project-id.appspot.com", // Replace with your actual Storage Bucket
+        messagingSenderId: "YOUR_SENDER_ID", // Replace with your actual Sender ID
         appId: "YOUR_APP_ID" // Replace with your actual App ID
     };
 
     // Initialize Firebase
     let app, auth, db, userId;
-    let isFirebaseReady = false;
+    let isFirebaseReady = false; // Flag to indicate if Firebase is initialized and user state is checked
 
     try {
         app = firebase.initializeApp(firebaseConfig);
         auth = firebase.auth();
         db = firebase.firestore();
 
-        // Listen for auth state changes
+        // --- Firebase Auth State Listener ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 userId = user.uid;
                 console.log("Firebase User ID:", userId);
-                loginPromptDiv.classList.add('hidden');
-                historyListDiv.classList.remove('hidden');
+                loginPromptDiv.classList.add('hidden'); // Hide login prompt
+                historyListDiv.classList.remove('hidden'); // Show history list
+                loginNavLink.classList.add('hidden'); // Hide login button in navbar
+                logoutNavLink.classList.remove('hidden'); // Show logout button in navbar
                 isFirebaseReady = true;
-                fetchPredictionHistory(); // Fetch history once logged in
+                fetchPredictionHistory(); // Fetch history for the logged-in user
+                authModal.classList.remove('visible'); // Hide auth modal if user logs in
             } else {
                 console.log("No Firebase user logged in.");
                 userId = null;
-                loginPromptDiv.classList.remove('hidden');
-                historyListDiv.classList.add('hidden');
+                loginPromptDiv.classList.remove('hidden'); // Show login prompt
+                historyListDiv.classList.add('hidden'); // Hide history list
+                loginNavLink.classList.remove('hidden'); // Show login button in navbar
+                logoutNavLink.classList.add('hidden'); // Hide logout button in navbar
                 isFirebaseReady = false;
+                historyListDiv.innerHTML = ''; // Clear history when logged out
+                noHistoryMessage.classList.remove('hidden'); // Show no history message
+                historyListDiv.appendChild(noHistoryMessage);
             }
         });
     } catch (error) {
@@ -79,6 +101,24 @@ document.addEventListener('DOMContentLoaded', function() {
         if (spinner) {
             spinner.style.display = 'none';
             element.classList.remove('loading-state');
+        }
+    }
+
+    // Custom Message Box (replaces alert/confirm)
+    function displayMessageBox(message, type = 'info') {
+        const messageBox = document.createElement('div');
+        messageBox.classList.add('message-box', type);
+        messageBox.innerHTML = `<p>${message}</p><button class="close-message">OK</button>`;
+        document.body.appendChild(messageBox);
+
+        messageBox.querySelector('.close-message').addEventListener('click', () => {
+            messageBox.remove();
+        });
+
+        if (type === 'info' || type === 'success') {
+            setTimeout(() => {
+                messageBox.remove();
+            }, 5000);
         }
     }
 
@@ -145,9 +185,27 @@ document.addEventListener('DOMContentLoaded', function() {
         predictionResultDiv.classList.remove('show');
         predictionResultDiv.classList.add('hidden'); // Ensure it's truly hidden
         predictionResultDiv.innerHTML = '';
-        insightResultDiv.classList.remove('show');
-        insightResultDiv.classList.add('hidden'); // Ensure it's truly hidden
-        insightResultDiv.innerHTML = '';
+        insightResultContainer.innerHTML = ''; // Clear previous insights
+        insightResultContainer.classList.remove('show');
+        
+        // Re-add the initial insight input card if it was removed
+        const insightsSection = document.getElementById('insights-section');
+        if (!document.querySelector('.insight-input-card')) {
+            const insightInputHtml = `
+                <div class="form-section card-layout insight-input-card">
+                    <h3 class="card-title">Ask a Question</h3>
+                    <div class="form-group">
+                        <label for="healthQuestion">Your Health Query:</label>
+                        <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
+                    </div>
+                    <button id="getInsightButton" class="submit-btn">Get Insight</button>
+                </div>
+            `;
+            insightsSection.insertAdjacentHTML('afterbegin', insightInputHtml);
+            // Re-attach event listener
+            document.getElementById('getInsightButton').addEventListener('click', handleGetInsight);
+        }
+
 
         if (selectedDisease === 'diabetes') {
             diabetesFormSection.classList.remove('hidden');
@@ -189,7 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
             data.HbA1c_level = parseFloat(data.HbA1c_level);
             data.blood_glucose_level = parseFloat(data.blood_glucose_level);
             data.hypertension = parseInt(data.hypertension);
-            data.heart_disease = parseInt(data.heart_disease);
+            // Note: Use the correct ID for the heart_disease input in diabetes form
+            data.heart_disease = parseInt(document.getElementById('heart_disease_input').value); 
         } else if (diseaseType === 'heart_disease') {
             data.hd_age = parseFloat(data.hd_age);
             data.hd_sex = parseInt(data.hd_sex);
@@ -237,18 +296,26 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- Gemini API Integration for Health Insights (via backend proxy) ---
-    getInsightButton.addEventListener('click', async () => {
+    async function handleGetInsight() {
         const prompt = healthQuestionInput.value.trim();
         if (!prompt) {
-            insightResultDiv.classList.remove('hidden');
-            insightResultDiv.innerHTML = '<p style="color: orange;">Please enter a question to get health insights.</p>';
-            insightResultDiv.classList.add('show');
+            insightResultContainer.innerHTML = ''; // Clear previous insights
+            insightResultContainer.classList.remove('hidden');
+            insightResultContainer.innerHTML = '<div class="insight-card"><p style="color: orange;">Please enter a question to get health insights.</p></div>';
             return;
         }
 
-        insightResultDiv.classList.remove('hidden');
-        insightResultDiv.innerHTML = '<p>Generating insight...</p>';
-        showSpinner(insightResultDiv);
+        insightResultContainer.innerHTML = ''; // Clear previous insights
+        insightResultContainer.classList.remove('hidden');
+        insightResultContainer.innerHTML = `
+            <div class="insight-card" id="currentInsightCard">
+                <div class="loading-spinner" style="display: block;"></div>
+                <p>Generating insight...</p>
+            </div>
+        `;
+        const currentInsightCard = document.getElementById('currentInsightCard');
+        showSpinner(currentInsightCard);
+
 
         try {
             const response = await fetch('/generate_insight', {
@@ -264,18 +331,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const result = await response.json();
             if (result.insight) {
-                insightResultDiv.innerHTML = `<p>${result.insight}</p>`;
+                const iconClass = "fas fa-brain"; // General AI insight icon
+                currentInsightCard.innerHTML = `
+                    <i class="${iconClass} insight-icon"></i>
+                    <h4>AI Insight</h4>
+                    <p>${result.insight}</p>
+                `;
+                currentInsightCard.classList.add('show');
             } else {
-                insightResultDiv.innerHTML = '<p style="color: red;">Could not get a valid insight from AI. Please try again.</p>';
+                currentInsightCard.innerHTML = '<p style="color: red;">Could not get a valid insight from AI. Please try again.</p>';
             }
         } catch (error) {
             console.error("Error calling backend for Gemini API:", error);
-            insightResultDiv.innerHTML = `<p style="color: red;">Error fetching insight: ${error.message}.</p>`;
+            currentInsightCard.innerHTML = `<p style="color: red;">Error fetching insight: ${error.message}.</p>`;
         } finally {
-            hideSpinner(insightResultDiv);
-            insightResultDiv.classList.add('show');
+            hideSpinner(currentInsightCard);
+            currentInsightCard.classList.add('show');
         }
-    });
+    }
 
     // --- Firebase History Functions ---
 
@@ -287,7 +360,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            // Use a generic app ID for the collection path for user deployment
             const appUniqueId = "health-predictor-app"; // Hardcoded unique ID for this app's data
             const userPredictionsRef = db.collection('artifacts').doc(appUniqueId).collection('users').doc(userId).collection('predictions');
 
@@ -302,6 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchPredictionHistory(); // Refresh history after saving
         } catch (error) {
             console.error("Error saving prediction to Firestore:", error);
+            displayMessageBox("Error saving prediction history: " + error.message, 'error');
         }
     }
 
@@ -312,19 +385,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        historyListDiv.innerHTML = '<div class="loading-spinner" style="display: block;"></div>';
+        historyListDiv.innerHTML = '<div class="loading-spinner" style="display: block; grid-column: 1 / -1;"></div>'; // Spinner spans all columns
         noHistoryMessage.classList.add('hidden');
 
         try {
             const appUniqueId = "health-predictor-app"; // Hardcoded unique ID for this app's data
             const userPredictionsRef = db.collection('artifacts').doc(appUniqueId).collection('users').doc(userId).collection('predictions');
             
-            // Fetch documents, ordered by timestamp descending
             const snapshot = await userPredictionsRef.orderBy('timestamp', 'desc').get();
             
             historyListDiv.innerHTML = ''; // Clear previous history
             if (snapshot.empty) {
                 noHistoryMessage.classList.remove('hidden');
+                historyListDiv.appendChild(noHistoryMessage); // Append to historyListDiv
             } else {
                 noHistoryMessage.classList.add('hidden');
                 snapshot.forEach(doc => {
@@ -332,17 +405,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'N/A';
                     
                     const inputsHtml = Object.entries(data.inputs).map(([key, value]) => {
+                        // Exclude disease_type from detailed inputs display
+                        if (key === 'disease_type') return '';
                         return `<p><strong>${key.replace('hd_', '').replace(/([A-Z])/g, ' $1').trim()}:</strong> ${value}</p>`;
                     }).join('');
+
+                    const probabilityValue = parseFloat(data.probability.replace('Probability of ', '').replace('%', '')) / 100;
+                    const confidencePercentage = (probabilityValue * 100).toFixed(0);
+
+                    const diseaseIcon = data.diseaseType === 'diabetes' ? 'fas fa-syringe' : 'fas fa-heartbeat'; // Icons for diseases
 
                     const historyCard = `
                         <details class="history-card" data-aos="fade-up" data-aos-delay="50">
                             <summary>
-                                <span>${data.diseaseType.toUpperCase()} Prediction - ${timestamp}</span>
+                                <div class="summary-content">
+                                    <i class="${diseaseIcon} history-icon"></i>
+                                    <span>${data.diseaseType.toUpperCase()} Prediction</span>
+                                    <span class="history-date">${timestamp}</span>
+                                </div>
                             </summary>
                             <div class="history-card-content">
                                 <p><strong>Result:</strong> ${data.prediction}</p>
                                 <p><strong>Probability:</strong> ${data.probability}</p>
+                                <div class="confidence-bar-container">
+                                    <div class="confidence-bar" style="width: ${confidencePercentage}%;">
+                                        ${confidencePercentage}%
+                                    </div>
+                                </div>
                                 <p><strong>Inputs:</strong></p>
                                 <div class="input-details">
                                     ${inputsHtml}
@@ -355,9 +444,59 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error("Error fetching prediction history:", error);
-            historyListDiv.innerHTML = `<p style="color: red;">Error loading history: ${error.message}</p>`;
+            historyListDiv.innerHTML = `<p style="color: red; grid-column: 1 / -1;">Error loading history: ${error.message}</p>`;
+            displayMessageBox("Error fetching prediction history: " + error.message, 'error');
         } finally {
             hideSpinner(historyListDiv);
+        }
+    }
+
+    // --- Firebase Authentication Functions ---
+
+    // Sign Up with Email and Password
+    async function handleSignup(event) {
+        event.preventDefault();
+        const email = signupEmailInput.value;
+        const password = signupPasswordInput.value;
+
+        try {
+            await auth.createUserWithEmailAndPassword(email, password);
+            displayMessageBox("Account created successfully! You are now logged in.", 'success');
+            signupForm.reset(); // Clear form
+            authModal.classList.remove('visible'); // Close modal
+        } catch (error) {
+            console.error("Error signing up:", error);
+            displayMessageBox("Sign Up Error: " + error.message, 'error');
+        }
+    }
+
+    // Login with Email and Password
+    async function handleLogin(event) {
+        event.preventDefault();
+        const email = loginEmailInput.value;
+        const password = loginPasswordInput.value;
+
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            displayMessageBox("Logged in successfully!", 'success');
+            loginForm.reset(); // Clear form
+            authModal.classList.remove('visible'); // Close modal
+        } catch (error) {
+            console.error("Error logging in:", error);
+            displayMessageBox("Login Error: " + error.message, 'error');
+        }
+    }
+
+    // Logout
+    async function handleLogout(event) {
+        event.preventDefault(); // Prevent default link behavior
+        try {
+            await auth.signOut();
+            displayMessageBox("Logged out successfully!", 'info');
+            // UI will be updated by onAuthStateChanged listener
+        } catch (error) {
+            console.error("Error logging out:", error);
+            displayMessageBox("Logout Error: " + error.message, 'error');
         }
     }
 
@@ -379,14 +518,49 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Anonymous Login for Firebase
+    // Show Auth Modal when Login button is clicked
+    loginNavLink.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default link behavior
+        authModal.classList.add('visible');
+        showLoginTabBtn.click(); // Default to login tab
+    });
+
+    // Close Auth Modal
+    closeAuthModalBtn.addEventListener('click', () => {
+        authModal.classList.remove('visible');
+    });
+
+    // Switch Auth Tabs
+    showLoginTabBtn.addEventListener('click', () => {
+        showLoginTabBtn.classList.add('active');
+        showSignupTabBtn.classList.remove('active');
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+    });
+
+    showSignupTabBtn.addEventListener('click', () => {
+        showSignupTabBtn.classList.add('active');
+        showLoginTabBtn.classList.remove('active');
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+    });
+
+    // Attach Auth Form Submit Listeners
+    loginForm.addEventListener('submit', handleLogin);
+    signupForm.addEventListener('submit', handleSignup);
+
+    // Attach Logout Listener
+    logoutNavLink.addEventListener('click', handleLogout);
+
+    // Anonymous Login for Firebase (Still available as an option)
     anonLoginBtn.addEventListener('click', async () => {
         try {
             await auth.signInAnonymously();
             console.log("Signed in anonymously");
+            displayMessageBox("Signed in anonymously! Your history will be saved.", 'info');
         } catch (error) {
             console.error("Error signing in anonymously:", error);
-            alert("Error signing in: " + error.message); // Using alert for critical Firebase error
+            displayMessageBox("Error signing in anonymously: " + error.message, 'error');
         }
     });
 
@@ -396,6 +570,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners for prediction forms
     diseaseTypeSelect.addEventListener('change', showSelectedForm);
     diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
+    // Re-attach getInsightButton listener if it exists (it's dynamically added)
+    const currentGetInsightButton = document.getElementById('getInsightButton');
+    if (currentGetInsightButton) {
+        currentGetInsightButton.addEventListener('click', handleGetInsight);
+    }
 
     // AOS Initialization
     AOS.init({

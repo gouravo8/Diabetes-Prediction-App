@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- AOS (Animate On Scroll) Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Font Awesome for Icons (e.g., hamburger, user) -->
+    <!-- Font Awesome for Icons (e.g., hamburger, user, health icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Favicon placeholder (you can replace this with a real favicon later) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
@@ -45,7 +45,9 @@
             <li><a href="#prediction-section" class="nav-link active">Predictions</a></li>
             <li><a href="#insights-section" class="nav-link">AI Insights</a></li>
             <li><a href="#history-section" class="nav-link">History</a></li>
-            <li><a href="/login_coming_soon" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
+            <!-- Login/Logout buttons, dynamically shown/hidden by JS -->
+            <li id="loginNavLink"><a href="#" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
+            <li id="logoutNavLink" class="hidden"><a href="#" class="nav-link logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </nav>
 
@@ -98,8 +100,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="heart_disease">Heart Disease:</label>
-                        <select id="heart_disease" name="heart_disease" required>
+                        <label for="heart_disease_input">Heart Disease:</label> <!-- Renamed ID here -->
+                        <select id="heart_disease_input" name="heart_disease" required>
                             <option value="0">No</option>
                             <option value="1">Yes</option>
                         </select>
@@ -155,14 +157,17 @@
         <!-- Health Insights Section (Powered by Gemini AI) -->
         <section id="insights-section" class="card-section" data-aos="fade-up" data-aos-delay="400">
             <h2 class="section-title">Health Insights (Powered by Gemini AI)</h2>
-            <div class="form-section card-layout">
+            <div class="form-section card-layout insight-input-card">
                 <h3 class="card-title">Ask a Question</h3>
                 <div class="form-group">
                     <label for="healthQuestion">Your Health Query:</label>
                     <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
                 </div>
                 <button id="getInsightButton" class="submit-btn">Get Insight</button>
-                <div id="insightResult" class="result-card hidden" data-aos="fade-up" data-aos-delay="100">
+            </div>
+            <!-- Insights will be displayed in this grid container -->
+            <div id="insightResultContainer" class="insight-grid-container">
+                <div id="insightResult" class="insight-card hidden" data-aos="fade-up" data-aos-delay="100">
                     <div class="loading-spinner" style="display: none;"></div>
                 </div>
             </div>
@@ -175,17 +180,57 @@
                 <p>Please log in to view your prediction history.</p>
                 <button id="anonLoginBtn" class="submit-btn">Login Anonymously</button>
             </div>
-            <div id="historyList" class="history-list hidden">
-                <!-- Prediction history cards will be dynamically loaded here -->
+            <div id="historyList" class="history-list-grid hidden">
                 <p class="no-history-message hidden">No prediction history found. Make a prediction to save it!</p>
             </div>
         </section>
 
     </div> <!-- /container -->
 
+    <!-- Authentication Modal/Section -->
+    <div id="authModal" class="auth-modal hidden">
+        <div class="auth-card">
+            <button class="close-auth-modal"><i class="fas fa-times"></i></button>
+            <div class="auth-tabs">
+                <button id="showLoginTab" class="auth-tab active">Login</button>
+                <button id="showSignupTab" class="auth-tab">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <h3 class="card-title">Login to Your Account</h3>
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" placeholder="your.email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" placeholder="********" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm" class="auth-form hidden">
+                <h3 class="card-title">Create New Account</h3>
+                <div class="form-group">
+                    <label for="signupEmail">Email:</label>
+                    <input type="email" id="signupEmail" placeholder="new.email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password:</label>
+                    <input type="password" id="signupPassword" placeholder="At least 6 characters" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
     <!-- AOS JavaScript -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <!-- Firebase SDKs -->
+    <!-- Chart.js for mini charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDKs (using compat versions for broader browser support) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
