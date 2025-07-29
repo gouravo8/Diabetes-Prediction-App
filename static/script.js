@@ -33,16 +33,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let heartDiseasePredictionForm = null; // This will hold the reference to the dynamically created form
 
-    // --- Firebase Configuration (IMPORTANT: Replace with your actual Firebase config) ---
+   // --- Firebase Configuration (IMPORTANT: Replace with your actual Firebase config) ---
     // You need to get your Firebase project's config from your Firebase console.
     // Go to Project settings -> Your apps -> Web app -> Firebase SDK snippet -> Config
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY", // Replace with your actual API Key
-        authDomain: "your-project-id.firebaseapp.com", // Replace with your actual Auth Domain
-        projectId: "your-project-id", // Replace with your actual Project ID
-        storageBucket: "your-project-id.appspot.com", // Replace with your actual Storage Bucket
-        messagingSenderId: "YOUR_SENDER_ID", // Replace with your actual Sender ID
-        appId: "YOUR_APP_ID" // Replace with your actual App ID
+        apiKey: "ATzaSyCowxZFfngcDkHNwnnahw4Tvat0IgAyQ-Y", // THIS IS YOUR REAL API KEY
+        authDomain: "diabetes-prediction-f0a3b.firebaseapp.com", // THIS IS YOUR REAL AUTH DOMAIN
+        projectId: "diabetes-prediction-f0a3b", // THIS IS YOUR REAL PROJECT ID
+        storageBucket: "diabetes-prediction-f0a3b.appspot.com", // THIS IS YOUR REAL STORAGE BUCKET
+        messagingSenderId: "717769556705", // THIS IS YOUR REAL SENDER ID
+        appId: "1:717769556705:web:990820cd33dd6feae92da0" // THIS IS YOUR REAL APP ID
     };
 
     // Initialize Firebase
