@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 
 # *** CRITICAL DEBUGGING STEP: List contents of /app to verify files are copied ***
-# This output will appear in your Render build logs.
+# This output MUST appear in your Render build logs.
 RUN ls -R /app
 
 # Expose the port that the application will listen on.
