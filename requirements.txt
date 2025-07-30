@@ -1,8 +1,14 @@
 Flask==2.3.2
-scikit-learn==1.5.0 # If you know the exact version used for training, use that.
-pandas==2.0.3
-numpy==2.2.5        # <--- CRITICAL FIX: Match your local numpy version
+scikit-learn==1.4.2
+pandas==2.2.2
+numpy==1.26.4
 gunicorn==21.2.0
 flask-cors==4.0.0
 requests==2.31.0
-joblib==1.5.1 
+joblib==1.4.2
+# Firebase/Google Cloud dependencies - trying specific stable versions
+firebase-admin==6.3.0
+google-cloud-firestore==2.14.0
+python-dotenv==1.0.0
+google-api-python-client==2.100.0
+httplib2==0.21.0
