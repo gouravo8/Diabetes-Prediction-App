@@ -1,8 +1,8 @@
-flask==2.3.2
-scikit-learn==1.5.0
+Flask==2.3.2
+scikit-learn==1.5.0 # If you know the exact version used for training, use that.
 pandas==2.0.3
-numpy==1.24.3
+numpy==2.2.5        # <--- CRITICAL FIX: Match your local numpy version
 gunicorn==21.2.0
 flask-cors==4.0.0
 requests==2.31.0
-joblib==1.5.1
+joblib==1.5.1 
