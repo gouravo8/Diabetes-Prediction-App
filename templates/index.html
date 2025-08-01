@@ -1,687 +1,220 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precision Health Hub</title>
-    <!-- Google Fonts: Poppins for headings, Roboto for body -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons (e.g., hamburger, user, health icons) -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Link to your custom CSS -->
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Health Hub</title>
+<!-- Google Fonts: Poppins for headings, Roboto for body -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;family=Roboto:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Link to your custom CSS -->
+<link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
+<!-- AOS (Animate On Scroll) Library -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<!-- Font Awesome for Icons (e.g., hamburger, user, health icons) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+<!-- Favicon placeholder (you can replace this with a real favicon later) -->
+<link href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;❤️&lt;/text&gt;&lt;/svg&gt;" rel="icon"/>
 </head>
 <body>
-
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a class="logo-link" href="#">
-                <svg class="app-logo-svg" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="15" y="5" width="20" height="40" rx="5" fill="#E8F0F2" stroke="#3f51b5" stroke-width="2"/>
-                    <rect x="5" y="15" width="40" height="20" rx="5" fill="#E8F0F2" stroke="#3f51b5" stroke-width="2"/>
-                    <circle cx="25" cy="25" r="8" fill="#ff5722"/>
-                </svg>
-                <span class="app-title">Precision Health Hub</span>
-            </a>
-            <div class="flex items-center gap-4">
-                <i
-                    id="dark-mode-toggle"
-                    class="fas fa-moon dark-mode-toggle"
-                ></i>
-                <button class="hamburger-menu">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-        <ul class="nav-links">
-            <li><a class="nav-link" href="#about-section">About</a></li>
-            <li><a class="nav-link" href="#services-section">Services</a></li>
-            <li><a class="nav-link active" href="#" data-tab="predict">Predict</a></li>
-            <li><a class="nav-link" href="#" data-tab="insights">Insights</a></li>
-            <li><a class="nav-link" href="#" data-tab="history">History</a></li>
-            <li>
-                <button id="auth-button" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-            </li>
-        </ul>
-    </nav>
-
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 id="hero-heading">Empowering Your Health Decisions</h1>
-            <p id="hero-subheading">Get accurate risk predictions for diabetes and heart disease, and personalized health insights, powered by AI. Take control of your well-being.</p>
-            <a href="#prediction-section" class="hero-btn">Start Predicting</a>
-        </div>
-    </section>
-
-    <div class="container">
-        <section class="card-section" id="services-section">
-            <h2 class="section-title">Our Services</h2>
-            <div class="service-cards-grid">
-                <div class="service-card">
-                    <i class="fas fa-heartbeat service-icon"></i>
-                    <h3>Heart Disease Prediction</h3>
-                    <p>Utilize advanced models to assess your risk of heart disease based on key health metrics.</p>
-                </div>
-                <div class="service-card">
-                    <i class="fas fa-syringe service-icon"></i>
-                    <h3>Diabetes Prediction</h3>
-                    <p>Receive an early risk assessment for diabetes, helping you to take proactive steps for your health.</p>
-                </div>
-                <div class="service-card">
-                    <i class="fas fa-brain service-icon"></i>
-                    <h3>AI-Powered Insights</h3>
-                    <p>Get personalized health insights and recommendations from our AI assistant to better understand your results.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="card-section" id="about-section">
-            <h2 class="section-title">About Precision Health Hub</h2>
-            <div class="about-content">
-                <p class="about-text">Precision Health Hub is a platform dedicated to making advanced health analytics accessible to everyone. Our mission is to empower individuals with the knowledge and tools to make informed decisions about their well-being. By leveraging cutting-edge machine learning and AI, we provide accurate, user-friendly risk predictions and personalized insights. We believe that a proactive approach to health is the key to a healthier future, and our platform is designed to be your trusted partner on that journey.</p>
-            </div>
-        </section>
-
-        <!-- Dynamic content will be loaded here via JavaScript -->
-        <main id="main-content">
-            <!-- Prediction Tab Content -->
-            <section class="card-section" id="predict-tab-content">
-                <h2 class="section-title">Your Health Risk Predictions</h2>
-                <div class="prediction-cards-grid">
-                    <div class="prediction-card" id="diabetes-card">
-                        <div class="icon-container">
-                            <i class="fas fa-syringe"></i>
-                        </div>
-                        <h3 class="card-title">Diabetes Risk</h3>
-                        <p class="card-subtitle">Analyze key health indicators to assess your risk of developing diabetes.</p>
-                        <button class="predict-btn" data-form="diabetes">Predict Now</button>
-                    </div>
-                    <div class="prediction-card" id="heart-disease-card">
-                        <div class="icon-container">
-                            <i class="fas fa-heartbeat"></i>
-                        </div>
-                        <h3 class="card-title">Heart Disease Risk</h3>
-                        <p class="card-subtitle">Evaluate various factors to understand your potential risk of heart disease.</p>
-                        <button class="predict-btn" data-form="heart-disease">Predict Now</button>
-                    </div>
-                </div>
-                <div id="prediction-form-container" class="mt-8 hidden"></div>
-            </section>
-
-            <!-- Insights Tab Content -->
-            <section class="card-section hidden" id="insights-tab-content">
-                <h2 class="section-title">AI Insights (Powered by Gemini AI)</h2>
-                <div class="form-section">
-                    <h3 class="card-title">Ask a Question</h3>
-                    <form id="insightForm">
-                        <div class="form-group">
-                            <label for="insightQuery">Your Health Query:</label>
-                            <textarea
-                                id="insightQuery"
-                                name="insightQuery"
-                                rows="4"
-                                class="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
-                                placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'"
-                            ></textarea>
-                        </div>
-                        <button class="submit-btn" type="submit">Get Insight</button>
-                    </form>
-                    <div id="insight-result-container" class="mt-4 hidden"></div>
-                </div>
-            </section>
-
-            <!-- History Tab Content -->
-            <section class="card-section hidden" id="history-tab-content">
-                <h2 class="section-title">Prediction History</h2>
-                <div id="history-content" class="form-section">
-                    <p>Please log in to view your prediction history.</p>
-                </div>
-            </section>
-
-            <!-- Auth Tab Content -->
-            <section class="card-section hidden" id="auth-tab-content">
-                <h2 class="section-title">Account</h2>
-                <div class="auth-card form-section">
-                    <div class="auth-tabs flex justify-center gap-4 mb-4">
-                        <button class="auth-tab px-4 py-2 rounded-full bg-primary text-white" data-view="login">Sign In</button>
-                        <button class="auth-tab px-4 py-2 rounded-full" data-view="signup">Sign Up</button>
-                    </div>
-                    <p id="auth-error-message" class="text-red-500 text-center mb-4 hidden"></p>
-                    <form id="authForm">
-                        <div class="form-group">
-                            <input type="email" id="authEmail" placeholder="Email" required class="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
-                        </div>
-                        <div class="form-group">
-                            <input type="password" id="authPassword" placeholder="Password" required class="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
-                        </div>
-                        <button type="submit" class="submit-btn w-full" id="authSubmitBtn">Sign In</button>
-                    </form>
-                </div>
-            </section>
-
-            <!-- Message box for alerts -->
-            <div id="message-box" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-[2000]">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
-                    <p id="message-box-text" class="text-lg mb-4"></p>
-                    <button id="message-box-close" class="submit-btn px-6 py-2">OK</button>
-                </div>
-            </div>
-
-            <!-- Global Loading Spinner -->
-            <div id="global-loading-spinner" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-[1500]">
-                <div class="loading-spinner"></div>
-            </div>
-        </main>
-    </div>
-
-    <footer class="footer">
-        <p>© 2024 Precision Health Hub. All rights reserved.</p>
-    </footer>
-
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-        // Global variables provided by the Canvas environment
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        // State variables
-        let app, auth, db;
-        let currentUser = null;
-        let isAuthReady = false;
-        let currentView = 'predict';
-        let isLoginView = true;
-
-        // UI Elements
-        const mainContent = document.getElementById('main-content');
-        const navLinks = document.querySelectorAll('.nav-link');
-        const heroBtn = document.querySelector('.hero-btn');
-        const authButton = document.getElementById('auth-button');
-        const authTabButtons = document.querySelectorAll('.auth-tab');
-        const authForm = document.getElementById('authForm');
-        const authEmail = document.getElementById('authEmail');
-        const authPassword = document.getElementById('authPassword');
-        const authSubmitBtn = document.getElementById('authSubmitBtn');
-        const authErrorMessage = document.getElementById('auth-error-message');
-        const hamburgerMenu = document.querySelector('.hamburger-menu');
-        const navList = document.querySelector('.nav-links');
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const messageBox = document.getElementById('message-box');
-        const messageBoxText = document.getElementById('message-box-text');
-        const messageBoxClose = document.getElementById('message-box-close');
-        const globalLoadingSpinner = document.getElementById('global-loading-spinner');
-
-        // Show a custom message box instead of alert()
-        function showMessageBox(message) {
-            messageBoxText.textContent = message;
-            messageBox.classList.remove('hidden');
-        }
-
-        messageBoxClose.addEventListener('click', () => {
-            messageBox.classList.add('hidden');
-        });
-
-        // Show/hide loading spinner
-        function setLoading(isLoading) {
-            if (isLoading) {
-                globalLoadingSpinner.classList.remove('hidden');
-            } else {
-                globalLoadingSpinner.classList.add('hidden');
-            }
-        }
-
-        // Initialize Firebase
-        if (Object.keys(firebaseConfig).length > 0) {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        }
-
-        // Get a unique user ID
-        const getUserId = (user) => user?.uid || 'anonymous';
-
-        // Render functions
-        function renderView(viewName) {
-            document.querySelectorAll('section').forEach(section => {
-                if (section.id.endsWith('-tab-content')) {
-                    section.classList.add('hidden');
-                }
-            });
-            const targetSection = document.getElementById(`${viewName}-tab-content`);
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-                // Special rendering logic for each view
-                if (viewName === 'history') {
-                    if (currentUser) {
-                        fetchHistory();
-                    } else {
-                        document.getElementById('history-content').innerHTML = '<p>Please log in to view your prediction history.</p>';
-                    }
-                }
-                if (viewName === 'predict') {
-                    renderPredictionForms();
-                }
-                if (viewName === 'auth') {
-                    renderAuthView();
-                }
-            }
-        }
-
-        function setActiveNav(tab) {
-            navLinks.forEach(link => link.classList.remove('active'));
-            const activeLink = document.querySelector(`a[data-tab="${tab}"]`);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        }
-
-        function renderPredictionForms() {
-            const container = document.getElementById('prediction-form-container');
-            container.innerHTML = '';
-            container.classList.add('hidden');
-        }
-
-        function renderAuthView() {
-            authSubmitBtn.textContent = isLoginView ? 'Sign In' : 'Sign Up';
-        }
-
-        function renderPredictionHistory(history) {
-            const container = document.getElementById('history-content');
-            if (history.length > 0) {
-                const historyHtml = history.map(entry => `
-                    <div class="p-4 border rounded-lg shadow-sm bg-gray-50 dark:bg-gray-800">
-                        <p class="font-bold text-lg">${entry.type.replace(/_/g, ' ').toUpperCase()} Prediction</p>
-                        <p>Result: <span class="font-semibold">${entry.result}</span></p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Date: ${new Date(entry.timestamp.seconds * 1000).toLocaleString()}</p>
-                    </div>
-                `).join('');
-                container.innerHTML = `<p>Your user ID: <span class="font-mono text-xs break-all">${getUserId(currentUser)}</span></p>
-                                       <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">${historyHtml}</div>`;
-            } else {
-                container.innerHTML = '<p>No prediction history found. Make a prediction to see it here.</p>';
-            }
-        }
-
-        function renderAiInsight(text) {
-            const container = document.getElementById('insight-result-container');
-            container.innerHTML = `<p>${text}</p>`;
-            container.classList.remove('hidden');
-        }
-        
-        function renderPredictionResult(type, result) {
-            const container = document.getElementById('prediction-form-container');
-            const resultHtml = `<div class="result-card">Prediction Result: ${result}</div>`;
-            container.insertAdjacentHTML('beforeend', resultHtml);
-        }
-
-        // Event Handlers
-        async function handleLogin(e) {
-            e.preventDefault();
-            authErrorMessage.classList.add('hidden');
-            try {
-                await signInWithEmailAndPassword(auth, authEmail.value, authPassword.value);
-            } catch (error) {
-                authErrorMessage.textContent = "Failed to sign in. Check your email and password.";
-                authErrorMessage.classList.remove('hidden');
-                console.error("Login failed:", error);
-            }
-        }
-
-        async function handleSignUp(e) {
-            e.preventDefault();
-            authErrorMessage.classList.add('hidden');
-            try {
-                await createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value);
-            } catch (error) {
-                authErrorMessage.textContent = "Failed to sign up. Email may already be in use.";
-                authErrorMessage.classList.remove('hidden');
-                console.error("Sign up failed:", error);
-            }
-        }
-
-        async function handleLogout() {
-            try {
-                await signOut(auth);
-                showMessageBox("You have been logged out.");
-            } catch (error) {
-                showMessageBox("Logout failed. Please try again.");
-                console.error("Logout failed:", error);
-            }
-        }
-
-        async function handlePredictionSubmit(e, formId, predictionType) {
-            e.preventDefault();
-            setLoading(true);
-            const form = document.getElementById(formId);
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            // Mock API call to get a prediction
-            // In a real app, this would be a fetch call to a backend model
-            const mockPrediction = new Promise((resolve) => {
-              setTimeout(() => {
-                const result = Math.random() > 0.5 ? 'Positive' : 'Negative';
-                resolve(result);
-              }, 2000);
-            });
-
-            const result = await mockPrediction;
-
-            if (currentUser && db) {
-                await savePredictionToHistory(predictionType, data, result);
-            }
-
-            renderPredictionResult(predictionType, result);
-            handleGetAiInsight(predictionType, result);
-            setLoading(false);
-        }
-
-        async function savePredictionToHistory(type, data, result) {
-            if (!db || !currentUser) {
-                console.error("Database not ready or user not authenticated.");
-                return;
-            }
-            const userId = getUserId(currentUser);
-            const collectionPath = `/artifacts/${appId}/users/${userId}/predictions`;
-            try {
-                await addDoc(collection(db, collectionPath), {
-                    type,
-                    data,
-                    result,
-                    timestamp: new Date(),
-                });
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
-        }
-
-        async function handleGetAiInsight(predictionType, predictionResult) {
-            let prompt;
-            if (predictionType === 'diabetes') {
-                prompt = `Based on a recent Diabetes risk prediction of '${predictionResult}', provide a brief, actionable health insight and tip. If the result is 'Positive', suggest proactive measures. If the result is 'Negative', recommend maintaining a healthy lifestyle.`;
-            } else {
-                prompt = `Based on a recent Heart Disease risk prediction of '${predictionResult}', provide a brief, actionable health insight and tip. If the result is 'Positive', suggest consulting a doctor and lifestyle changes. If the result is 'Negative', recommend maintaining a heart-healthy routine.`;
-            }
-            setLoading(true);
-            try {
-                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                const payload = { contents: chatHistory };
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-
-                const result = await response.json();
-                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                renderAiInsight(text || "Could not generate an insight. Please try again.");
-            } catch (error) {
-                console.error("Error fetching AI insight:", error);
-                renderAiInsight("An error occurred while generating insight. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        async function handleAskQuestion(e) {
-            e.preventDefault();
-            setLoading(true);
-            const prompt = document.getElementById('insightQuery').value;
-            try {
-                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-                const payload = { contents: chatHistory };
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-
-                const result = await response.json();
-                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                renderAiInsight(text || "Could not generate an insight. Please try again.");
-            } catch (error) {
-                console.error("Error fetching AI insight:", error);
-                renderAiInsight("An error occurred while generating insight. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        function fetchHistory() {
-            if (!isAuthReady || !db || !currentUser) return;
-
-            const userId = getUserId(currentUser);
-            const collectionPath = `/artifacts/${appId}/users/${userId}/predictions`;
-            const q = query(collection(db, collectionPath));
-
-            onSnapshot(q, (snapshot) => {
-                const history = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
-                const sortedHistory = history.sort((a, b) => b.timestamp.toDate() - a.timestamp.toDate());
-                renderPredictionHistory(sortedHistory);
-            }, (error) => {
-                console.error("Error fetching history:", error);
-            });
-        }
-
-        function toggleDarkMode() {
-            if (document.body.getAttribute('data-theme') === 'dark') {
-                document.body.removeAttribute('data-theme');
-                darkModeToggle.classList.remove('fa-sun');
-                darkModeToggle.classList.add('fa-moon');
-            } else {
-                document.body.setAttribute('data-theme', 'dark');
-                darkModeToggle.classList.remove('fa-moon');
-                darkModeToggle.classList.add('fa-sun');
-            }
-        }
-
-        // Initial setup and event listeners
-        window.onload = function() {
-            // Check for authentication state
-            if (auth) {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        currentUser = user;
-                        authButton.textContent = 'Logout';
-                        authButton.classList.remove('login-btn');
-                        authButton.classList.add('logout-btn');
-                        authButton.innerHTML = `<i class="fas fa-sign-out-alt"></i> Logout`;
-                    } else {
-                        currentUser = null;
-                        authButton.textContent = 'Login';
-                        authButton.classList.remove('logout-btn');
-                        authButton.classList.add('login-btn');
-                        authButton.innerHTML = `<i class="fas fa-sign-in-alt"></i> Login`;
-                        if (!initialAuthToken) {
-                             try {
-                                await signInAnonymously(auth);
-                            } catch (error) {
-                                console.error("Error signing in anonymously:", error);
-                            }
-                        }
-                    }
-                    isAuthReady = true;
-                });
-
-                // Use custom token if available
-                const signIn = async () => {
-                    if (initialAuthToken) {
-                        try {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } catch (error) {
-                            console.error("Error signing in with custom token:", error);
-                        }
-                    }
-                };
-                signIn();
-            }
-
-            // Navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (link.hasAttribute('data-tab')) {
-                        const tab = link.getAttribute('data-tab');
-                        setActiveNav(tab);
-                        renderView(tab);
-                    } else {
-                        const targetId = link.getAttribute('href');
-                        document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
-                    }
-                    navList.classList.remove('active');
-                });
-            });
-
-            // Hero button scroll
-            heroBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                setActiveNav('predict');
-                renderView('predict');
-                document.querySelector(heroBtn.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
-            });
-
-            // Auth button logic
-            authButton.addEventListener('click', () => {
-                if (currentUser) {
-                    handleLogout();
-                } else {
-                    setActiveNav('auth');
-                    renderView('auth');
-                }
-            });
-
-            // Hamburger menu for mobile
-            hamburgerMenu.addEventListener('click', () => {
-                navList.classList.toggle('active');
-            });
-
-            // Dark mode toggle
-            darkModeToggle.addEventListener('click', toggleDarkMode);
-
-            // Auth form
-            authTabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    isLoginView = button.getAttribute('data-view') === 'login';
-                    authTabButtons.forEach(btn => btn.classList.remove('bg-primary', 'text-white'));
-                    authTabButtons.forEach(btn => btn.classList.add('bg-gray-200', 'dark:bg-gray-700'));
-                    button.classList.add('bg-primary', 'text-white');
-                    button.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-                    renderAuthView();
-                });
-            });
-
-            authForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                if (isLoginView) {
-                    handleLogin(e);
-                } else {
-                    handleSignUp(e);
-                }
-            });
-
-            // Prediction form handlers
-            document.addEventListener('click', (e) => {
-                if (e.target.matches('.predict-btn[data-form="diabetes"]')) {
-                    const container = document.getElementById('prediction-form-container');
-                    container.classList.remove('hidden');
-                    container.innerHTML = `
-                        <div class="form-section">
-                            <h3 class="card-title">Diabetes Prediction</h3>
-                            <form id="diabetesPredictionForm">
-                                <div class="form-group">
-                                    <label for="gender">Gender:</label>
-                                    <select id="gender" name="gender" required>
-                                        <option value="">Select Gender</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="age">Age:</label>
-                                    <input id="age" name="age" type="number" step="0.1" min="0" max="120" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="hypertension">Hypertension:</label>
-                                    <select id="hypertension" name="hypertension" required>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="heart_disease_input">Heart Disease:</label>
-                                    <select id="heart_disease_input" name="heart_disease" required>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="bmi">BMI:</label>
-                                    <input id="bmi" name="bmi" type="number" step="0.1" min="0" max="100" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="HbA1c_level">HbA1c Level:</label>
-                                    <input id="HbA1c_level" name="HbA1c_level" type="number" step="0.1" min="0" max="20" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="blood_glucose_level">Blood Glucose Level:</label>
-                                    <input id="blood_glucose_level" name="blood_glucose_level" type="number" step="0.1" min="0" max="500" required />
-                                </div>
-                                <button class="submit-btn" type="submit">Get Prediction</button>
-                            </form>
-                        </div>
-                    `;
-                    document.getElementById('diabetesPredictionForm').addEventListener('submit', (evt) => handlePredictionSubmit(evt, 'diabetesPredictionForm', 'diabetes'));
-                } else if (e.target.matches('.predict-btn[data-form="heart-disease"]')) {
-                    const container = document.getElementById('prediction-form-container');
-                    container.classList.remove('hidden');
-                    container.innerHTML = `
-                        <div class="form-section">
-                            <h3 class="card-title">Heart Disease Prediction</h3>
-                            <form id="heartDiseasePredictionForm">
-                                <div class="form-group">
-                                    <label for="age-hd">Age:</label>
-                                    <input id="age-hd" name="age" type="number" step="0.1" min="0" max="120" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="cholesterol">Cholesterol:</label>
-                                    <input id="cholesterol" name="cholesterol" type="number" step="0.1" min="0" max="500" required />
-                                </div>
-                                <div class="form-group">
-                                    <label for="max-heart-rate">Max Heart Rate:</label>
-                                    <input id="max-heart-rate" name="max-heart-rate" type="number" step="0.1" min="0" max="250" required />
-                                </div>
-                                <button class="submit-btn" type="submit">Get Prediction</button>
-                            </form>
-                        </div>
-                    `;
-                    document.getElementById('heartDiseasePredictionForm').addEventListener('submit', (evt) => handlePredictionSubmit(evt, 'heartDiseasePredictionForm', 'heart_disease'));
-                }
-            });
-
-            // AI Insight form handler
-            document.getElementById('insightForm').addEventListener('submit', handleAskQuestion);
-
-            // Initial render
-            renderView('predict');
-        };
-    </script>
-</body>
+<!-- Responsive Navbar -->
+<nav class="navbar">
+<div class="navbar-brand">
+<a class="logo-link" href="/">
+<!-- NEW SVG Logo: Stylized Heartbeat + Plus Sign -->
+<svg class="app-logo-svg" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="logoGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#8A2BE2"></stop> <!-- Lavender -->
+<stop offset="100%" stop-color="#ADD8E6"></stop> <!-- Soft Blue -->
+</lineargradient>
+</defs>
+<!-- Heartbeat line -->
+<path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50" fill="none" stroke="url(#logoGradient)" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"></path>
+<!-- Plus sign for health/medical -->
+<line stroke="#00CED1" stroke-linecap="round" stroke-width="8" x1="45" x2="55" y1="40" y2="60"></line>
+<line stroke="#00CED1" stroke-linecap="round" stroke-width="8" x1="55" x2="45" y1="40" y2="60"></line>
+</svg>
+<span class="app-title">Precision Health Hub</span>
+</a>
+</div>
+<button aria-label="Toggle navigation" class="hamburger-menu">
+<i class="fas fa-bars"></i>
+</button>
+<ul class="nav-links">
+<li><a class="nav-link active" href="#prediction-section">Predictions</a></li>
+<li><a class="nav-link" href="#insights-section">AI Insights</a></li>
+<li><a class="nav-link" href="#history-section">History</a></li>
+<!-- Login/Logout buttons, dynamically shown/hidden by JS -->
+<li id="loginNavLink"><a class="nav-link login-btn" href="#"><i class="fas fa-user-circle"></i> Login</a></li>
+<li class="hidden" id="logoutNavLink"><a class="nav-link logout-btn" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+</ul>
+</nav>
+<!-- Hero Section with Animated Text -->
+<section class="hero-section">
+<div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
+<h1 class="animated-text" id="hero-heading">Empowering Your Health Journey</h1>
+<p class="animated-text-sub" id="hero-subheading">Data-driven insights for a healthier future.</p>
+</div>
+</section>
+<div class="container">
+<!-- Prediction Section -->
+<section class="card-section" data-aos="fade-up" data-aos-delay="200" id="prediction-section">
+<h2 class="section-title">Predict Your Health Risk</h2>
+<div class="disease-selection-group">
+<label for="diseaseType">Select Disease:</label>
+<select id="diseaseType" name="diseaseType" required="">
+<option value="">-- Choose a Disease --</option>
+<option value="diabetes">Diabetes</option>
+<option value="heart_disease">Heart Disease</option>
+</select>
+</div>
+<!-- Diabetes Prediction Form Section -->
+<div class="form-section card-layout" id="diabetesFormSection">
+<h3 class="card-title">Diabetes Prediction</h3>
+<form id="diabetesPredictionForm">
+<div class="form-group">
+<label for="gender">Gender:</label>
+<select id="gender" name="gender" required="">
+<option value="">Select Gender</option>
+<option value="Female">Female</option>
+<option value="Male">Male</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<label for="age">Age:</label>
+<input id="age" max="120" min="0" name="age" required="" step="0.1" type="number"/>
+</div>
+<div class="form-group">
+<label for="hypertension">Hypertension:</label>
+<select id="hypertension" name="hypertension" required="">
+<option value="0">No</option>
+<option value="1">Yes</option>
+</select>
+</div>
+<div class="form-group">
+<label for="heart_disease_input">Heart Disease:</label> <!-- Renamed ID here -->
+<select id="heart_disease_input" name="heart_disease" required="">
+<option value="0">No</option>
+<option value="1">Yes</option>
+</select>
+</div>
+<div class="form-group">
+<label for="smoking_history">Smoking History:</label>
+<select id="smoking_history" name="smoking_history" required="">
+<option value="">Select Smoking History</option>
+<option value="never">Never</option>
+<option value="No Info">No Info</option>
+<option value="current">Current Smoker</option>
+<option value="ever">Ever Smoked</option>
+<option value="former">Former Smoker</option>
+<option value="not current">Not Current Smoker</option>
+</select>
+</div>
+<div class="form-group">
+<label for="bmi">BMI:</label>
+<input id="bmi" max="100" min="10" name="bmi" required="" step="0.01" type="number"/>
+</div>
+<div class="form-group">
+<label for="HbA1c_level">HbA1c Level:</label>
+<input id="HbA1c_level" max="10.0" min="3.0" name="HbA1c_level" required="" step="0.1" type="number"/>
+</div>
+<div class="form-group">
+<label for="blood_glucose_level">Blood Glucose Level:</label>
+<input id="blood_glucose_level" max="350" min="50" name="blood_glucose_level" required="" step="1" type="number"/>
+</div>
+<button class="submit-btn" type="submit">Predict Diabetes Risk</button>
+</form>
+</div>
+<!-- Heart Disease Prediction Form Section (initially hidden) -->
+<div class="form-section card-layout hidden" id="heartDiseaseFormSection">
+<h3 class="card-title">Heart Disease Prediction</h3>
+<form id="heartDiseasePredictionForm">
+<!-- Fields will be dynamically generated by script.js -->
+<button class="submit-btn" type="submit">Predict Heart Disease Risk</button>
+</form>
+</div>
+<div class="result-card hidden" data-aos="fade-up" data-aos-delay="300" id="predictionResult">
+<!-- Prediction result will be displayed here dynamically by JavaScript -->
+<div class="loading-spinner" style="display: none;"></div>
+</div>
+</section>
+<!-- Health Insights Section (Powered by Gemini AI) -->
+<section class="card-section" data-aos="fade-up" data-aos-delay="400" id="insights-section">
+<h2 class="section-title">Health Insights (Powered by Gemini AI)</h2>
+<div class="form-section card-layout insight-input-card">
+<h3 class="card-title">Ask a Question</h3>
+<div class="form-group">
+<label for="healthQuestion">Your Health Query:</label>
+<textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
+</div>
+<button class="submit-btn" id="getInsightButton">Get Insight</button>
+</div>
+<!-- Insights will be displayed in this grid container -->
+<div class="insight-grid-container" id="insightResultContainer">
+<div class="insight-card hidden" data-aos="fade-up" data-aos-delay="100" id="insightResult">
+<div class="loading-spinner" style="display: none;"></div>
+</div>
+</div>
+</section>
+<!-- Prediction History Section (Firebase Integration) -->
+<section class="card-section" data-aos="fade-up" data-aos-delay="500" id="history-section">
+<h2 class="section-title">Your Prediction History</h2>
+<div class="info-card" id="loginPrompt">
+<p>Please log in to view your prediction history.</p>
+<button class="submit-btn" id="anonLoginBtn">Login Anonymously</button>
+</div>
+<div class="history-list-grid hidden" id="historyList">
+<p class="no-history-message hidden">No prediction history found. Make a prediction to save it!</p>
+</div>
+</section>
+</div> <!-- /container -->
+<!-- Authentication Modal/Section -->
+<div class="auth-modal hidden" id="authModal">
+<div class="auth-card">
+<button class="close-auth-modal"><i class="fas fa-times"></i></button>
+<div class="auth-tabs">
+<button class="auth-tab active" id="showLoginTab">Login</button>
+<button class="auth-tab" id="showSignupTab">Sign Up</button>
+</div>
+<!-- Login Form -->
+<form class="auth-form" id="loginForm">
+<h3 class="card-title">Login to Your Account</h3>
+<div class="form-group">
+<label for="loginEmail">Email:</label>
+<input id="loginEmail" placeholder="your.email@example.com" required="" type="email"/>
+</div>
+<div class="form-group">
+<label for="loginPassword">Password:</label>
+<input id="loginPassword" placeholder="********" required="" type="password"/>
+</div>
+<button class="submit-btn" type="submit">Login</button>
+</form>
+<!-- Sign Up Form -->
+<form class="auth-form hidden" id="signupForm">
+<h3 class="card-title">Create New Account</h3>
+<div class="form-group">
+<label for="signupEmail">Email:</label>
+<input id="signupEmail" placeholder="new.email@example.com" required="" type="email"/>
+</div>
+<div class="form-group">
+<label for="signupPassword">Password:</label>
+<input id="signupPassword" placeholder="At least 6 characters" required="" type="password"/>
+</div>
+<button class="submit-btn" type="submit">Sign Up</button>
+</form>
+</div>
+</div>
+<!-- AOS JavaScript -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<!-- Chart.js for mini charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Firebase SDKs (using compat versions for broader browser support) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<!-- Your custom JavaScript -->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<section class="card-section" id="team"><h2 class="section-title">Meet Our Team</h2><div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;"><div style="text-align: center;"><img alt="Gourav" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00CED1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"/><p style="margin-top: 10px; font-family: 'Poppins', sans-serif; color: #E0E0F0;">Gourav</p></div><div style="text-align: center;"><img alt="Dr. Smith" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00CED1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"/><p style="margin-top: 10px; font-family: 'Poppins', sans-serif; color: #E0E0F0;">Dr. Smith</p></div><div style="text-align: center;"><img alt="AI Specialist" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00CED1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"/><p style="margin-top: 10px; font-family: 'Poppins', sans-serif; color: #E0E0F0;">AI Specialist</p></div></div></section></body>
 </html>
