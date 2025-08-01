@@ -850,9 +850,19 @@
                     body: JSON.stringify(payload),
                 });
 
+                if (!response.ok) {
+                    console.error("API response was not ok:", response.status, response.statusText);
+                    showMessageBox("Could not generate an insight. Please try again.");
+                    renderAiInsight("An error occurred while generating insight. Please try again.");
+                    return;
+                }
+
                 const result = await response.json();
+                console.log("Gemini API response:", result);
+
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!text) {
+                    console.error("AI insight text not found in response:", result);
                     showMessageBox("Could not generate an insight. Please try again.");
                 }
                 renderAiInsight(text || "Could not generate an insight. Please try again.");
@@ -881,10 +891,20 @@
                     body: JSON.stringify(payload),
                 });
 
+                if (!response.ok) {
+                    console.error("API response was not ok:", response.status, response.statusText);
+                    showMessageBox("Could not generate an insight. Please try again.");
+                    renderAiInsight("An error occurred while generating insight. Please try again.");
+                    return;
+                }
+
                 const result = await response.json();
+                console.log("Gemini API response:", result);
+
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (!text) {
-                     showMessageBox("Could not generate an insight. Please try again.");
+                    console.error("AI insight text not found in response:", result);
+                    showMessageBox("Could not generate an insight. Please try again.");
                 }
                 renderAiInsight(text || "Could not generate an insight. Please try again.");
             } catch (error) {
