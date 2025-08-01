@@ -125,6 +125,11 @@
             align-items: center;
             gap: 1rem;
         }
+        
+        .app-logo-svg {
+            width: 40px; /* Smaller logo size */
+            height: 40px;
+        }
 
         .logo-link {
             display: flex;
@@ -204,7 +209,7 @@
 
         /* Hero Section */
         .hero-section {
-            height: 80vh;
+            height: 50vh; /* Smaller hero section height */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -233,14 +238,14 @@
         }
 
         #hero-heading {
-            font-size: 4rem;
+            font-size: 3rem; /* Smaller hero heading font size */
             font-weight: 700;
             color: var(--text-light);
             margin-bottom: 1rem;
         }
 
         #hero-subheading {
-            font-size: 1.25rem;
+            font-size: 1rem; /* Smaller subheading font size */
             color: var(--text-muted);
             margin-bottom: 2rem;
         }
@@ -847,9 +852,13 @@
 
                 const result = await response.json();
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) {
+                    showMessageBox("Could not generate an insight. Please try again.");
+                }
                 renderAiInsight(text || "Could not generate an insight. Please try again.");
             } catch (error) {
                 console.error("Error fetching AI insight:", error);
+                showMessageBox("Could not generate an insight. Please try again.");
                 renderAiInsight("An error occurred while generating insight. Please try again.");
             } finally {
                 setLoading(false);
@@ -874,9 +883,13 @@
 
                 const result = await response.json();
                 const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) {
+                     showMessageBox("Could not generate an insight. Please try again.");
+                }
                 renderAiInsight(text || "Could not generate an insight. Please try again.");
             } catch (error) {
                 console.error("Error fetching AI insight:", error);
+                showMessageBox("Could not generate an insight. Please try again.");
                 renderAiInsight("An error occurred while generating insight. Please try again.");
             } finally {
                 setLoading(false);
