@@ -1,4 +1,30 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { 
+    getAuth, 
+    signInAnonymously, 
+    signInWithCustomToken, 
+    onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    query, 
+    getDocs,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
 document.addEventListener('DOMContentLoaded', function() {
+    // --- Global Canvas Environment Variables ---
+    // These are provided by the canvas and must be used for Firebase.
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
     // --- UI Element References ---
     const diseaseTypeSelect = document.getElementById('diseaseType');
     const diabetesFormSection = document.getElementById('diabetesFormSection');
@@ -30,53 +56,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginPasswordInput = document.getElementById('loginPassword');
     const signupEmailInput = document.getElementById('signupEmail');
     const signupPasswordInput = document.getElementById('signupPassword');
-
+    
     let heartDiseasePredictionForm = null; // This will hold the reference to the dynamically created form
 
-    // --- Firebase Configuration (IMPORTANT: These are your confirmed values) ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyCowxZFnmgcDkHNwwnahw4Tvat0IgAyQ-Y",
-        authDomain: "diabetes-prediction-f0a3b.firebaseapp.com",
-        projectId: "diabetes-prediction-f0a3b",
-        storageBucket: "diabetes-prediction-f0a3b.firebasestorage.app",
-        messagingSenderId: "717769556705",
-        appId: "1:717769556705:web:990820cd33dd6feae92da0"
-    };
-
-    // Initialize Firebase
+    // --- Firebase Initialization with Canvas-Provided Variables ---
     let app, auth, db, userId;
     let isFirebaseReady = false; // Flag to indicate if Firebase is initialized and user state is checked
 
     try {
-        app = firebase.initializeApp(firebaseConfig);
-        auth = firebase.auth();
-        db = firebase.firestore();
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
 
-        // --- Firebase Auth State Listener ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                userId = user.uid;
-                console.log("Firebase User ID:", userId);
-                loginPromptDiv.classList.add('hidden'); // Hide login prompt
-                historyListDiv.classList.remove('hidden'); // Show history list
-                loginNavLink.classList.add('hidden'); // Hide login button in navbar
-                logoutNavLink.classList.remove('hidden'); // Show logout button in navbar
-                isFirebaseReady = true;
-                fetchPredictionHistory(); // Fetch history for the logged-in user
-                authModal.classList.remove('visible'); // Hide auth modal if user logs in
+        // Function to handle initial authentication and set up auth state listener
+        const setupAuthAndFirestore = async () => {
+            // Use the provided custom token if available, otherwise sign in anonymously
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("Signed in with custom token.");
+                } catch (error) {
+                    console.error("Error signing in with custom token:", error);
+                    // Fallback to anonymous login if custom token fails
+                    await signInAnonymously(auth);
+                }
             } else {
-                console.log("No Firebase user logged in.");
-                userId = null;
-                loginPromptDiv.classList.remove('hidden'); // Show login prompt
-                historyListDiv.classList.add('hidden'); // Hide history list
-                loginNavLink.classList.remove('hidden'); // Show login button in navbar
-                logoutNavLink.classList.add('hidden'); // Hide logout button in navbar
-                isFirebaseReady = false;
-                historyListDiv.innerHTML = ''; // Clear history when logged out
-                noHistoryMessage.classList.remove('hidden'); // Show no history message
-                historyListDiv.appendChild(noHistoryMessage);
+                await signInAnonymously(auth);
             }
-        });
+
+            // --- Firebase Auth State Listener ---
+            onAuthStateChanged(auth, user => {
+                if (user) {
+                    userId = user.uid;
+                    console.log("Firebase User ID:", userId);
+                    loginPromptDiv.classList.add('hidden'); // Hide login prompt
+                    historyListDiv.classList.remove('hidden'); // Show history list
+                    loginNavLink.classList.add('hidden'); // Hide login button in navbar
+                    logoutNavLink.classList.remove('hidden'); // Show logout button in navbar
+                    isFirebaseReady = true;
+                    fetchPredictionHistory(); // Fetch history for the logged-in user
+                    authModal.classList.remove('visible'); // Hide auth modal if user logs in
+                } else {
+                    console.log("No Firebase user logged in.");
+                    userId = null;
+                    loginPromptDiv.classList.remove('hidden'); // Show login prompt
+                    historyListDiv.classList.add('hidden'); // Hide history list
+                    loginNavLink.classList.remove('hidden'); // Show login button in navbar
+                    logoutNavLink.classList.add('hidden'); // Hide logout button in navbar
+                    isFirebaseReady = false;
+                    historyListDiv.innerHTML = ''; // Clear history when logged out
+                    noHistoryMessage.classList.remove('hidden'); // Show no history message
+                    historyListDiv.appendChild(noHistoryMessage);
+                }
+            });
+        };
+        setupAuthAndFirestore();
+
     } catch (error) {
         console.error("Firebase initialization error:", error);
         loginPromptDiv.innerHTML = `<p style="color: red;">Error initializing Firebase. History feature unavailable.</p>`;
@@ -151,10 +186,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </select>`;
             } else {
                 inputElement = `<input type="${field.type}" id="${field.id}" name="${field.id}"
-                                   ${field.min !== undefined ? `min="${field.min}"` : ''}
-                                   ${field.max !== undefined ? `max="${field.max}"` : ''}
-                                   ${field.step !== undefined ? `step="${field.step}"` : ''}
-                                   ${field.required ? 'required' : ''}>`;
+                                    ${field.min !== undefined ? `min="${field.min}"` : ''}
+                                    ${field.max !== undefined ? `max="${field.max}"` : ''}
+                                    ${field.step !== undefined ? `step="${field.step}"` : ''}
+                                    ${field.required ? 'required' : ''}>`;
             }
             return `
                 <div class="form-group">
@@ -204,7 +239,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('getInsightButton').addEventListener('click', handleGetInsight);
         }
 
-
         if (selectedDisease === 'diabetes') {
             diabetesFormSection.classList.remove('hidden');
             heartDiseaseFormSection.classList.add('hidden');
@@ -245,8 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data.HbA1c_level = parseFloat(data.HbA1c_level);
             data.blood_glucose_level = parseFloat(data.blood_glucose_level);
             data.hypertension = parseInt(data.hypertension);
-            // Note: Use the correct ID for the heart_disease input in diabetes form
-            data.heart_disease = parseInt(document.getElementById('heart_disease_input').value); 
+            data.heart_disease = parseInt(document.getElementById('heart_disease_input').value);
         } else if (diseaseType === 'heart_disease') {
             data.hd_age = parseFloat(data.hd_age);
             data.hd_sex = parseInt(data.hd_sex);
@@ -314,7 +347,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentInsightCard = document.getElementById('currentInsightCard');
         showSpinner(currentInsightCard);
 
-
         try {
             const response = await fetch('/generate_insight', {
                 method: 'POST',
@@ -358,15 +390,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const appUniqueId = "health-predictor-app"; // Hardcoded unique ID for this app's data
-            const userPredictionsRef = db.collection('artifacts').doc(appUniqueId).collection('users').doc(userId).collection('predictions');
+            // Use the dynamic `appId` provided by the canvas environment
+            const userPredictionsRef = collection(db, 'artifacts', appId, 'users', userId, 'predictions');
 
-            await userPredictionsRef.add({
+            await addDoc(userPredictionsRef, {
                 diseaseType: diseaseType,
                 inputs: inputs,
                 prediction: predictionText,
                 probability: probability,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                timestamp: serverTimestamp()
             });
             console.log("Prediction saved to Firestore!");
             fetchPredictionHistory(); // Refresh history after saving
@@ -387,19 +419,29 @@ document.addEventListener('DOMContentLoaded', function() {
         noHistoryMessage.classList.add('hidden');
 
         try {
-            const appUniqueId = "health-predictor-app"; // Hardcoded unique ID for this app's data
-            const userPredictionsRef = db.collection('artifacts').doc(appUniqueId).collection('users').doc(userId).collection('predictions');
+            // Use the dynamic `appId` provided by the canvas environment
+            const userPredictionsRef = collection(db, 'artifacts', appId, 'users', userId, 'predictions');
             
-            const snapshot = await userPredictionsRef.orderBy('timestamp', 'desc').get();
+            const q = query(userPredictionsRef);
+            const querySnapshot = await getDocs(q);
             
             historyListDiv.innerHTML = ''; // Clear previous history
-            if (snapshot.empty) {
+            if (querySnapshot.empty) {
                 noHistoryMessage.classList.remove('hidden');
                 historyListDiv.appendChild(noHistoryMessage); // Append to historyListDiv
             } else {
                 noHistoryMessage.classList.add('hidden');
-                snapshot.forEach(doc => {
-                    const data = doc.data();
+
+                // Get all documents and then sort them in memory
+                const predictions = [];
+                querySnapshot.forEach(doc => {
+                    predictions.push(doc.data());
+                });
+
+                // Sort by timestamp in descending order
+                predictions.sort((a, b) => b.timestamp - a.timestamp);
+                
+                predictions.forEach(data => {
                     const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'N/A';
                     
                     const inputsHtml = Object.entries(data.inputs).map(([key, value]) => {
@@ -458,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = signupPasswordInput.value;
 
         try {
-            await auth.createUserWithEmailAndPassword(email, password);
+            await createUserWithEmailAndPassword(auth, email, password);
             displayMessageBox("Account created successfully! You are now logged in.", 'success');
             signupForm.reset(); // Clear form
             authModal.classList.remove('visible'); // Close modal
@@ -475,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const password = loginPasswordInput.value;
 
         try {
-            await auth.signInWithEmailAndPassword(email, password);
+            await signInWithEmailAndPassword(auth, email, password);
             displayMessageBox("Logged in successfully!", 'success');
             loginForm.reset(); // Clear form
             authModal.classList.remove('visible'); // Close modal
@@ -489,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function handleLogout(event) {
         event.preventDefault(); // Prevent default link behavior
         try {
-            await auth.signOut();
+            await signOut(auth);
             displayMessageBox("Logged out successfully!", 'info');
             // UI will be updated by onAuthStateChanged listener
         } catch (error) {
@@ -530,44 +572,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Switch Auth Tabs
     showLoginTabBtn.addEventListener('click', () => {
+        document.querySelector('.auth-tab.active')?.classList.remove('active');
         showLoginTabBtn.classList.add('active');
-        showSignupTabBtn.classList.remove('active');
         loginForm.classList.remove('hidden');
         signupForm.classList.add('hidden');
     });
 
     showSignupTabBtn.addEventListener('click', () => {
+        document.querySelector('.auth-tab.active')?.classList.remove('active');
         showSignupTabBtn.classList.add('active');
-        showLoginTabBtn.classList.remove('active');
         signupForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
     });
 
     // Attach Auth Form Submit Listeners
-    loginForm.addEventListener('submit', handleLogin);
-    signupForm.addEventListener('submit', handleSignup);
+    if (loginForm) loginForm.addEventListener('submit', handleLogin);
+    if (signupForm) signupForm.addEventListener('submit', handleSignup);
 
     // Attach Logout Listener
-    logoutNavLink.addEventListener('click', handleLogout);
+    if (logoutNavLink) logoutNavLink.addEventListener('click', handleLogout);
 
-    // Anonymous Login for Firebase (Still available as an option)
-    anonLoginBtn.addEventListener('click', async () => {
-        try {
-            await auth.signInAnonymously();
-            console.log("Signed in anonymously");
-            displayMessageBox("Signed in anonymously! Your history will be saved.", 'info');
-        } catch (error) {
-            console.error("Error signing in anonymously:", error);
-            displayMessageBox("Error signing in anonymously: " + error.message, 'error');
-        }
-    });
+    // Anonymous Login for Firebase
+    if (anonLoginBtn) {
+        anonLoginBtn.addEventListener('click', async () => {
+            try {
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously");
+                displayMessageBox("Signed in anonymously! Your history will be saved.", 'info');
+            } catch (error) {
+                console.error("Error signing in anonymously:", error);
+                displayMessageBox("Error signing in anonymously: " + error.message, 'error');
+            }
+        });
+    }
 
     // --- Initial Setup ---
     showSelectedForm(); // Display initial form (Diabetes by default)
 
     // Event listeners for prediction forms
-    diseaseTypeSelect.addEventListener('change', showSelectedForm);
-    diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
+    if (diseaseTypeSelect) diseaseTypeSelect.addEventListener('change', showSelectedForm);
+    if (diabetesPredictionForm) diabetesPredictionForm.addEventListener('submit', handlePredictionFormSubmit);
+    
     // Re-attach getInsightButton listener if it exists (it's dynamically added)
     const currentGetInsightButton = document.getElementById('getInsightButton');
     if (currentGetInsightButton) {
@@ -585,6 +630,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const heroSubheading = document.getElementById('hero-subheading');
 
     const typeWriterEffect = (element, text, delay = 50) => {
+        if (!element) return;
         let i = 0;
         element.innerHTML = ''; // Clear content
         element.style.opacity = 1; // Make visible
@@ -598,12 +644,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }, delay);
     };
 
-    const originalHeadingText = heroHeading.textContent;
-    const originalSubheadingText = heroSubheading.textContent;
+    const originalHeadingText = heroHeading?.textContent || '';
+    const originalSubheadingText = heroSubheading?.textContent || '';
 
     // Clear and re-animate on load
-    heroHeading.textContent = '';
-    heroSubheading.textContent = '';
+    if (heroHeading) heroHeading.textContent = '';
+    if (heroSubheading) heroSubheading.textContent = '';
 
     setTimeout(() => {
         typeWriterEffect(heroHeading, originalHeadingText, 70);
@@ -612,39 +658,4 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         typeWriterEffect(heroSubheading, originalSubheadingText, 40);
     }, 2000); // Start subheading after 2s
-});
-
-
-// Ensure hero section animations run on load
-document.addEventListener('DOMContentLoaded', () => {
-  const heroHeading = document.getElementById('hero-heading');
-  const heroSubheading = document.getElementById('hero-subheading');
-
-  const typeWriterEffect = (element, text, delay = 50) => {
-    let i = 0;
-    element.innerHTML = '';
-    element.style.opacity = 1;
-    const interval = setInterval(() => {
-      if (i < text.length) {
-        element.innerHTML += text.charAt(i);
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, delay);
-  };
-
-  const originalHeadingText = heroHeading.textContent;
-  const originalSubheadingText = heroSubheading.textContent;
-
-  heroHeading.textContent = '';
-  heroSubheading.textContent = '';
-
-  setTimeout(() => {
-    typeWriterEffect(heroHeading, originalHeadingText, 70);
-  }, 500);
-
-  setTimeout(() => {
-    typeWriterEffect(heroSubheading, originalSubheadingText, 40);
-  }, 2000);
 });
