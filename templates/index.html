@@ -1,698 +1,220 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precision Health Hub: Diabetes Predictor</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Poppins for headings, Inter for body -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Custom Tailwind Configuration (for fonts and dark mode) */
-        :root {
-            --font-inter: 'Inter', sans-serif;
-            --font-poppins: 'Poppins', sans-serif;
-        }
-        html.dark {
-            background-color: #1a202c; /* Dark mode background */
-            color: #e2e8f0; /* Dark mode text */
-        }
-        body {
-            font-family: var(--font-inter);
-            @apply bg-gray-100 text-gray-900 transition-colors duration-300;
-        }
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-poppins);
-        }
-
-        /* Ensure smooth transitions for dark mode and other elements */
-        body, .bg-gray-100, .bg-gray-900, .text-gray-900, .text-gray-100,
-        .bg-white, .bg-gray-800, .text-gray-700, .text-gray-300,
-        .hover\:bg-gray-100, .dark\:hover\:bg-gray-700,
-        .border-gray-300, .dark\:border-gray-600,
-        .bg-gray-50, .dark\:bg-gray-700,
-        .focus\:ring-indigo-500, .focus\:ring-green-500,
-        .shadow-md, .shadow-lg, .shadow-xl,
-        .transition-colors, .transition-all, .transition-transform, .transition-opacity, .transition-height {
-            transition-property: background-color, border-color, color, transform, box-shadow, opacity, height;
-            transition-duration: 300ms;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Glassmorphism Effect */
-        .glassmorphism {
-            background-color: rgba(255, 255, 255, 0.15); /* Light semi-transparent white */
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-        .dark .glassmorphism {
-            background-color: rgba(30, 41, 59, 0.3); /* Darker semi-transparent blue-gray */
-            border: 1px solid rgba(67, 78, 97, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-        }
-
-        /* Glowing Border Effect */
-        .glowing-border {
-            position: relative;
-            overflow: hidden; /* Ensures glow doesn't spill out */
-            border-radius: 0.75rem; /* Match Tailwind rounded-xl */
-            border: 1px solid transparent; /* Initial transparent border */
-            background-clip: padding-box; /* Ensures border is not part of background */
-        }
-        .glowing-border::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #a78bfa, #818cf8, #6366f1); /* Initial subtle gradient */
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            border-radius: inherit;
-        }
-        .glowing-border:hover::before {
-            opacity: 1; /* Show glow on hover */
-            background: linear-gradient(45deg, #6366f1, #818cf8, #a78bfa); /* More vibrant glow on hover */
-        }
-        .dark .glowing-border::before {
-            background: linear-gradient(45deg, #a78bfa, #c4b5fd, #818cf8); /* Dark mode gradient */
-        }
-        .dark .glowing-border:hover::before {
-            background: linear-gradient(45deg, #818cf8, #c4b5fd, #a78bfa); /* Dark mode vibrant glow */
-        }
-
-        /* Shimmer effect for loading */
-        .shimmer {
-            background: linear-gradient(to right, #f6f7f8 0%, #edeef0 20%, #f6f7f8 40%);
-            background-size: 1000px 100%;
-            animation: shimmer 1.5s infinite linear;
-        }
-        .dark .shimmer {
-            background: linear-gradient(to right, #2d3748 0%, #3a455a 20%, #2d3748 40%);
-        }
-        @keyframes shimmer {
-            0% { background-position: -500px 0; }
-            100% { background-position: 500px 0; }
-        }
-
-        /* Flip-in animation for initial history card load */
-        .flip-in {
-            transform: rotateY(-90deg);
-            opacity: 0;
-            transition: transform 0.6s ease-out, opacity 0.6s ease-out;
-        }
-        .flip-in.is-visible {
-            transform: rotateY(0deg);
-            opacity: 1;
-        }
-
-        /* History card expand/collapse */
-        .history-card-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease-out;
-        }
-        .history-card-content.expanded {
-            max-height: 500px; /* Sufficiently large value */
-        }
-        .history-card-toggle-icon {
-            transition: transform 0.3s ease-in-out;
-        }
-        .history-card-toggle-icon.expanded {
-            transform: rotate(180deg);
-        }
-
-        /* Tooltip styles */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-        }
-        .tooltip-text {
-            visibility: hidden;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 8px;
-            position: absolute;
-            z-index: 10;
-            bottom: 125%; /* Position above the element */
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            white-space: nowrap;
-            font-size: 0.8rem;
-        }
-        .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-    </style>
-    <script>
-        // Tailwind CSS Custom Configuration (must be before Tailwind CDN script)
-        tailwind.config = {
-            darkMode: 'class', // Enable dark mode based on 'dark' class on the html tag
-            theme: {
-                extend: {
-                    fontFamily: {
-                        inter: ['Inter', 'sans-serif'],
-                        poppins: ['Poppins', 'sans-serif'],
-                    },
-                },
-            },
-        }
-    </script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Health Hub</title>
+<!-- Google Fonts: Poppins for headings, Roboto for body -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;family=Roboto:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Link to your custom CSS -->
+<link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
+<!-- AOS (Animate On Scroll) Library -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<!-- Font Awesome for Icons (e.g., hamburger, user, health icons) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+<!-- Favicon placeholder (you can replace this with a real favicon later) -->
+<link href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;❤️&lt;/text&gt;&lt;/svg&gt;" rel="icon"/>
 </head>
-<body class="min-h-screen">
-    <!-- Hero Section -->
-    <section class="relative bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white py-16 md:py-24 overflow-hidden shadow-xl">
-        <div class="container mx-auto px-4 text-center relative z-10">
-            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">
-                Your Health, Predicted.
-            </h1>
-            <p class="text-lg md:text-xl opacity-90 mb-8 animate-fade-in-up">
-                Empowering you with insights into your diabetes risk.
-            </p>
-            <button id="scrollToPredict" class="bg-white text-blue-600 dark:text-gray-900 px-8 py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-pop-in">
-                Start Prediction
-            </button>
-        </div>
-        <!-- Abstract background shapes -->
-        <div class="absolute inset-0 z-0 opacity-20">
-            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
-                <circle cx="20" cy="20" r="15" fill="currentColor" class="text-blue-400 animate-pulse-slow"></circle>
-                <circle cx="80" cy="50" r="20" fill="currentColor" class="text-indigo-400 animate-pulse-medium"></circle>
-                <circle cx="50" cy="90" r="10" fill="currentColor" class="text-blue-300 animate-pulse-fast"></circle>
-            </svg>
-        </div>
-    </section>
-
-    <div class="flex flex-col lg:flex-row min-h-screen-minus-header">
-        <!-- Sidebar Navigation -->
-        <aside class="lg:w-64 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none p-4 lg:p-6 flex flex-col items-center lg:sticky lg:top-0 lg:h-screen z-20">
-            <div class="flex justify-between items-center w-full lg:mb-8">
-                <h2 class="text-2xl font-bold text-indigo-700 dark:text-indigo-400 lg:hidden">Menu</h2>
-                <button id="darkModeToggle"
-                        class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <svg id="moonIcon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                    <svg id="sunIcon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
-                </button>
-            </div>
-            <nav class="flex lg:flex-col w-full lg:space-y-4 justify-around lg:justify-start mt-4 lg:mt-0" role="tablist">
-                <button id="predictTabBtn"
-                        class="flex items-center justify-center lg:justify-start gap-2 p-3 rounded-lg text-lg font-medium transition-all duration-300 bg-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 transform"
-                        role="tab" aria-selected="true" aria-controls="predictTabContent">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                    <span class="hidden lg:inline">Predict</span>
-                </button>
-                <button id="historyTabBtn"
-                        class="flex items-center justify-center lg:justify-start gap-2 p-3 rounded-lg text-lg font-medium transition-all duration-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md hover:scale-105 transform"
-                        role="tab" aria-selected="false" aria-controls="historyTabContent">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 12 3v5"/></svg>
-                    <span class="hidden lg:inline">History</span>
-                </button>
-                <!-- Add more sidebar items here if needed -->
-            </nav>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 p-4 md:p-8 lg:ml-8 lg:mt-8">
-            <!-- Message Display Area -->
-            <div id="messageDisplay" class="hidden p-3 mb-6 rounded-lg flex items-center justify-between shadow-md" role="alert">
-                <span id="messageText"></span>
-                <button id="messageCloseBtn" class="ml-4 text-current hover:opacity-75 focus:outline-none">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
-                </button>
-            </div>
-
-            <!-- Tab Content Container -->
-            <div id="tabContent">
-                <!-- Predict Tab Content (Default Active) -->
-                <div id="predictTabContent" class="glassmorphism glowing-border p-6 sm:p-8 rounded-xl" role="tabpanel" aria-labelledby="predictTabBtn">
-                    <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
-                        Enter Patient Data
-                    </h2>
-                    <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <!-- Input Fields -->
-                        <div class="flex flex-col tooltip-container">
-                            <label for="pregnancies" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pregnancies</label>
-                            <input type="number" id="pregnancies" name="pregnancies" placeholder="e.g., 6" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">Number of times pregnant.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="glucose" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Glucose (mg/dL)</label>
-                            <input type="number" id="glucose" name="glucose" placeholder="e.g., 148" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">Plasma glucose concentration a 2 hours in an oral glucose tolerance test.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="bloodPressure" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Blood Pressure (mmHg)</label>
-                            <input type="number" id="bloodPressure" name="bloodPressure" placeholder="e.g., 72" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">Diastolic blood pressure.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="skinThickness" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skin Thickness (mm)</label>
-                            <input type="number" id="skinThickness" name="skinThickness" placeholder="e.g., 35" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">Triceps skin fold thickness.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="insulin" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Insulin (mu/U/ml)</label>
-                            <input type="number" id="insulin" name="insulin" placeholder="e.g., 0" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">2-Hour serum insulin.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="bmi" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">BMI</label>
-                            <input type="number" id="bmi" name="bmi" placeholder="e.g., 33.6" step="any" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">Body Mass Index.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="diabetesPedigreeFunction" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diabetes Pedigree Function</label>
-                            <input type="number" id="diabetesPedigreeFunction" name="diabetesPedigreeFunction" placeholder="e.g., 0.627" step="any" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">A function that scores likelihood of diabetes based on family history.</span>
-                        </div>
-                        <div class="flex flex-col tooltip-container">
-                            <label for="age" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age (years)</label>
-                            <input type="number" id="age" name="age" placeholder="e.g., 50" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
-                            <span class="tooltip-text">Age in years.</span>
-                        </div>
-
-                        <!-- Prediction Result Display & Skeleton Loader -->
-                        <div id="predictionResultContainer" class="md:col-span-2 hidden p-4 rounded-lg text-center font-semibold text-lg flex flex-col items-center justify-center min-h-[150px]">
-                            <div id="predictionSkeleton" class="w-full hidden">
-                                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded shimmer mb-4 w-3/4 mx-auto"></div>
-                                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded shimmer w-1/2 mx-auto"></div>
-                                <div class="h-40 w-40 rounded-full bg-gray-200 dark:bg-gray-700 shimmer mx-auto mt-4"></div>
-                            </div>
-                            <div id="actualPredictionContent" class="hidden w-full">
-                                <p id="predictionText" class="text-2xl font-bold mb-2"></p>
-                                <p id="predictionProbability" class="text-lg text-gray-700 dark:text-gray-300 mb-4"></p>
-                                <canvas id="confidenceDonut" width="160" height="160" class="mx-auto"></canvas>
-                                <button type="button" id="savePredictionBtn"
-                                        class="mt-6 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex items-center justify-center mx-auto">
-                                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Prediction
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Action Button -->
-                        <div class="md:col-span-2 flex justify-center mt-6">
-                            <button type="submit"
-                                    class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                                Predict Risk
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- History Tab Content -->
-                <div id="historyTabContent" class="hidden glassmorphism glowing-border p-6 sm:p-8 rounded-xl" role="tabpanel" aria-labelledby="historyTabBtn">
-                    <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
-                        Prediction History
-                    </h2>
-                    <div id="historyList" class="space-y-4">
-                        <p class="text-gray-600 dark:text-gray-400 text-center py-8">
-                            No predictions saved yet. Make a prediction and save it!
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const htmlElement = document.documentElement;
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const moonIcon = document.getElementById('moonIcon');
-            const sunIcon = document.getElementById('sunIcon');
-
-            const predictTabBtn = document.getElementById('predictTabBtn');
-            const historyTabBtn = document.getElementById('historyTabBtn');
-            const predictTabContent = document.getElementById('predictTabContent');
-            const historyTabContent = document.getElementById('historyTabContent');
-
-            const predictionForm = document.getElementById('predictionForm');
-            const predictionResultContainer = document.getElementById('predictionResultContainer');
-            const predictionSkeleton = document.getElementById('predictionSkeleton');
-            const actualPredictionContent = document.getElementById('actualPredictionContent');
-            const predictionText = document.getElementById('predictionText');
-            const predictionProbability = document.getElementById('predictionProbability');
-            const confidenceDonut = document.getElementById('confidenceDonut');
-            const savePredictionBtn = document.getElementById('savePredictionBtn');
-
-            const messageDisplay = document.getElementById('messageDisplay');
-            const messageText = document.getElementById('messageText');
-            const messageCloseBtn = document.getElementById('messageCloseBtn');
-            const historyList = document.getElementById('historyList');
-            const scrollToPredictBtn = document.getElementById('scrollToPredict');
-
-            let isDarkMode = false;
-            let currentPredictionResult = null;
-            let currentPredictionProbability = 0;
-            let history = []; // To store prediction history
-
-            // --- Dark Mode Toggle ---
-            const toggleDarkMode = () => {
-                isDarkMode = !isDarkMode;
-                if (isDarkMode) {
-                    htmlElement.classList.add('dark');
-                    moonIcon.style.display = 'none';
-                    sunIcon.style.display = 'block';
-                } else {
-                    htmlElement.classList.remove('dark');
-                    moonIcon.style.display = 'block';
-                    sunIcon.style.display = 'none';
-                }
-            };
-            darkModeToggle.addEventListener('click', toggleDarkMode);
-
-            // Initialize dark mode icons based on initial state
-            if (htmlElement.classList.contains('dark')) { // Check if dark class is already present
-                isDarkMode = true;
-                moonIcon.style.display = 'none';
-                sunIcon.style.display = 'block';
-            } else {
-                moonIcon.style.display = 'block';
-                sunIcon.style.display = 'none';
-            }
-
-            // --- Tab Switching ---
-            const showTab = (tabName) => {
-                // Reset active classes for buttons
-                predictTabBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
-                predictTabBtn.classList.add('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
-                predictTabBtn.setAttribute('aria-selected', 'false');
-
-                historyTabBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
-                historyTabBtn.classList.add('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
-                historyTabBtn.setAttribute('aria-selected', 'false');
-
-                // Hide all content tabs
-                predictTabContent.classList.add('hidden');
-                historyTabContent.classList.add('hidden');
-
-                if (tabName === 'predict') {
-                    predictTabContent.classList.remove('hidden');
-                    predictTabBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
-                    predictTabBtn.setAttribute('aria-selected', 'true');
-                } else if (tabName === 'history') {
-                    historyTabContent.classList.remove('hidden');
-                    historyTabBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
-                    historyTabBtn.setAttribute('aria-selected', 'true');
-                    renderHistory(); // Render history when tab is activated
-                }
-            };
-
-            predictTabBtn.addEventListener('click', () => showTab('predict'));
-            historyTabBtn.addEventListener('click', () => showTab('history'));
-
-            // --- Message Display Function ---
-            let messageTimeout;
-            const showMessage = (type, text) => {
-                clearTimeout(messageTimeout); // Clear any existing timeout
-                messageText.textContent = text;
-                messageDisplay.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200', 'bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200', 'bg-blue-100', 'text-blue-800', 'dark:bg-blue-900', 'dark:text-blue-200');
-
-                if (type === 'success') {
-                    messageDisplay.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200');
-                } else if (type === 'error') {
-                    messageDisplay.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200');
-                } else if (type === 'info') {
-                    messageDisplay.classList.add('bg-blue-100', 'text-blue-800', 'dark:bg-blue-900', 'dark:text-blue-200');
-                }
-                messageDisplay.classList.remove('hidden');
-
-                messageTimeout = setTimeout(() => {
-                    messageDisplay.classList.add('hidden');
-                }, 5000);
-            };
-
-            messageCloseBtn.addEventListener('click', () => {
-                messageDisplay.classList.add('hidden');
-                clearTimeout(messageTimeout);
-            });
-
-            // --- Form Handling and Prediction Logic ---
-            const getFormData = () => {
-                return {
-                    pregnancies: parseFloat(document.getElementById('pregnancies').value),
-                    glucose: parseFloat(document.getElementById('glucose').value),
-                    bloodPressure: parseFloat(document.getElementById('bloodPressure').value),
-                    skinThickness: parseFloat(document.getElementById('skinThickness').value),
-                    insulin: parseFloat(document.getElementById('insulin').value),
-                    bmi: parseFloat(document.getElementById('bmi').value),
-                    diabetesPedigreeFunction: parseFloat(document.getElementById('diabetesPedigreeFunction').value),
-                    age: parseFloat(document.getElementById('age').value),
-                };
-            };
-
-            const validateForm = (data) => {
-                for (const key in data) {
-                    if (isNaN(data[key]) || data[key] === '' || data[key] === null) {
-                        const labelElement = document.querySelector(`label[for="${key}"]`);
-                        const labelText = labelElement ? labelElement.textContent.replace(/\s\(.*\)/, '') : key;
-                        showMessage('error', `Please enter a valid number for ${labelText}.`);
-                        return false;
-                    }
-                }
-                return true;
-            };
-
-            const resetForm = () => {
-                predictionForm.reset();
-                predictionResultContainer.classList.add('hidden');
-                actualPredictionContent.classList.add('hidden');
-                predictionSkeleton.classList.add('hidden');
-                savePredictionBtn.classList.add('hidden');
-                currentPredictionResult = null;
-                currentPredictionProbability = 0;
-            };
-
-            predictionForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const formData = getFormData();
-
-                if (!validateForm(formData)) {
-                    return;
-                }
-
-                // Show skeleton loader and shimmer
-                predictionResultContainer.classList.remove('hidden');
-                predictionSkeleton.classList.remove('hidden');
-                actualPredictionContent.classList.add('hidden');
-                predictionResultContainer.classList.add('shimmer'); // Apply shimmer to container
-
-                showMessage('info', 'Predicting your risk...');
-
-                // Simulate API call delay
-                setTimeout(() => {
-                    // In a real app, you would send formData to your backend model here
-                    // const response = await fetch('/api/predict', { method: 'POST', body: JSON.stringify(formData) });
-                    // const data = await response.json();
-                    // currentPredictionResult = data.result; // e.g., 'high' or 'low'
-                    // currentPredictionProbability = data.probability; // e.g., 0.75 for 75%
-
-                    // Simulated prediction: random high/low risk with probability
-                    const isHighRisk = Math.random() > 0.5;
-                    currentPredictionResult = isHighRisk ? 'high' : 'low';
-                    currentPredictionProbability = isHighRisk ? (Math.random() * (0.95 - 0.6) + 0.6) * 100 : (Math.random() * (0.4 - 0.05) + 0.05) * 100; // 60-95% for high, 5-40% for low
-
-                    // Hide skeleton, show actual content
-                    predictionSkeleton.classList.add('hidden');
-                    predictionResultContainer.classList.remove('shimmer'); // Remove shimmer
-                    actualPredictionContent.classList.remove('hidden');
-
-                    predictionText.textContent = currentPredictionResult === 'high' ? 'High Risk of Diabetes' : 'Low Risk of Diabetes';
-                    predictionText.className = `text-2xl font-bold mb-2 ${
-                        currentPredictionResult === 'high' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
-                    }`;
-                    predictionProbability.textContent = `Confidence: ${currentPredictionProbability.toFixed(2)}%`;
-
-                    drawConfidenceDonut(currentPredictionProbability);
-                    showMessage('success', 'Prediction complete!');
-                    savePredictionBtn.classList.remove('hidden'); // Show save button
-                }, 2500); // Increased delay for better shimmer visibility
-            });
-
-            // --- Animated Confidence Donut Chart ---
-            const drawConfidenceDonut = (percentage) => {
-                const ctx = confidenceDonut.getContext('2d');
-                const centerX = confidenceDonut.width / 2;
-                const centerY = confidenceDonut.height / 2;
-                const radius = 70;
-                const lineWidth = 15;
-
-                // Clear canvas
-                ctx.clearRect(0, 0, confidenceDonut.width, confidenceDonut.height);
-
-                // Background circle
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                ctx.lineWidth = lineWidth;
-                ctx.strokeStyle = isDarkMode ? '#4a5568' : '#e2e8f0'; // Gray for background
-                ctx.stroke();
-
-                // Foreground arc
-                const endAngle = (Math.PI * 2 * percentage) / 100;
-                const startAngle = -Math.PI / 2; // Start from top
-
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, radius, startAngle, startAngle + endAngle);
-                ctx.lineWidth = lineWidth;
-                ctx.lineCap = 'round'; // Rounded ends for the arc
-                ctx.strokeStyle = percentage > 50 ? (isDarkMode ? '#ef4444' : '#dc2626') : (isDarkMode ? '#22c55e' : '#16a34a'); // Red for high, Green for low
-                ctx.stroke();
-
-                // Text in center
-                ctx.font = 'bold 24px "Poppins", sans-serif';
-                ctx.fillStyle = isDarkMode ? '#e2e8f0' : '#1a202c';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(`${percentage.toFixed(0)}%`, centerX, centerY);
-            };
-
-            // --- Save Prediction to History ---
-            savePredictionBtn.addEventListener('click', () => {
-                if (currentPredictionResult && currentPredictionProbability !== 0) {
-                    const newEntry = {
-                        id: Date.now(),
-                        date: new Date().toLocaleString(),
-                        data: getFormData(),
-                        result: currentPredictionResult,
-                        probability: currentPredictionProbability,
-                        expanded: false // New state for expand/collapse
-                    };
-                    history.push(newEntry);
-                    showMessage('success', 'Prediction saved to history!');
-                    resetForm(); // Clear form after saving
-                    renderHistory(); // Re-render history to show new entry
-                } else {
-                    showMessage('error', 'No prediction to save.');
-                }
-            });
-
-            // --- Render History with Flip-in and Expand/Collapse ---
-            const renderHistory = () => {
-                historyList.innerHTML = ''; // Clear previous history
-                if (history.length === 0) {
-                    historyList.innerHTML = `
-                        <p class="text-gray-600 dark:text-gray-400 text-center py-8">
-                            No predictions saved yet. Make a prediction and save it!
-                        </p>
-                    `;
-                    return;
-                }
-
-                history.forEach((entry, index) => {
-                    const entryDiv = document.createElement('div');
-                    entryDiv.className = 'glassmorphism glowing-border p-4 rounded-xl shadow-md flip-in cursor-pointer'; // Add glassmorphism, glowing-border, flip-in
-                    entryDiv.style.animationDelay = `${index * 0.1}s`; // Stagger animation
-
-                    let dataHtml = '';
-                    for (const key in entry.data) {
-                        const labelElement = document.querySelector(`label[for="${key}"]`);
-                        const labelText = labelElement ? labelElement.textContent.replace(/\s\(.*\)/, '') : key.replace(/([A-Z])/g, ' $1');
-                        dataHtml += `
-                            <li class="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
-                                <span class="font-medium text-gray-700 dark:text-gray-300 capitalize">${labelText}:</span>
-                                <span class="text-gray-900 dark:text-gray-100">${entry.data[key]}</span>
-                            </li>
-                        `;
-                    }
-
-                    entryDiv.innerHTML = `
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm text-gray-500 dark:text-gray-400">${entry.date}</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                                entry.result === 'high'
-                                    ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
-                                    : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
-                            }">
-                                ${entry.result === 'high' ? 'High Risk' : 'Low Risk'}
-                            </span>
-                        </div>
-                        <p class="text-sm font-medium mt-2 text-gray-600 dark:text-gray-400 mb-2">
-                            Confidence: ${entry.probability ? entry.probability.toFixed(2) : 'N/A'}%
-                        </p>
-                        <div class="history-card-content">
-                            <ul class="text-gray-700 dark:text-gray-300 text-sm mt-2 space-y-1">
-                                ${dataHtml}
-                            </ul>
-                        </div>
-                        <button class="flex items-center justify-center w-full mt-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold text-sm">
-                            <span class="mr-1">${entry.expanded ? 'Show Less' : 'Show More'} Details</span>
-                            <svg class="w-4 h-4 history-card-toggle-icon ${entry.expanded ? 'expanded' : ''}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </button>
-                    `;
-                    historyList.appendChild(entryDiv);
-
-                    // Add click listener for expand/collapse
-                    const toggleButton = entryDiv.querySelector('button');
-                    const contentDiv = entryDiv.querySelector('.history-card-content');
-                    const toggleIcon = entryDiv.querySelector('.history-card-toggle-icon');
-
-                    if (entry.expanded) {
-                        contentDiv.classList.add('expanded');
-                        toggleIcon.classList.add('expanded');
-                    }
-
-                    toggleButton.addEventListener('click', (event) => {
-                        event.stopPropagation(); // Prevent card click from propagating if a nested element is clicked
-                        entry.expanded = !entry.expanded;
-                        contentDiv.classList.toggle('expanded', entry.expanded);
-                        toggleIcon.classList.toggle('expanded', entry.expanded);
-                        toggleButton.querySelector('span').textContent = entry.expanded ? 'Show Less Details' : 'Show More Details';
-                    });
-
-                    // Trigger initial flip-in animation
-                    setTimeout(() => entryDiv.classList.add('is-visible'), 10);
-                });
-            };
-
-            // --- Scroll to Predict Button ---
-            scrollToPredictBtn.addEventListener('click', () => {
-                predictTabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                showTab('predict'); // Ensure predict tab is active
-            });
-
-            // --- Tooltip Initialization ---
-            const formFields = predictionForm.querySelectorAll('input');
-            formFields.forEach(field => {
-                const tooltipContainer = field.closest('.tooltip-container');
-                if (tooltipContainer) {
-                    const tooltipText = tooltipContainer.querySelector('.tooltip-text');
-                    if (tooltipText) {
-                        // Optional: Show tooltip on focus for accessibility
-                        field.addEventListener('focus', () => {
-                            tooltipText.style.visibility = 'visible';
-                            tooltipText.style.opacity = '1';
-                        });
-                        field.addEventListener('blur', () => {
-                            tooltipText.style.visibility = 'hidden';
-                            tooltipText.style.opacity = '0';
-                        });
-                    }
-                }
-            });
-
-            // Initial tab display
-            showTab('predict');
-        });
-    </script>
-</body>
+<body>
+<!-- Responsive Navbar -->
+<nav class="navbar">
+<div class="navbar-brand">
+<a class="logo-link" href="/">
+<!-- NEW SVG Logo: Stylized Heartbeat + Plus Sign -->
+<svg class="app-logo-svg" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<lineargradient id="logoGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#8A2BE2"></stop> <!-- Lavender -->
+<stop offset="100%" stop-color="#ADD8E6"></stop> <!-- Soft Blue -->
+</lineargradient>
+</defs>
+<!-- Heartbeat line -->
+<path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50" fill="none" stroke="url(#logoGradient)" stroke-linecap="round" stroke-linejoin="round" stroke-width="8"></path>
+<!-- Plus sign for health/medical -->
+<line stroke="#00CED1" stroke-linecap="round" stroke-width="8" x1="45" x2="55" y1="40" y2="60"></line>
+<line stroke="#00CED1" stroke-linecap="round" stroke-width="8" x1="55" x2="45" y1="40" y2="60"></line>
+</svg>
+<span class="app-title">Precision Health Hub</span>
+</a>
+</div>
+<button aria-label="Toggle navigation" class="hamburger-menu">
+<i class="fas fa-bars"></i>
+</button>
+<ul class="nav-links">
+<li><a class="nav-link active" href="#prediction-section">Predictions</a></li>
+<li><a class="nav-link" href="#insights-section">AI Insights</a></li>
+<li><a class="nav-link" href="#history-section">History</a></li>
+<!-- Login/Logout buttons, dynamically shown/hidden by JS -->
+<li id="loginNavLink"><a class="nav-link login-btn" href="#"><i class="fas fa-user-circle"></i> Login</a></li>
+<li class="hidden" id="logoutNavLink"><a class="nav-link logout-btn" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+</ul>
+</nav>
+<!-- Hero Section with Animated Text -->
+<section class="hero-section">
+<div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
+<h1 class="animated-text" id="hero-heading">Empowering Your Health Journey</h1>
+<p class="animated-text-sub" id="hero-subheading">Data-driven insights for a healthier future.</p>
+</div>
+</section>
+<div class="container">
+<!-- Prediction Section -->
+<section class="card-section" data-aos="fade-up" data-aos-delay="200" id="prediction-section">
+<h2 class="section-title">Predict Your Health Risk</h2>
+<div class="disease-selection-group">
+<label for="diseaseType">Select Disease:</label>
+<select id="diseaseType" name="diseaseType" required="">
+<option value="">-- Choose a Disease --</option>
+<option value="diabetes">Diabetes</option>
+<option value="heart_disease">Heart Disease</option>
+</select>
+</div>
+<!-- Diabetes Prediction Form Section -->
+<div class="form-section card-layout" id="diabetesFormSection">
+<h3 class="card-title">Diabetes Prediction</h3>
+<form id="diabetesPredictionForm">
+<div class="form-group">
+<label for="gender">Gender:</label>
+<select id="gender" name="gender" required="">
+<option value="">Select Gender</option>
+<option value="Female">Female</option>
+<option value="Male">Male</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<label for="age">Age:</label>
+<input id="age" max="120" min="0" name="age" required="" step="0.1" type="number"/>
+</div>
+<div class="form-group">
+<label for="hypertension">Hypertension:</label>
+<select id="hypertension" name="hypertension" required="">
+<option value="0">No</option>
+<option value="1">Yes</option>
+</select>
+</div>
+<div class="form-group">
+<label for="heart_disease_input">Heart Disease:</label> <!-- Renamed ID here -->
+<select id="heart_disease_input" name="heart_disease" required="">
+<option value="0">No</option>
+<option value="1">Yes</option>
+</select>
+</div>
+<div class="form-group">
+<label for="smoking_history">Smoking History:</label>
+<select id="smoking_history" name="smoking_history" required="">
+<option value="">Select Smoking History</option>
+<option value="never">Never</option>
+<option value="No Info">No Info</option>
+<option value="current">Current Smoker</option>
+<option value="ever">Ever Smoked</option>
+<option value="former">Former Smoker</option>
+<option value="not current">Not Current Smoker</option>
+</select>
+</div>
+<div class="form-group">
+<label for="bmi">BMI:</label>
+<input id="bmi" max="100" min="10" name="bmi" required="" step="0.01" type="number"/>
+</div>
+<div class="form-group">
+<label for="HbA1c_level">HbA1c Level:</label>
+<input id="HbA1c_level" max="10.0" min="3.0" name="HbA1c_level" required="" step="0.1" type="number"/>
+</div>
+<div class="form-group">
+<label for="blood_glucose_level">Blood Glucose Level:</label>
+<input id="blood_glucose_level" max="350" min="50" name="blood_glucose_level" required="" step="1" type="number"/>
+</div>
+<button class="submit-btn" type="submit">Predict Diabetes Risk</button>
+</form>
+</div>
+<!-- Heart Disease Prediction Form Section (initially hidden) -->
+<div class="form-section card-layout hidden" id="heartDiseaseFormSection">
+<h3 class="card-title">Heart Disease Prediction</h3>
+<form id="heartDiseasePredictionForm">
+<!-- Fields will be dynamically generated by script.js -->
+<button class="submit-btn" type="submit">Predict Heart Disease Risk</button>
+</form>
+</div>
+<div class="result-card hidden" data-aos="fade-up" data-aos-delay="300" id="predictionResult">
+<!-- Prediction result will be displayed here dynamically by JavaScript -->
+<div class="loading-spinner" style="display: none;"></div>
+</div>
+</section>
+<!-- Health Insights Section (Powered by Gemini AI) -->
+<section class="card-section" data-aos="fade-up" data-aos-delay="400" id="insights-section">
+<h2 class="section-title">Health Insights (Powered by Gemini AI)</h2>
+<div class="form-section card-layout insight-input-card">
+<h3 class="card-title">Ask a Question</h3>
+<div class="form-group">
+<label for="healthQuestion">Your Health Query:</label>
+<textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
+</div>
+<button class="submit-btn" id="getInsightButton">Get Insight</button>
+</div>
+<!-- Insights will be displayed in this grid container -->
+<div class="insight-grid-container" id="insightResultContainer">
+<div class="insight-card hidden" data-aos="fade-up" data-aos-delay="100" id="insightResult">
+<div class="loading-spinner" style="display: none;"></div>
+</div>
+</div>
+</section>
+<!-- Prediction History Section (Firebase Integration) -->
+<section class="card-section" data-aos="fade-up" data-aos-delay="500" id="history-section">
+<h2 class="section-title">Your Prediction History</h2>
+<div class="info-card" id="loginPrompt">
+<p>Please log in to view your prediction history.</p>
+<button class="submit-btn" id="anonLoginBtn">Login Anonymously</button>
+</div>
+<div class="history-list-grid hidden" id="historyList">
+<p class="no-history-message hidden">No prediction history found. Make a prediction to save it!</p>
+</div>
+</section>
+</div> <!-- /container -->
+<!-- Authentication Modal/Section -->
+<div class="auth-modal hidden" id="authModal">
+<div class="auth-card">
+<button class="close-auth-modal"><i class="fas fa-times"></i></button>
+<div class="auth-tabs">
+<button class="auth-tab active" id="showLoginTab">Login</button>
+<button class="auth-tab" id="showSignupTab">Sign Up</button>
+</div>
+<!-- Login Form -->
+<form class="auth-form" id="loginForm">
+<h3 class="card-title">Login to Your Account</h3>
+<div class="form-group">
+<label for="loginEmail">Email:</label>
+<input id="loginEmail" placeholder="your.email@example.com" required="" type="email"/>
+</div>
+<div class="form-group">
+<label for="loginPassword">Password:</label>
+<input id="loginPassword" placeholder="********" required="" type="password"/>
+</div>
+<button class="submit-btn" type="submit">Login</button>
+</form>
+<!-- Sign Up Form -->
+<form class="auth-form hidden" id="signupForm">
+<h3 class="card-title">Create New Account</h3>
+<div class="form-group">
+<label for="signupEmail">Email:</label>
+<input id="signupEmail" placeholder="new.email@example.com" required="" type="email"/>
+</div>
+<div class="form-group">
+<label for="signupPassword">Password:</label>
+<input id="signupPassword" placeholder="At least 6 characters" required="" type="password"/>
+</div>
+<button class="submit-btn" type="submit">Sign Up</button>
+</form>
+</div>
+</div>
+<!-- AOS JavaScript -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<!-- Chart.js for mini charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Firebase SDKs (using compat versions for broader browser support) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<!-- Your custom JavaScript -->
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+<section class="card-section" id="team"><h2 class="section-title">Meet Our Team</h2><div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;"><div style="text-align: center;"><img alt="Gourav" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00CED1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"/><p style="margin-top: 10px; font-family: 'Poppins', sans-serif; color: #E0E0F0;">Gourav</p></div><div style="text-align: center;"><img alt="Dr. Smith" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00CED1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"/><p style="margin-top: 10px; font-family: 'Poppins', sans-serif; color: #E0E0F0;">Dr. Smith</p></div><div style="text-align: center;"><img alt="AI Specialist" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00CED1; box-shadow: 0 4px 12px rgba(0,0,0,0.2);"/><p style="margin-top: 10px; font-family: 'Poppins', sans-serif; color: #E0E0F0;">AI Specialist</p></div></div></section></body>
 </html>
