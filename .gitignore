@@ -25,4 +25,4 @@ logs/
 
 # Database files
 *.db
-*.sqlite
+*.sqlitevenv_py311/ 
