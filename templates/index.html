@@ -1,1839 +1,697 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precision Health Hub: Risk Prediction & Insights</title>
-    <!-- Google Fonts: Poppins (for headings) and Inter (for body text) -->
+    <title>Precision Health Hub: Diabetes Predictor</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins for headings, Inter for body -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- AOS Library for Animations -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Firebase SDKs (v8.10.0 for compatibility) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
-        /* Base Styles & Global Variables */
+        /* Custom Tailwind Configuration (for fonts and dark mode) */
         :root {
-            --bg-light: #f5f7fa; /* Main background color */
-            --primary-accent: #4e8cff; /* Blue accent for primary actions, headings */
-            --secondary-accent: #ff6b6b; /* Red accent for warnings, secondary actions */
-            --text-dark: #333; /* Dark text color */
-            --text-light: #666; /* Lighter text for paragraphs */
-            --card-bg: #ffffff; /* Card and modal background */
-            --shadow-light: rgba(0, 0, 0, 0.1); /* Light shadow for cards */
-            --shadow-medium: rgba(0, 0, 0, 0.2); /* Medium shadow for hover/active */
-            --border-light: #e0e0e0; /* Light border color */
-            --input-border: #ccc; /* Input field border */
-            --input-focus: #4e8cff; /* Input focus border color */
-            --link-hover: #3a75e0; /* Link hover color */
-            --success-color: #28a745; /* Green for success messages */
+            --font-inter: 'Inter', sans-serif;
+            --font-poppins: 'Poppins', sans-serif;
         }
-
-        /* General Body Styling */
+        html.dark {
+            background-color: #1a202c; /* Dark mode background */
+            color: #e2e8f0; /* Dark mode text */
+        }
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-            overflow-x: hidden; /* Prevent horizontal scroll */
-            line-height: 1.6;
+            font-family: var(--font-inter);
+            @apply bg-gray-100 text-gray-900 transition-colors duration-300;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-poppins);
         }
 
-        /* Headings and Titles */
-        h1, h2, h3, h4, .app-title, .card-title {
-            font-family: 'Poppins', sans-serif;
-            color: var(--primary-accent);
-            font-weight: 600;
+        /* Ensure smooth transitions for dark mode and other elements */
+        body, .bg-gray-100, .bg-gray-900, .text-gray-900, .text-gray-100,
+        .bg-white, .bg-gray-800, .text-gray-700, .text-gray-300,
+        .hover\:bg-gray-100, .dark\:hover\:bg-gray-700,
+        .border-gray-300, .dark\:border-gray-600,
+        .bg-gray-50, .dark\:bg-gray-700,
+        .focus\:ring-indigo-500, .focus\:ring-green-500,
+        .shadow-md, .shadow-lg, .shadow-xl,
+        .transition-colors, .transition-all, .transition-transform, .transition-opacity, .transition-height {
+            transition-property: background-color, border-color, color, transform, box-shadow, opacity, height;
+            transition-duration: 300ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Navbar Styling */
-        .navbar {
-            width: 100%;
-            background-color: var(--card-bg);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px var(--shadow-light);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid var(--border-light);
+        /* Glassmorphism Effect */
+        .glassmorphism {
+            background-color: rgba(255, 255, 255, 0.15); /* Light semi-transparent white */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .dark .glassmorphism {
+            background-color: rgba(30, 41, 59, 0.3); /* Darker semi-transparent blue-gray */
+            border: 1px solid rgba(67, 78, 97, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         }
 
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-link {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .app-logo-icon {
-            font-size: 2.2em;
-            color: var(--primary-accent);
-            margin-right: 10px;
-            transition: transform 0.3s ease;
-        }
-
-        .app-logo-icon:hover {
-            transform: rotate(5deg) scale(1.05);
-        }
-
-        .app-title {
-            font-size: 1.8em;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0;
-            transition: color 0.3s ease;
-        }
-
-        .logo-link:hover .app-title {
-            color: var(--primary-accent);
-        }
-
-        .hamburger-menu {
-            display: none; /* Hidden by default on desktop */
-            background: none;
-            border: none;
-            font-size: 1.8em;
-            color: var(--text-dark);
-            cursor: pointer;
-            padding: 5px;
-            transition: color 0.3s ease;
-        }
-
-        .hamburger-menu:hover {
-            color: var(--primary-accent);
-        }
-
-        .nav-links {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            gap: 25px;
-        }
-
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 500;
-            font-size: 1.05em;
-            padding: 8px 0;
+        /* Glowing Border Effect */
+        .glowing-border {
             position: relative;
-            transition: color 0.3s ease, transform 0.2s ease;
+            overflow: hidden; /* Ensures glow doesn't spill out */
+            border-radius: 0.75rem; /* Match Tailwind rounded-xl */
+            border: 1px solid transparent; /* Initial transparent border */
+            background-clip: padding-box; /* Ensures border is not part of background */
         }
-
-        .nav-link::after {
+        .glowing-border::before {
             content: '';
             position: absolute;
-            width: 0;
-            height: 3px;
-            background-color: var(--primary-accent);
-            bottom: -5px;
-            left: 0;
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--link-hover);
-            transform: translateY(-2px);
-        }
-
-        .nav-link:hover::after,
-        .nav-link.active::after {
-            width: 100%;
-        }
-
-        .nav-link.active {
-            color: var(--primary-accent);
-        }
-
-        .auth-btn {
-            background-color: var(--primary-accent);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 3px 10px rgba(78, 140, 255, 0.3);
-            border: none;
-            cursor: pointer;
-        }
-
-        .auth-btn:hover {
-            background-color: var(--link-hover);
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 5px 15px rgba(78, 140, 255, 0.4);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            width: 100%;
-            background: linear-gradient(135deg, var(--primary-accent) 0%, #6a9eff 100%);
-            color: white;
-            padding: 80px 20px;
-            text-align: center;
-            box-shadow: 0 4px 20px var(--shadow-medium);
-            position: relative;
-            overflow: hidden;
-            min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hero-content {
-            z-index: 2;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .hero-section h1 {
-            font-size: 3.8em;
-            margin-bottom: 15px;
-            line-height: 1.2;
-            color: white; /* Override primary-accent for hero heading */
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            opacity: 0; /* Initial state for animation */
-        }
-
-        .hero-section p {
-            font-size: 1.3em;
-            max-width: 600px;
-            margin: 0 auto 30px auto;
-            opacity: 0; /* Initial state for animation */
-        }
-
-        .hero-section .cta-button {
-            background-color: var(--secondary-accent);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-            opacity: 0; /* Initial state for animation */
-        }
-
-        .hero-section .cta-button:hover {
-            background-color: #e05c5c;
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
-        }
-
-        /* Main Content Container */
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-
-        /* Section Titles */
-        .section-title {
-            text-align: center;
-            font-size: 2.8em;
-            margin-bottom: 40px;
-            padding-bottom: 15px;
-            position: relative;
-            color: var(--primary-accent);
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            width: 80px;
-            height: 4px;
-            background-color: var(--secondary-accent);
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        /* Prediction Cards Section */
-        .prediction-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
-        }
-
-        .prediction-card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 25px var(--shadow-light);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid var(--border-light);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            min-height: 250px;
-        }
-
-        .prediction-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px var(--shadow-medium);
-        }
-
-        .prediction-card .icon {
-            font-size: 3.5em;
-            color: var(--primary-accent);
-            margin-bottom: 20px;
-        }
-
-        .prediction-card h3 {
-            font-size: 1.8em;
-            margin-bottom: 10px;
-            color: var(--text-dark);
-        }
-
-        .prediction-card p {
-            font-size: 1em;
-            color: var(--text-light);
-            margin-bottom: 25px;
-            flex-grow: 1;
-        }
-
-        .prediction-card .predict-btn {
-            background-color: var(--primary-accent);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 10px rgba(78, 140, 255, 0.3);
-        }
-
-        .prediction-card .predict-btn:hover {
-            background-color: var(--link-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(78, 140, 255, 0.4);
-        }
-
-        /* Form Sections (Prediction & AI Insights) */
-        .form-section {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px var(--shadow-light);
-            margin-bottom: 40px;
-            border: 1px solid var(--border-light);
-            transition: all 0.5s ease-in-out;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #a78bfa, #818cf8, #6366f1); /* Initial subtle gradient */
+            z-index: -1;
             opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: inherit;
+        }
+        .glowing-border:hover::before {
+            opacity: 1; /* Show glow on hover */
+            background: linear-gradient(45deg, #6366f1, #818cf8, #a78bfa); /* More vibrant glow on hover */
+        }
+        .dark .glowing-border::before {
+            background: linear-gradient(45deg, #a78bfa, #c4b5fd, #818cf8); /* Dark mode gradient */
+        }
+        .dark .glowing-border:hover::before {
+            background: linear-gradient(45deg, #818cf8, #c4b5fd, #a78bfa); /* Dark mode vibrant glow */
+        }
+
+        /* Shimmer effect for loading */
+        .shimmer {
+            background: linear-gradient(to right, #f6f7f8 0%, #edeef0 20%, #f6f7f8 40%);
+            background-size: 1000px 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        .dark .shimmer {
+            background: linear-gradient(to right, #2d3748 0%, #3a455a 20%, #2d3748 40%);
+        }
+        @keyframes shimmer {
+            0% { background-position: -500px 0; }
+            100% { background-position: 500px 0; }
+        }
+
+        /* Flip-in animation for initial history card load */
+        .flip-in {
+            transform: rotateY(-90deg);
+            opacity: 0;
+            transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+        }
+        .flip-in.is-visible {
+            transform: rotateY(0deg);
+            opacity: 1;
+        }
+
+        /* History card expand/collapse */
+        .history-card-content {
             max-height: 0;
             overflow: hidden;
-            visibility: hidden; /* Hide completely when not active */
+            transition: max-height 0.4s ease-out;
         }
-
-        .form-section.active {
-            opacity: 1;
-            max-height: 2000px; /* Large enough to show content */
-            visibility: visible;
-            padding: 30px; /* Restore padding */
+        .history-card-content.expanded {
+            max-height: 500px; /* Sufficiently large value */
         }
-
-        .form-group {
-            margin-bottom: 20px;
-            position: relative; /* For floating labels */
+        .history-card-toggle-icon {
+            transition: transform 0.3s ease-in-out;
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-dark);
-            font-size: 0.95em;
-        }
-
-        .form-group input[type="number"],
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            font-size: 1em;
-            box-sizing: border-box;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .form-group input[type="number"]:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 3px rgba(78, 140, 255, 0.2);
-        }
-
-        .form-group select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%234e8cff" d="M9.293 12.95l.707.707 4.243-4.243-1.414-1.414L10 11.536 6.707 8.243 5.293 9.657 9.293 13.65z"/%3E%3C/svg%3E');
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            cursor: pointer;
-        }
-
-        .submit-btn {
-            background-color: var(--primary-accent);
-            color: white;
-            padding: 14px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.05em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(78, 140, 255, 0.3);
-        }
-
-        .submit-btn:hover {
-            background-color: var(--link-hover);
-            box-shadow: 0 6px 20px rgba(78, 140, 255, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .prediction-result-card {
-            background-color: var(--bg-light);
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: inset 0 1px 8px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-light);
-            text-align: center;
-            font-size: 1.1em;
-            font-weight: 500;
-            color: var(--text-dark);
-            margin-top: 30px;
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            visibility: hidden;
-            transition: opacity 0.5s ease-in-out, max-height 0.7s ease-in-out;
-        }
-
-        .prediction-result-card.active {
-            opacity: 1;
-            max-height: 500px; /* Adjust as needed */
-            visibility: visible;
-            padding: 25px; /* Restore padding */
-        }
-
-        /* AI Insights Section */
-        .ai-insights-section .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .insight-accordion {
-            margin-top: 30px;
-        }
-
-        .accordion-item {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-light);
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 10px var(--shadow-light);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .accordion-item.loading {
-            background-color: #f0f0f0; /* Lighter background for loading */
-        }
-
-        .accordion-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 25px;
-            background-color: var(--primary-accent);
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1em;
-            border-radius: 10px 10px 0 0;
-            transition: background-color 0.3s ease;
-        }
-
-        .accordion-header:hover {
-            background-color: var(--link-hover);
-        }
-
-        .accordion-header .icon {
-            margin-right: 15px;
-        }
-
-        .accordion-header .arrow-icon {
-            transition: transform 0.3s ease;
-        }
-
-        .accordion-item.open .accordion-header .arrow-icon {
+        .history-card-toggle-icon.expanded {
             transform: rotate(180deg);
         }
 
-        .accordion-content {
-            padding: 0 25px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
-            background-color: var(--card-bg);
-            color: var(--text-dark);
-            border-top: 1px solid var(--border-light);
-        }
-
-        .accordion-item.open .accordion-content {
-            max-height: 500px; /* Max height to allow smooth transition */
-            padding: 25px;
-        }
-
-        .accordion-content p {
-            margin-bottom: 10px;
-        }
-
-        /* History Section (Timeline View Simulation) */
-        .history-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .history-card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 15px var(--shadow-light);
-            border: 1px solid var(--border-light);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        /* Tooltip styles */
+        .tooltip-container {
             position: relative;
-            overflow: hidden;
+            display: inline-block;
         }
-
-        .history-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px var(--shadow-medium);
-        }
-
-        .history-card h4 {
-            font-size: 1.4em;
-            color: var(--primary-accent);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .history-card .date {
-            font-size: 0.9em;
-            color: #777;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border-light);
-            padding-bottom: 10px;
-        }
-
-        .history-card p {
-            font-size: 0.95em;
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .history-card strong {
-            color: var(--text-dark);
-        }
-
-        .history-card .prediction-result {
-            font-weight: 600;
-            color: var(--secondary-accent); /* Default to red */
-        }
-        .history-card .prediction-result.positive {
-            color: var(--secondary-accent); /* Red for positive risk */
-        }
-        .history-card .prediction-result.negative {
-            color: var(--success-color); /* Green for negative risk */
-        }
-
-        /* Auth Modal - Glassmorphism Style */
-        .auth-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Dark overlay */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1001;
-            opacity: 0;
+        .tooltip-text {
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .auth-modal.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .auth-card {
-            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
-            backdrop-filter: blur(10px); /* Glassmorphism blur */
-            -webkit-backdrop-filter: blur(10px); /* Safari support */
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            width: 90%;
-            max-width: 480px;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Light border */
-            transform: translateY(-50px); /* Initial slide-in effect */
-            transition: transform 0.4s ease-out;
-            color: var(--text-dark);
-        }
-
-        .auth-modal.visible .auth-card {
-            transform: translateY(0);
-        }
-
-        .close-auth-modal {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 8px;
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 1.8em;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .close-auth-modal:hover {
-            color: var(--secondary-accent);
-        }
-
-        .auth-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--border-light);
-            padding-bottom: 10px;
-            gap: 15px;
-        }
-
-        .auth-tab {
-            background: none;
-            border: none;
-            color: #888;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.2em;
-            font-weight: 600;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .auth-tab::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 3px;
-            background-color: var(--primary-accent);
-            bottom: -12px;
+            z-index: 10;
+            bottom: 125%; /* Position above the element */
             left: 50%;
             transform: translateX(-50%);
-            transition: width 0.3s ease;
-        }
-
-        .auth-tab:hover {
-            color: var(--text-dark);
-        }
-
-        .auth-tab.active {
-            color: var(--primary-accent);
-        }
-        .auth-tab.active::after {
-            width: 100%;
-        }
-
-        .auth-form {
-            padding-top: 15px;
-        }
-
-        .auth-form h3 {
-            text-align: center;
-            font-size: 2em;
-            margin-bottom: 30px;
-            color: var(--primary-accent);
-        }
-
-        /* Floating Labels for Auth Forms */
-        .floating-label-group {
-            position: relative;
-            margin-bottom: 25px;
-        }
-
-        .floating-label-group input {
-            width: 100%;
-            padding: 15px 12px 10px 12px; /* Adjust padding for label */
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            font-size: 1em;
-            box-sizing: border-box;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .floating-label-group label {
-            position: absolute;
-            top: 15px;
-            left: 12px;
-            font-size: 1em;
-            color: #777;
-            pointer-events: none;
-            transition: all 0.2s ease;
-            background-color: var(--bg-light); /* Match input background */
-            padding: 0 4px; /* Padding for background */
-        }
-
-        .floating-label-group input:focus + label,
-        .floating-label-group input:not(:placeholder-shown) + label {
-            top: -10px; /* Move up */
-            font-size: 0.8em; /* Shrink */
-            color: var(--primary-accent); /* Change color */
-            left: 8px; /* Adjust horizontal position */
-        }
-
-        .auth-form .submit-btn {
-            margin-top: 20px;
-        }
-
-        /* Custom Message Box */
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            z-index: 2000;
-            text-align: center;
-            border: 1px solid var(--border-light);
-            max-width: 400px;
-            width: 90%;
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s ease-in-out;
+            white-space: nowrap;
+            font-size: 0.8rem;
         }
-
-        .message-box.visible {
-            opacity: 1;
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
             visibility: visible;
-        }
-
-        .message-box.info { border-left: 5px solid var(--primary-accent); }
-        .message-box.error { border-left: 5px solid var(--secondary-accent); }
-        .message-box.success { border-left: 5px solid var(--success-color); }
-
-        .message-box p {
-            font-size: 1.1em;
-            margin-bottom: 20px;
-            color: var(--text-dark);
-        }
-
-        .message-box .close-message {
-            background-color: var(--primary-accent);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .message-box .close-message:hover {
-            background-color: var(--link-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(78, 140, 255, 0.4);
-        }
-
-        /* Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-        .text-center { text-align: center; }
-        .mt-4 { margin-top: 1rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-6 { margin-bottom: 1.5rem; }
-
-        /* Loading Spinner */
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top: 4px solid var(--primary-accent);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none; /* Hidden by default */
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .navbar {
-                flex-wrap: wrap;
-                padding: 15px 20px;
-            }
-
-            .navbar-brand {
-                width: 100%;
-                justify-content: space-between;
-                margin-bottom: 15px;
-            }
-
-            .hamburger-menu {
-                display: block; /* Show hamburger on mobile */
-            }
-
-            .nav-links {
-                flex-direction: column;
-                width: 100%;
-                display: none; /* Hidden by default */
-                gap: 10px;
-                text-align: center;
-                padding-top: 10px;
-                border-top: 1px solid var(--border-light);
-            }
-
-            .nav-links.active {
-                display: flex; /* Show when active */
-            }
-
-            .nav-link {
-                padding: 10px 0;
-                font-size: 1.1em;
-            }
-
-            .nav-link::after {
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .auth-btn {
-                margin-top: 10px;
-                width: 80%; /* Make button wider on mobile */
-                max-width: 250px;
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .hero-section {
-                padding: 60px 15px;
-                min-height: 300px;
-            }
-
-            .hero-section h1 {
-                font-size: 2.8em;
-            }
-
-            .hero-section p {
-                font-size: 1.1em;
-            }
-
-            .hero-section .cta-button {
-                font-size: 1em;
-                padding: 12px 25px;
-            }
-
-            .container {
-                margin: 30px auto;
-                padding: 0 15px;
-            }
-
-            .section-title {
-                font-size: 2.2em;
-                margin-bottom: 30px;
-            }
-
-            .prediction-card {
-                padding: 25px;
-            }
-
-            .prediction-card .icon {
-                font-size: 3em;
-            }
-
-            .prediction-card h3 {
-                font-size: 1.6em;
-            }
-
-            .form-section {
-                padding: 20px;
-            }
-
-            .accordion-header {
-                padding: 15px 20px;
-                font-size: 1em;
-            }
-
-            .accordion-content {
-                padding: 20px;
-            }
-
-            .history-list {
-                grid-template-columns: 1fr; /* Single column on small screens */
-            }
-
-            .auth-card {
-                padding: 30px;
-            }
-
-            .auth-tab {
-                font-size: 1em;
-                padding: 8px 15px;
-            }
+            opacity: 1;
         }
     </style>
+    <script>
+        // Tailwind CSS Custom Configuration (must be before Tailwind CDN script)
+        tailwind.config = {
+            darkMode: 'class', // Enable dark mode based on 'dark' class on the html tag
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
 </head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a href="#" class="logo-link">
-                <i class="fas fa-heartbeat app-logo-icon"></i> <!-- Medical icon for health theme -->
-                <h1 class="app-title">Precision Health Hub</h1>
-            </a>
-            <button class="hamburger-menu" aria-label="Toggle navigation">
-                <i class="fas fa-bars"></i>
+<body class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-r from-blue-600 to-indigo-700 dark:from-gray-800 dark:to-gray-900 text-white py-16 md:py-24 overflow-hidden shadow-xl">
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">
+                Your Health, Predicted.
+            </h1>
+            <p class="text-lg md:text-xl opacity-90 mb-8 animate-fade-in-up">
+                Empowering you with insights into your diabetes risk.
+            </p>
+            <button id="scrollToPredict" class="bg-white text-blue-600 dark:text-gray-900 px-8 py-3 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-pop-in">
+                Start Prediction
             </button>
         </div>
-        <ul class="nav-links">
-            <li><a href="#prediction-section" class="nav-link">Predict</a></li>
-            <li><a href="#insights-section" class="nav-link">Insights</a></li>
-            <li><a href="#history-section" class="nav-link">History</a></li>
-            <li><button id="authButton" class="auth-btn"><i class="fas fa-sign-in-alt"></i> Login</button></li>
-            <li><button id="logoutButton" class="auth-btn hidden"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
-        </ul>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1 id="hero-heading">Empowering Your Health Decisions</h1>
-            <p id="hero-subheading">Get accurate risk predictions for diabetes and heart disease, and personalized health insights, powered by AI. Take control of your well-being.</p>
-            <button class="cta-button" id="startPredictingBtn">Start Predicting</button>
+        <!-- Abstract background shapes -->
+        <div class="absolute inset-0 z-0 opacity-20">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+                <circle cx="20" cy="20" r="15" fill="currentColor" class="text-blue-400 animate-pulse-slow"></circle>
+                <circle cx="80" cy="50" r="20" fill="currentColor" class="text-indigo-400 animate-pulse-medium"></circle>
+                <circle cx="50" cy="90" r="10" fill="currentColor" class="text-blue-300 animate-pulse-fast"></circle>
+            </svg>
         </div>
     </section>
 
-    <div class="container">
-        <!-- Prediction Section -->
-        <section id="prediction-section" class="mb-6">
-            <h2 class="section-title" data-aos="fade-up">Your Health Risk Predictions</h2>
-            <div class="prediction-cards-grid">
-                <!-- Diabetes Prediction Card -->
-                <div class="prediction-card" data-aos="fade-up" data-aos-delay="100">
-                    <i class="fas fa-syringe icon"></i>
-                    <h3>Diabetes Risk</h3>
-                    <p>Analyze key health indicators to assess your risk of developing diabetes.</p>
-                    <button class="predict-btn" data-disease="diabetes">Predict Now</button>
-                </div>
-                <!-- Heart Disease Prediction Card -->
-                <div class="prediction-card" data-aos="fade-up" data-aos-delay="200">
-                    <i class="fas fa-heartbeat icon"></i>
-                    <h3>Heart Disease Risk</h3>
-                    <p>Evaluate various factors to understand your potential risk of heart disease.</p>
-                    <button class="predict-btn" data-disease="heart">Predict Now</button>
-                </div>
+    <div class="flex flex-col lg:flex-row min-h-screen-minus-header">
+        <!-- Sidebar Navigation -->
+        <aside class="lg:w-64 bg-white dark:bg-gray-800 shadow-lg lg:shadow-none p-4 lg:p-6 flex flex-col items-center lg:sticky lg:top-0 lg:h-screen z-20">
+            <div class="flex justify-between items-center w-full lg:mb-8">
+                <h2 class="text-2xl font-bold text-indigo-700 dark:text-indigo-400 lg:hidden">Menu</h2>
+                <button id="darkModeToggle"
+                        class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg id="moonIcon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                    <svg id="sunIcon" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
+                </button>
+            </div>
+            <nav class="flex lg:flex-col w-full lg:space-y-4 justify-around lg:justify-start mt-4 lg:mt-0" role="tablist">
+                <button id="predictTabBtn"
+                        class="flex items-center justify-center lg:justify-start gap-2 p-3 rounded-lg text-lg font-medium transition-all duration-300 bg-indigo-600 text-white shadow-md hover:shadow-lg hover:scale-105 transform"
+                        role="tab" aria-selected="true" aria-controls="predictTabContent">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span class="hidden lg:inline">Predict</span>
+                </button>
+                <button id="historyTabBtn"
+                        class="flex items-center justify-center lg:justify-start gap-2 p-3 rounded-lg text-lg font-medium transition-all duration-300 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:shadow-md hover:scale-105 transform"
+                        role="tab" aria-selected="false" aria-controls="historyTabContent">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 12 3v5"/></svg>
+                    <span class="hidden lg:inline">History</span>
+                </button>
+                <!-- Add more sidebar items here if needed -->
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-4 md:p-8 lg:ml-8 lg:mt-8">
+            <!-- Message Display Area -->
+            <div id="messageDisplay" class="hidden p-3 mb-6 rounded-lg flex items-center justify-between shadow-md" role="alert">
+                <span id="messageText"></span>
+                <button id="messageCloseBtn" class="ml-4 text-current hover:opacity-75 focus:outline-none">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                </button>
             </div>
 
-            <!-- Diabetes Prediction Form -->
-            <div id="diabetesFormSection" class="form-section" data-aos="fade-up">
-                <h3 class="card-title">Diabetes Prediction</h3>
-                <form id="diabetesPredictionForm">
-                    <div class="form-group">
-                        <label for="pregnancies">Pregnancies:</label>
-                        <input type="number" id="pregnancies" name="pregnancies" min="0" required placeholder=" ">
+            <!-- Tab Content Container -->
+            <div id="tabContent">
+                <!-- Predict Tab Content (Default Active) -->
+                <div id="predictTabContent" class="glassmorphism glowing-border p-6 sm:p-8 rounded-xl" role="tabpanel" aria-labelledby="predictTabBtn">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
+                        Enter Patient Data
+                    </h2>
+                    <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <!-- Input Fields -->
+                        <div class="flex flex-col tooltip-container">
+                            <label for="pregnancies" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pregnancies</label>
+                            <input type="number" id="pregnancies" name="pregnancies" placeholder="e.g., 6" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">Number of times pregnant.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="glucose" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Glucose (mg/dL)</label>
+                            <input type="number" id="glucose" name="glucose" placeholder="e.g., 148" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">Plasma glucose concentration a 2 hours in an oral glucose tolerance test.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="bloodPressure" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Blood Pressure (mmHg)</label>
+                            <input type="number" id="bloodPressure" name="bloodPressure" placeholder="e.g., 72" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">Diastolic blood pressure.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="skinThickness" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Skin Thickness (mm)</label>
+                            <input type="number" id="skinThickness" name="skinThickness" placeholder="e.g., 35" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">Triceps skin fold thickness.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="insulin" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Insulin (mu/U/ml)</label>
+                            <input type="number" id="insulin" name="insulin" placeholder="e.g., 0" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">2-Hour serum insulin.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="bmi" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">BMI</label>
+                            <input type="number" id="bmi" name="bmi" placeholder="e.g., 33.6" step="any" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">Body Mass Index.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="diabetesPedigreeFunction" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Diabetes Pedigree Function</label>
+                            <input type="number" id="diabetesPedigreeFunction" name="diabetesPedigreeFunction" placeholder="e.g., 0.627" step="any" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">A function that scores likelihood of diabetes based on family history.</span>
+                        </div>
+                        <div class="flex flex-col tooltip-container">
+                            <label for="age" class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age (years)</label>
+                            <input type="number" id="age" name="age" placeholder="e.g., 50" class="p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200">
+                            <span class="tooltip-text">Age in years.</span>
+                        </div>
+
+                        <!-- Prediction Result Display & Skeleton Loader -->
+                        <div id="predictionResultContainer" class="md:col-span-2 hidden p-4 rounded-lg text-center font-semibold text-lg flex flex-col items-center justify-center min-h-[150px]">
+                            <div id="predictionSkeleton" class="w-full hidden">
+                                <div class="h-8 bg-gray-200 dark:bg-gray-700 rounded shimmer mb-4 w-3/4 mx-auto"></div>
+                                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded shimmer w-1/2 mx-auto"></div>
+                                <div class="h-40 w-40 rounded-full bg-gray-200 dark:bg-gray-700 shimmer mx-auto mt-4"></div>
+                            </div>
+                            <div id="actualPredictionContent" class="hidden w-full">
+                                <p id="predictionText" class="text-2xl font-bold mb-2"></p>
+                                <p id="predictionProbability" class="text-lg text-gray-700 dark:text-gray-300 mb-4"></p>
+                                <canvas id="confidenceDonut" width="160" height="160" class="mx-auto"></canvas>
+                                <button type="button" id="savePredictionBtn"
+                                        class="mt-6 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex items-center justify-center mx-auto">
+                                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Prediction
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="md:col-span-2 flex justify-center mt-6">
+                            <button type="submit"
+                                    class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                Predict Risk
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- History Tab Content -->
+                <div id="historyTabContent" class="hidden glassmorphism glowing-border p-6 sm:p-8 rounded-xl" role="tabpanel" aria-labelledby="historyTabBtn">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
+                        Prediction History
+                    </h2>
+                    <div id="historyList" class="space-y-4">
+                        <p class="text-gray-600 dark:text-gray-400 text-center py-8">
+                            No predictions saved yet. Make a prediction and save it!
+                        </p>
                     </div>
-                    <div class="form-group">
-                        <label for="glucose">Glucose (mg/dL):</label>
-                        <input type="number" id="glucose" name="glucose" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="bloodPressure">Blood Pressure (mm Hg):</label>
-                        <input type="number" id="bloodPressure" name="bloodPressure" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="skinThickness">Skin Thickness (mm):</label>
-                        <input type="number" id="skinThickness" name="skinThickness" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="insulin">Insulin (mu U/ml):</label>
-                        <input type="number" id="insulin" name="insulin" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="bmi">BMI (Body Mass Index):</label>
-                        <input type="number" id="bmi" name="bmi" step="0.1" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="diabetesPedigreeFunction">Diabetes Pedigree Function:</label>
-                        <input type="number" id="diabetesPedigreeFunction" name="diabetesPedigreeFunction" step="0.001" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="age">Age:</label>
-                        <input type="number" id="age" name="age" min="0" required placeholder=" ">
-                    </div>
-                    <button type="submit" class="submit-btn">Predict Diabetes Risk</button>
-                </form>
-                <div id="diabetesPredictionResult" class="prediction-result-card">
-                    <div class="loading-spinner"></div>
-                    <p>Your diabetes risk prediction will appear here.</p>
                 </div>
             </div>
-
-            <!-- Heart Disease Prediction Form -->
-            <div id="heartDiseaseFormSection" class="form-section" data-aos="fade-up">
-                <h3 class="card-title">Heart Disease Prediction</h3>
-                <form id="heartDiseasePredictionForm">
-                    <div class="form-group">
-                        <label for="ageHeart">Age:</label>
-                        <input type="number" id="ageHeart" name="age" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="sex">Sex:</label>
-                        <select id="sex" name="sex" required>
-                            <option value="">Select Sex</option>
-                            <option value="1">Male</option>
-                            <option value="0">Female</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="chestPainType">Chest Pain Type (CP):</label>
-                        <select id="chestPainType" name="chestPainType" required>
-                            <option value="">Select Type</option>
-                            <option value="0">Typical Angina</option>
-                            <option value="1">Atypical Angina</option>
-                            <option value="2">Non-Anginal Pain</option>
-                            <option value="3">Asymptomatic</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="restingBP">Resting Blood Pressure (trestbps):</label>
-                        <input type="number" id="restingBP" name="restingBP" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="cholesterol">Cholesterol (chol):</label>
-                        <input type="number" id="cholesterol" name="cholesterol" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="fastingBS">Fasting Blood Sugar > 120 mg/dl (fbs):</label>
-                        <select id="fastingBS" name="fastingBS" required>
-                            <option value="">Select</option>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="restingECG">Resting Electrocardiographic Results (restecg):</label>
-                        <select id="restingECG" name="restingECG" required>
-                            <option value="">Select Result</option>
-                            <option value="0">Normal</option>
-                            <option value="1">ST-T wave abnormality</option>
-                            <option value="2">Left ventricular hypertrophy</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="maxHR">Maximum Heart Rate Achieved (thalach):</label>
-                        <input type="number" id="maxHR" name="maxHR" min="0" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="exerciseAngina">Exercise Induced Angina (exang):</label>
-                        <select id="exerciseAngina" name="exerciseAngina" required>
-                            <option value="">Select</option>
-                            <option value="1">Yes</option>
-                            <option value="0">No</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="oldpeak">Oldpeak (ST depression induced by exercise relative to rest):</label>
-                        <input type="number" id="oldpeak" name="oldpeak" step="0.1" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="stSlope">Slope of the peak exercise ST segment (slope):</label>
-                        <select id="stSlope" name="stSlope" required>
-                            <option value="">Select Slope</option>
-                            <option value="0">Upsloping</option>
-                            <option value="1">Flat</option>
-                            <option value="2">Downsloping</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="numMajorVessels">Number of Major Vessels (0-3) colored by flourosopy (ca):</label>
-                        <input type="number" id="numMajorVessels" name="numMajorVessels" min="0" max="3" required placeholder=" ">
-                    </div>
-                    <div class="form-group">
-                        <label for="thal">Thal (Thalassemia):</label>
-                        <select id="thal" name="thal" required>
-                            <option value="">Select Type</option>
-                            <option value="0">Normal</option>
-                            <option value="1">Fixed Defect</option>
-                            <option value="2">Reversible Defect</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="submit-btn">Predict Heart Disease Risk</button>
-                </form>
-                <div id="heartDiseasePredictionResult" class="prediction-result-card">
-                    <div class="loading-spinner"></div>
-                    <p>Your heart disease risk prediction will appear here.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- AI Insights Section -->
-        <section id="insights-section" class="mb-6">
-            <h2 class="section-title" data-aos="fade-up">AI-Powered Health Insights</h2>
-            <div class="form-section ai-insights-section" data-aos="fade-up" data-aos-delay="100">
-                <h3 class="card-title">Ask a Health-Related Question</h3>
-                <div class="form-group">
-                    <label for="healthQuestion">Your Query:</label>
-                    <textarea id="healthQuestion" name="healthQuestion" placeholder="E.g., 'What are early signs of Type 2 diabetes?' or 'Suggest a heart-healthy meal plan.'" rows="6"></textarea>
-                </div>
-                <button id="getInsightButton" class="submit-btn">Get Insight</button>
-
-                <div id="insightResultContainer" class="insight-accordion">
-                    <!-- Insights will be dynamically loaded here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- History Section -->
-        <section id="history-section" class="mb-6">
-            <h2 class="section-title" data-aos="fade-up">Your Prediction History</h2>
-            <div id="loginPrompt" class="form-section text-center" data-aos="fade-up" data-aos-delay="100">
-                <p>Log in or sign up to save and view your prediction history.</p>
-                <button id="anonLoginBtn" class="submit-btn mt-4">Login Anonymously</button>
-            </div>
-            <div id="historyList" class="history-list hidden" data-aos="fade-up" data-aos-delay="200">
-                <p class="text-center" style="grid-column: 1 / -1;">Loading history...</p>
-                <!-- History items will be dynamically loaded here -->
-            </div>
-        </section>
+        </main>
     </div>
 
-    <!-- Authentication Modal -->
-    <div id="authModal" class="auth-modal">
-        <div class="auth-card">
-            <button class="close-auth-modal">&times;</button>
-            <div class="auth-tabs">
-                <button id="showLoginTab" class="auth-tab active">Login</button>
-                <button id="showSignupTab" class="auth-tab">Sign Up</button>
-            </div>
-
-            <form id="loginForm" class="auth-form">
-                <h3>Login</h3>
-                <div class="floating-label-group">
-                    <input type="email" id="loginEmail" name="email" required placeholder=" ">
-                    <label for="loginEmail">Email</label>
-                </div>
-                <div class="floating-label-group">
-                    <input type="password" id="loginPassword" name="password" required placeholder=" ">
-                    <label for="loginPassword">Password</label>
-                </div>
-                <button type="submit" class="submit-btn">Login</button>
-            </form>
-
-            <form id="signupForm" class="auth-form hidden">
-                <h3>Sign Up</h3>
-                <div class="floating-label-group">
-                    <input type="email" id="signupEmail" name="email" required placeholder=" ">
-                    <label for="signupEmail">Email</label>
-                </div>
-                <div class="floating-label-group">
-                    <input type="password" id="signupPassword" name="password" required placeholder=" ">
-                    <label for="signupPassword">Password</label>
-                </div>
-                <button type="submit" class="submit-btn">Sign Up</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Custom Message Box Container -->
-    <div id="messageBoxContainer"></div>
-
-    <!-- AOS JS -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- UI Element References ---
-            const authButton = document.getElementById('authButton');
-            const logoutButton = document.getElementById('logoutButton');
-            const authModal = document.getElementById('authModal');
-            const closeAuthModalBtn = document.querySelector('.close-auth-modal');
-            const showLoginTabBtn = document.getElementById('showLoginTab');
-            const showSignupTabBtn = document.getElementById('showSignupTab');
-            const loginForm = document.getElementById('loginForm');
-            const signupForm = document.getElementById('signupForm');
-            const loginEmailInput = document.getElementById('loginEmail');
-            const loginPasswordInput = document.getElementById('loginPassword');
-            const signupEmailInput = document.getElementById('signupEmail');
-            const signupPasswordInput = document.getElementById('signupPassword');
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlElement = document.documentElement;
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const moonIcon = document.getElementById('moonIcon');
+            const sunIcon = document.getElementById('sunIcon');
 
-            const predictionCards = document.querySelectorAll('.prediction-card .predict-btn');
-            const diabetesFormSection = document.getElementById('diabetesFormSection');
-            const heartDiseaseFormSection = document.getElementById('heartDiseaseFormSection');
-            const diabetesPredictionForm = document.getElementById('diabetesPredictionForm');
-            const heartDiseasePredictionForm = document.getElementById('heartDiseasePredictionForm');
-            const diabetesPredictionResultDiv = document.getElementById('diabetesPredictionResult');
-            const heartDiseasePredictionResultDiv = document.getElementById('heartDiseasePredictionResult');
+            const predictTabBtn = document.getElementById('predictTabBtn');
+            const historyTabBtn = document.getElementById('historyTabBtn');
+            const predictTabContent = document.getElementById('predictTabContent');
+            const historyTabContent = document.getElementById('historyTabContent');
 
-            const healthQuestionInput = document.getElementById('healthQuestion');
-            const getInsightButton = document.getElementById('getInsightButton');
-            const insightResultContainer = document.getElementById('insightResultContainer');
+            const predictionForm = document.getElementById('predictionForm');
+            const predictionResultContainer = document.getElementById('predictionResultContainer');
+            const predictionSkeleton = document.getElementById('predictionSkeleton');
+            const actualPredictionContent = document.getElementById('actualPredictionContent');
+            const predictionText = document.getElementById('predictionText');
+            const predictionProbability = document.getElementById('predictionProbability');
+            const confidenceDonut = document.getElementById('confidenceDonut');
+            const savePredictionBtn = document.getElementById('savePredictionBtn');
 
-            const loginPromptDiv = document.getElementById('loginPrompt');
-            const anonLoginBtn = document.getElementById('anonLoginBtn');
-            const historyListDiv = document.getElementById('historyList');
+            const messageDisplay = document.getElementById('messageDisplay');
+            const messageText = document.getElementById('messageText');
+            const messageCloseBtn = document.getElementById('messageCloseBtn');
+            const historyList = document.getElementById('historyList');
+            const scrollToPredictBtn = document.getElementById('scrollToPredict');
 
-            const heroHeading = document.getElementById('hero-heading');
-            const heroSubheading = document.getElementById('hero-subheading');
-            const ctaButton = document.getElementById('startPredictingBtn');
-            const hamburgerMenu = document.querySelector('.hamburger-menu');
-            const navLinks = document.querySelector('.nav-links');
+            let isDarkMode = false;
+            let currentPredictionResult = null;
+            let currentPredictionProbability = 0;
+            let history = []; // To store prediction history
 
-            // --- Firebase Configuration (IMPORTANT: Use your actual values) ---
-            // These global variables are provided by the Canvas environment.
-            // They are crucial for Firebase to connect to your project.
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // Fallback for local testing
-
-            let app, auth, db, userId;
-            let isFirebaseReady = false; // Flag to indicate if Firebase is initialized and user state is checked
-
-            // --- Firebase Initialization and Auth State Listener ---
-            try {
-                app = firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
-
-                // Listen for authentication state changes
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        // User is signed in.
-                        userId = user.uid;
-                        console.log("Firebase User ID:", userId);
-                        authButton.classList.add('hidden'); // Hide login button
-                        logoutButton.classList.remove('hidden'); // Show logout button
-                        loginPromptDiv.classList.add('hidden'); // Hide login prompt in history section
-                        historyListDiv.classList.remove('hidden'); // Show history list
-                        isFirebaseReady = true;
-                        fetchPredictionHistory(); // Fetch history for the logged-in user
-                        authModal.classList.remove('visible'); // Close auth modal if user logs in
-                    } else {
-                        // User is signed out.
-                        console.log("No Firebase user logged in.");
-                        userId = null;
-                        authButton.classList.remove('hidden'); // Show login button
-                        logoutButton.classList.add('hidden'); // Hide logout button
-                        loginPromptDiv.classList.remove('hidden'); // Show login prompt in history section
-                        historyListDiv.classList.add('hidden'); // Hide history list
-                        isFirebaseReady = false;
-                        historyListDiv.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">Log in or sign up to view your history.</p>'; // Clear and show prompt
-                    }
-                });
-
-                // Attempt anonymous sign-in if no user is found initially
-                // This ensures that even unauthenticated users can still use some features
-                if (!auth.currentUser) {
-                    if (initialAuthToken) {
-                        // Use custom token if provided by the environment
-                        auth.signInWithCustomToken(initialAuthToken)
-                            .then(() => console.log("Signed in with custom token."))
-                            .catch(error => {
-                                console.error("Error signing in with custom token:", error);
-                                displayMessageBox(`Authentication Error: ${error.message}`, 'error');
-                            });
-                    } else {
-                        // Fallback to anonymous sign-in
-                        auth.signInAnonymously()
-                            .then(() => {
-                                displayMessageBox("Signed in anonymously! Your history will be saved.", 'info');
-                            })
-                            .catch(error => {
-                                console.error("Error signing in anonymously:", error);
-                                displayMessageBox(`Anonymous Login Error: ${error.message}`, 'error');
-                            });
-                    }
+            // --- Dark Mode Toggle ---
+            const toggleDarkMode = () => {
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    htmlElement.classList.add('dark');
+                    moonIcon.style.display = 'none';
+                    sunIcon.style.display = 'block';
+                } else {
+                    htmlElement.classList.remove('dark');
+                    moonIcon.style.display = 'block';
+                    sunIcon.style.display = 'none';
                 }
+            };
+            darkModeToggle.addEventListener('click', toggleDarkMode);
 
-            } catch (error) {
-                console.error("Firebase initialization error:", error);
-                displayMessageBox(`Firebase initialization failed: ${error.message}. History and Auth features may be unavailable.`, 'error');
-                isFirebaseReady = false;
+            // Initialize dark mode icons based on initial state
+            if (htmlElement.classList.contains('dark')) { // Check if dark class is already present
+                isDarkMode = true;
+                moonIcon.style.display = 'none';
+                sunIcon.style.display = 'block';
+            } else {
+                moonIcon.style.display = 'block';
+                sunIcon.style.display = 'none';
             }
 
-            // --- Helper Functions for UI Interactions ---
+            // --- Tab Switching ---
+            const showTab = (tabName) => {
+                // Reset active classes for buttons
+                predictTabBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
+                predictTabBtn.classList.add('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                predictTabBtn.setAttribute('aria-selected', 'false');
 
-            // Shows a loading spinner within a given element
-            function showSpinner(element) {
-                const spinner = element.querySelector('.loading-spinner');
-                if (spinner) {
-                    spinner.style.display = 'block';
-                    element.classList.add('loading-state');
+                historyTabBtn.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg');
+                historyTabBtn.classList.add('text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+                historyTabBtn.setAttribute('aria-selected', 'false');
+
+                // Hide all content tabs
+                predictTabContent.classList.add('hidden');
+                historyTabContent.classList.add('hidden');
+
+                if (tabName === 'predict') {
+                    predictTabContent.classList.remove('hidden');
+                    predictTabBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+                    predictTabBtn.setAttribute('aria-selected', 'true');
+                } else if (tabName === 'history') {
+                    historyTabContent.classList.remove('hidden');
+                    historyTabBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg');
+                    historyTabBtn.setAttribute('aria-selected', 'true');
+                    renderHistory(); // Render history when tab is activated
                 }
-            }
-
-            // Hides a loading spinner within a given element
-            function hideSpinner(element) {
-                const spinner = element.querySelector('.loading-spinner');
-                if (spinner) {
-                    spinner.style.display = 'none';
-                    element.classList.remove('loading-state');
-                }
-            }
-
-            // Displays a custom message box (replaces alert/confirm)
-            function displayMessageBox(message, type = 'info') {
-                const container = document.getElementById('messageBoxContainer');
-                const messageBox = document.createElement('div');
-                messageBox.classList.add('message-box', type);
-                messageBox.innerHTML = `<p>${message}</p><button class="close-message">OK</button>`;
-                container.appendChild(messageBox);
-
-                // Make it visible with a slight delay for CSS transition
-                setTimeout(() => messageBox.classList.add('visible'), 50);
-
-                // Close button event listener
-                messageBox.querySelector('.close-message').addEventListener('click', () => {
-                    messageBox.classList.remove('visible');
-                    // Remove message box from DOM after transition
-                    messageBox.addEventListener('transitionend', () => messageBox.remove(), { once: true });
-                });
-
-                // Auto-hide after 5 seconds for info/success messages
-                if (type === 'info' || type === 'success') {
-                    setTimeout(() => {
-                        if (messageBox.classList.contains('visible')) {
-                            messageBox.classList.remove('visible');
-                            messageBox.addEventListener('transitionend', () => messageBox.remove(), { once: true });
-                        }
-                    }, 5000);
-                }
-            }
-
-            // Hides all prediction forms and their results
-            function hideAllPredictionForms() {
-                diabetesFormSection.classList.remove('active');
-                heartDiseaseFormSection.classList.remove('active');
-                diabetesPredictionResultDiv.classList.remove('active');
-                heartDiseasePredictionResultDiv.classList.remove('active');
-            }
-
-            // Shows a specific prediction form based on disease type
-            function showPredictionForm(diseaseType) {
-                hideAllPredictionForms(); // Hide others first
-                if (diseaseType === 'diabetes') {
-                    diabetesFormSection.classList.add('active');
-                    diabetesPredictionResultDiv.classList.remove('active');
-                } else if (diseaseType === 'heart') {
-                    heartDiseaseFormSection.classList.add('active');
-                    heartDiseasePredictionResultDiv.classList.remove('active');
-                }
-                // Scroll to the prediction section to show the active form
-                const targetSection = document.getElementById('prediction-section');
-                if (targetSection) {
-                    targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }
-
-            // --- Unified Prediction Form Submission Handler ---
-            async function handlePredictionSubmit(event) {
-                event.preventDefault();
-
-                const form = event.target;
-                const diseaseType = form.id === 'diabetesPredictionForm' ? 'diabetes' : 'heart';
-                const resultDiv = form.id === 'diabetesPredictionForm' ? diabetesPredictionResultDiv : heartDiseasePredictionResultDiv;
-
-                // Display loading state
-                resultDiv.innerHTML = '<div class="loading-spinner"></div><p>Predicting...</p>';
-                resultDiv.classList.add('active');
-                showSpinner(resultDiv);
-
-                const formData = new FormData(form);
-                const data = {};
-                formData.forEach((value, key) => {
-                    // Convert form values to numbers where appropriate
-                    if (form.elements[key].type === 'number' || form.elements[key].tagName === 'SELECT') {
-                        data[key] = parseFloat(value);
-                    } else {
-                        data[key] = value;
-                    }
-                });
-                data['disease_type'] = diseaseType; // Add disease type for backend processing
-
-                try {
-                    // Make a POST request to the hypothetical backend /predict endpoint
-                    const response = await fetch('/predict', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Server error: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    const predictionText = result.prediction_text || "No prediction text available.";
-                    const probability = result.probability ? parseFloat(result.probability.replace('%', '')) : null;
-
-                    // Determine CSS class based on prediction result
-                    let predictionClass = '';
-                    if (predictionText.includes('Positive') || predictionText.includes('High Risk')) {
-                        predictionClass = 'positive';
-                    } else if (predictionText.includes('Negative') || predictionText.includes('Low Risk')) {
-                        predictionClass = 'negative';
-                    }
-
-                    // Update result display
-                    resultDiv.innerHTML = `
-                        <p><strong>Prediction:</strong> <span class="prediction-result ${predictionClass}">${predictionText}</span></p>
-                        ${probability !== null ? `<p><strong>Probability:</strong> ${probability.toFixed(2)}%</p>` : ''}
-                    `;
-                    resultDiv.classList.add('active');
-
-                    // Save prediction to Firebase if user is logged in
-                    if (isFirebaseReady && userId) {
-                        savePredictionHistory(diseaseType, data, predictionText, probability);
-                    }
-
-                } catch (error) {
-                    console.error(`Error during ${diseaseType} prediction:`, error);
-                    resultDiv.innerHTML = `<p style="color: var(--secondary-accent);">An error occurred: ${error.message}. Please check your inputs.</p>`;
-                    resultDiv.classList.add('active');
-                    displayMessageBox(`Prediction Error: ${error.message}`, 'error');
-                } finally {
-                    hideSpinner(resultDiv); // Always hide spinner
-                }
-            }
-
-            // --- Gemini API Integration for Health Insights ---
-            async function handleGetInsight() {
-                const prompt = healthQuestionInput.value.trim();
-                if (!prompt) {
-                    displayMessageBox('Please enter a question to get health insights.', 'info');
-                    return;
-                }
-
-                // Display loading state in the accordion
-                insightResultContainer.innerHTML = `
-                    <div class="accordion-item loading">
-                        <div class="accordion-header">
-                            <i class="fas fa-brain icon"></i>
-                            <span>Generating Insight...</span>
-                            <i class="fas fa-spinner fa-spin arrow-icon"></i>
-                        </div>
-                        <div class="accordion-content">
-                            <p>Please wait while AI generates your health insight.</p>
-                        </div>
-                    </div>
-                `;
-                insightResultContainer.classList.add('active'); // Ensure container is visible
-
-                try {
-                    // Make a POST request to the hypothetical backend /generate_insight endpoint
-                    const response = await fetch('/generate_insight', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: prompt })
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `Server error: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-                    if (result.insight) {
-                        // Display the generated insight
-                        insightResultContainer.innerHTML = `
-                            <div class="accordion-item open">
-                                <div class="accordion-header">
-                                    <i class="fas fa-lightbulb icon"></i>
-                                    <span>AI Insight: Your Question</span>
-                                    <i class="fas fa-chevron-down arrow-icon"></i>
-                                </div>
-                                <div class="accordion-content">
-                                    <p>${result.insight}</p>
-                                </div>
-                            </div>
-                        `;
-                        // Re-attach event listener for the newly created accordion item
-                        insightResultContainer.querySelector('.accordion-header').addEventListener('click', toggleAccordion);
-                    } else {
-                        // Handle cases where insight generation failed
-                        insightResultContainer.innerHTML = `
-                            <div class="accordion-item open">
-                                <div class="accordion-header">
-                                    <i class="fas fa-exclamation-triangle icon"></i>
-                                    <span>Insight Generation Failed</span>
-                                    <i class="fas fa-chevron-down arrow-icon"></i>
-                                </div>
-                                <div class="accordion-content">
-                                    <p style="color: var(--secondary-accent);">Could not get a valid insight from AI. Please try again with a different query.</p>
-                                </div>
-                            </div>
-                        `;
-                    }
-                } catch (error) {
-                    console.error("Error calling backend for Gemini API:", error);
-                    insightResultContainer.innerHTML = `
-                        <div class="accordion-item open">
-                            <div class="accordion-header">
-                                <i class="fas fa-exclamation-circle icon"></i>
-                                <span>Error Getting Insight</span>
-                                <i class="fas fa-chevron-down arrow-icon"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <p style="color: var(--secondary-accent);">Error fetching insight: ${error.message}.</p>
-                            </div>
-                        </div>
-                    `;
-                    displayMessageBox(`Insight Error: ${error.message}`, 'error');
-                } finally {
-                    // No spinner to hide here, as content is replaced directly
-                }
-            }
-
-            // Toggles the open/close state of an accordion item
-            function toggleAccordion(event) {
-                const item = event.currentTarget.closest('.accordion-item');
-                item.classList.toggle('open');
-            }
-
-            // --- Firebase History Functions ---
-            async function savePredictionHistory(diseaseType, inputs, predictionText, probability) {
-                if (!isFirebaseReady || !userId) {
-                    console.warn("Firebase not ready or user not logged in. Cannot save history.");
-                    return;
-                }
-
-                try {
-                    // Reference to the user's private predictions collection
-                    const userPredictionsRef = db.collection(`artifacts/${appId}/users/${userId}/predictions`);
-                    await userPredictionsRef.add({
-                        diseaseType: diseaseType,
-                        inputs: inputs,
-                        prediction: predictionText,
-                        probability: probability,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp() // Server timestamp for accurate ordering
-                    });
-                    console.log("Prediction saved to Firestore!");
-                    // History will auto-update due to onSnapshot listener in fetchPredictionHistory
-                } catch (error) {
-                    console.error("Error saving prediction to Firestore:", error);
-                    displayMessageBox("Error saving prediction history: " + error.message, 'error');
-                }
-            }
-
-            async function fetchPredictionHistory() {
-                if (!isFirebaseReady || !userId) {
-                    console.warn("Firebase not ready or user not logged in. Cannot fetch history.");
-                    historyListDiv.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">Log in or sign up to view your history.</p>';
-                    return;
-                }
-
-                historyListDiv.innerHTML = '<div class="loading-spinner" style="grid-column: 1 / -1; display: block;"></div>'; // Show spinner
-
-                const userPredictionsRef = db.collection(`artifacts/${appId}/users/${userId}/predictions`);
-                // Fetch all predictions for the current user and sort them client-side
-                const q = userPredictionsRef;
-
-                // Use onSnapshot for real-time updates to the history list
-                // This listener will automatically update the UI whenever data changes in Firestore
-                auth.onAuthStateChanged(user => { // Ensure auth state is stable before attaching listener
-                    if (user && user.uid === userId) { // Only attach if the user is still the same
-                        const unsubscribe = q.onSnapshot(snapshot => {
-                            historyListDiv.innerHTML = ''; // Clear previous history content
-                            if (snapshot.empty) {
-                                historyListDiv.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">No prediction history yet. Make a prediction to see it here!</p>';
-                            } else {
-                                // Sort data client-side by timestamp in descending order
-                                const sortedDocs = snapshot.docs.sort((a, b) => {
-                                    const timestampA = a.data().timestamp ? a.data().timestamp.toDate().getTime() : 0;
-                                    const timestampB = b.data().timestamp ? b.data().timestamp.toDate().getTime() : 0;
-                                    return timestampB - timestampA; // Descending order (latest first)
-                                });
-
-                                sortedDocs.forEach(doc => {
-                                    const data = doc.data();
-                                    const timestamp = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'N/A';
-                                    
-                                    // Dynamically generate HTML for input details
-                                    const inputsHtml = Object.entries(data.inputs || {}).map(([key, value]) => {
-                                        if (key === 'disease_type') return ''; // Exclude internal key
-                                        let displayKey = key.replace(/([A-Z])/g, ' $1').trim(); // Add space before capital letters
-                                        displayKey = displayKey.charAt(0).toUpperCase() + displayKey.slice(1); // Capitalize first letter
-                                        return `<p><strong>${displayKey}:</strong> ${value}</p>`;
-                                    }).filter(Boolean).join(''); // Filter out empty strings and join
-
-                                    // Determine icon and color for prediction result
-                                    const predictionClass = (data.prediction && (data.prediction.includes('Positive') || data.prediction.includes('High Risk'))) ? 'positive' : 'negative';
-                                    const iconClass = data.diseaseType === 'diabetes' ? 'fas fa-syringe' : 'fas fa-heartbeat';
-
-                                    const historyCard = `
-                                        <div class="history-card" data-aos="fade-up" data-aos-delay="50">
-                                            <h4><i class="${iconClass}"></i> ${data.diseaseType.toUpperCase()} Prediction</h4>
-                                            <p class="date">${timestamp}</p>
-                                            <p><strong>Result:</strong> <span class="prediction-result ${predictionClass}">${data.prediction || 'N/A'}</span></p>
-                                            <p><strong>Probability:</strong> ${data.probability ? `${parseFloat(data.probability).toFixed(2)}%` : 'N/A'}</p>
-                                            <details>
-                                                <summary>Input Details</summary>
-                                                <div class="mt-2 text-sm">
-                                                    ${inputsHtml || '<p>No detailed inputs available.</p>'}
-                                                </div>
-                                            </details>
-                                        </div>
-                                    `;
-                                    historyListDiv.innerHTML += historyCard;
-                                });
-                            }
-                            hideSpinner(historyListDiv); // Hide spinner once data is rendered
-                        }, error => {
-                            console.error("Error real-time fetching history:", error);
-                            historyListDiv.innerHTML = `<p class="text-center" style="grid-column: 1 / -1; color: var(--secondary-accent);">Error loading history: ${error.message}</p>`;
-                            hideSpinner(historyListDiv);
-                            displayMessageBox(`History Load Error: ${error.message}`, 'error');
-                        });
-                        // Return unsubscribe function to clean up the listener if needed (e.g., on logout)
-                        return unsubscribe;
-                    } else {
-                        // If user logs out or changes, ensure spinner is hidden and prompt is shown
-                        hideSpinner(historyListDiv);
-                        historyListDiv.innerHTML = '<p class="text-center" style="grid-column: 1 / -1;">Log in or sign up to view your history.</p>';
-                    }
-                });
-            }
-
-
-            // --- Firebase Authentication Functions ---
-            async function handleSignup(event) {
-                event.preventDefault();
-                const email = signupEmailInput.value;
-                const password = signupPasswordInput.value;
-
-                try {
-                    await auth.createUserWithEmailAndPassword(email, password);
-                    displayMessageBox("Account created successfully! You are now logged in.", 'success');
-                    signupForm.reset(); // Clear form
-                    authModal.classList.remove('visible'); // Close modal
-                } catch (error) {
-                    console.error("Error signing up:", error);
-                    displayMessageBox(`Sign Up Error: ${error.message}`, 'error');
-                }
-            }
-
-            async function handleLogin(event) {
-                event.preventDefault();
-                const email = loginEmailInput.value;
-                const password = loginPasswordInput.value;
-
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    displayMessageBox("Logged in successfully!", 'success');
-                    loginForm.reset(); // Clear form
-                    authModal.classList.remove('visible'); // Close modal
-                } catch (error) {
-                    console.error("Error logging in:", error);
-                    displayMessageBox(`Login Error: ${error.message}`, 'error');
-                }
-            }
-
-            async function handleLogout() {
-                try {
-                    await auth.signOut();
-                    displayMessageBox("Logged out successfully!", 'info');
-                } catch (error) {
-                    console.error("Error logging out:", error);
-                    displayMessageBox(`Logout Error: ${error.message}`, 'error');
-                }
-            }
-
-            // --- Event Listeners ---
-
-            // Navbar hamburger menu toggle for mobile
-            hamburgerMenu.addEventListener('click', () => {
-                navLinks.classList.toggle('active');
-            });
-            // Close mobile nav when a link is clicked
-            navLinks.querySelectorAll('.nav-link, .auth-btn').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (navLinks.classList.contains('active')) {
-                        navLinks.classList.remove('active');
-                    }
-                });
-            });
-
-
-            // Hero section CTA button scrolls to prediction section
-            ctaButton.addEventListener('click', () => {
-                const predictionSection = document.getElementById('prediction-section');
-                if (predictionSection) {
-                    predictionSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-
-            // "Predict Now" buttons on cards show the relevant form
-            predictionCards.forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const diseaseType = event.target.dataset.disease;
-                    showPredictionForm(diseaseType);
-                });
-            });
-
-            // Form submissions for prediction
-            diabetesPredictionForm.addEventListener('submit', handlePredictionSubmit);
-            heartDiseasePredictionForm.addEventListener('submit', handlePredictionSubmit);
-
-            // AI Insight button click
-            getInsightButton.addEventListener('click', handleGetInsight);
-
-            // Auth Modal triggers
-            authButton.addEventListener('click', () => {
-                authModal.classList.add('visible');
-                showLoginTabBtn.click(); // Default to login tab
-            });
-            logoutButton.addEventListener('click', handleLogout);
-            closeAuthModalBtn.addEventListener('click', () => authModal.classList.remove('visible'));
-
-            // Auth Tab switching
-            showLoginTabBtn.addEventListener('click', () => {
-                showLoginTabBtn.classList.add('active');
-                showSignupTabBtn.classList.remove('active');
-                loginForm.classList.remove('hidden');
-                signupForm.classList.add('hidden');
-            });
-            showSignupTabBtn.addEventListener('click', () => {
-                showSignupTabBtn.classList.add('active');
-                showLoginTabBtn.classList.remove('active');
-                signupForm.classList.remove('hidden');
-                loginForm.classList.add('hidden');
-            });
-
-            // Auth form submissions
-            loginForm.addEventListener('submit', handleLogin);
-            signupForm.addEventListener('submit', handleSignup);
-
-            // Anonymous Login button in history section
-            anonLoginBtn.addEventListener('click', async () => {
-                try {
-                    await auth.signInAnonymously();
-                    displayMessageBox("Signed in anonymously! Your history will be saved.", 'info');
-                } catch (error) {
-                    console.error("Error signing in anonymously:", error);
-                    displayMessageBox(`Anonymous Login Error: ${error.message}`, 'error');
-                }
-            });
-
-            // --- Hero Section Animated Text (Typewriter effect) ---
-            const typeWriterEffect = (element, text, delay = 50, callback = null) => {
-                let i = 0;
-                element.innerHTML = ''; // Clear content
-                element.style.opacity = 1; // Make element visible before typing
-                const interval = setInterval(() => {
-                    if (i < text.length) {
-                        element.innerHTML += text.charAt(i);
-                        i++;
-                    } else {
-                        clearInterval(interval);
-                        if (callback) callback();
-                    }
-                }, delay);
             };
 
-            // Store original text content before clearing for animation
-            const originalHeadingText = heroHeading.textContent;
-            const originalSubheadingText = heroSubheading.textContent;
-            const originalCtaText = ctaButton.textContent;
+            predictTabBtn.addEventListener('click', () => showTab('predict'));
+            historyTabBtn.addEventListener('click', () => showTab('history'));
 
-            // Clear content initially to prepare for typewriter effect
-            heroHeading.textContent = '';
-            heroSubheading.textContent = '';
-            ctaButton.textContent = '';
+            // --- Message Display Function ---
+            let messageTimeout;
+            const showMessage = (type, text) => {
+                clearTimeout(messageTimeout); // Clear any existing timeout
+                messageText.textContent = text;
+                messageDisplay.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200', 'bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200', 'bg-blue-100', 'text-blue-800', 'dark:bg-blue-900', 'dark:text-blue-200');
 
-            // Initialize AOS (Animate On Scroll) library
-            AOS.init({
-                duration: 1000, // Animation duration
-                once: true,    // Whether animation should happen only once - while scrolling down
-                offset: 50,    // Offset (in px) from the top of the screen to trigger animations
+                if (type === 'success') {
+                    messageDisplay.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900', 'dark:text-green-200');
+                } else if (type === 'error') {
+                    messageDisplay.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900', 'dark:text-red-200');
+                } else if (type === 'info') {
+                    messageDisplay.classList.add('bg-blue-100', 'text-blue-800', 'dark:bg-blue-900', 'dark:text-blue-200');
+                }
+                messageDisplay.classList.remove('hidden');
+
+                messageTimeout = setTimeout(() => {
+                    messageDisplay.classList.add('hidden');
+                }, 5000);
+            };
+
+            messageCloseBtn.addEventListener('click', () => {
+                messageDisplay.classList.add('hidden');
+                clearTimeout(messageTimeout);
             });
 
-            // Sequential animation for hero section elements
-            setTimeout(() => {
-                typeWriterEffect(heroHeading, originalHeadingText, 70, () => {
-                    heroHeading.style.opacity = 1; // Ensure full opacity after typing
-                    heroHeading.classList.add('aos-animate'); // Trigger AOS if needed
-                });
-            }, 500); // Start heading animation after 0.5 seconds
+            // --- Form Handling and Prediction Logic ---
+            const getFormData = () => {
+                return {
+                    pregnancies: parseFloat(document.getElementById('pregnancies').value),
+                    glucose: parseFloat(document.getElementById('glucose').value),
+                    bloodPressure: parseFloat(document.getElementById('bloodPressure').value),
+                    skinThickness: parseFloat(document.getElementById('skinThickness').value),
+                    insulin: parseFloat(document.getElementById('insulin').value),
+                    bmi: parseFloat(document.getElementById('bmi').value),
+                    diabetesPedigreeFunction: parseFloat(document.getElementById('diabetesPedigreeFunction').value),
+                    age: parseFloat(document.getElementById('age').value),
+                };
+            };
 
-            setTimeout(() => {
-                typeWriterEffect(heroSubheading, originalSubheadingText, 40, () => {
-                    heroSubheading.style.opacity = 1;
-                    heroSubheading.classList.add('aos-animate');
-                });
-            }, 2000); // Start subheading animation after 2 seconds
+            const validateForm = (data) => {
+                for (const key in data) {
+                    if (isNaN(data[key]) || data[key] === '' || data[key] === null) {
+                        const labelElement = document.querySelector(`label[for="${key}"]`);
+                        const labelText = labelElement ? labelElement.textContent.replace(/\s\(.*\)/, '') : key;
+                        showMessage('error', `Please enter a valid number for ${labelText}.`);
+                        return false;
+                    }
+                }
+                return true;
+            };
 
-            setTimeout(() => {
-                typeWriterEffect(ctaButton, originalCtaText, 60, () => {
-                    ctaButton.style.opacity = 1;
-                    ctaButton.classList.add('aos-animate');
-                });
-            }, 4000); // Start CTA button animation after 4 seconds
+            const resetForm = () => {
+                predictionForm.reset();
+                predictionResultContainer.classList.add('hidden');
+                actualPredictionContent.classList.add('hidden');
+                predictionSkeleton.classList.add('hidden');
+                savePredictionBtn.classList.add('hidden');
+                currentPredictionResult = null;
+                currentPredictionProbability = 0;
+            };
 
+            predictionForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = getFormData();
+
+                if (!validateForm(formData)) {
+                    return;
+                }
+
+                // Show skeleton loader and shimmer
+                predictionResultContainer.classList.remove('hidden');
+                predictionSkeleton.classList.remove('hidden');
+                actualPredictionContent.classList.add('hidden');
+                predictionResultContainer.classList.add('shimmer'); // Apply shimmer to container
+
+                showMessage('info', 'Predicting your risk...');
+
+                // Simulate API call delay
+                setTimeout(() => {
+                    // In a real app, you would send formData to your backend model here
+                    // const response = await fetch('/api/predict', { method: 'POST', body: JSON.stringify(formData) });
+                    // const data = await response.json();
+                    // currentPredictionResult = data.result; // e.g., 'high' or 'low'
+                    // currentPredictionProbability = data.probability; // e.g., 0.75 for 75%
+
+                    // Simulated prediction: random high/low risk with probability
+                    const isHighRisk = Math.random() > 0.5;
+                    currentPredictionResult = isHighRisk ? 'high' : 'low';
+                    currentPredictionProbability = isHighRisk ? (Math.random() * (0.95 - 0.6) + 0.6) * 100 : (Math.random() * (0.4 - 0.05) + 0.05) * 100; // 60-95% for high, 5-40% for low
+
+                    // Hide skeleton, show actual content
+                    predictionSkeleton.classList.add('hidden');
+                    predictionResultContainer.classList.remove('shimmer'); // Remove shimmer
+                    actualPredictionContent.classList.remove('hidden');
+
+                    predictionText.textContent = currentPredictionResult === 'high' ? 'High Risk of Diabetes' : 'Low Risk of Diabetes';
+                    predictionText.className = `text-2xl font-bold mb-2 ${
+                        currentPredictionResult === 'high' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
+                    }`;
+                    predictionProbability.textContent = `Confidence: ${currentPredictionProbability.toFixed(2)}%`;
+
+                    drawConfidenceDonut(currentPredictionProbability);
+                    showMessage('success', 'Prediction complete!');
+                    savePredictionBtn.classList.remove('hidden'); // Show save button
+                }, 2500); // Increased delay for better shimmer visibility
+            });
+
+            // --- Animated Confidence Donut Chart ---
+            const drawConfidenceDonut = (percentage) => {
+                const ctx = confidenceDonut.getContext('2d');
+                const centerX = confidenceDonut.width / 2;
+                const centerY = confidenceDonut.height / 2;
+                const radius = 70;
+                const lineWidth = 15;
+
+                // Clear canvas
+                ctx.clearRect(0, 0, confidenceDonut.width, confidenceDonut.height);
+
+                // Background circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.lineWidth = lineWidth;
+                ctx.strokeStyle = isDarkMode ? '#4a5568' : '#e2e8f0'; // Gray for background
+                ctx.stroke();
+
+                // Foreground arc
+                const endAngle = (Math.PI * 2 * percentage) / 100;
+                const startAngle = -Math.PI / 2; // Start from top
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, startAngle, startAngle + endAngle);
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round'; // Rounded ends for the arc
+                ctx.strokeStyle = percentage > 50 ? (isDarkMode ? '#ef4444' : '#dc2626') : (isDarkMode ? '#22c55e' : '#16a34a'); // Red for high, Green for low
+                ctx.stroke();
+
+                // Text in center
+                ctx.font = 'bold 24px "Poppins", sans-serif';
+                ctx.fillStyle = isDarkMode ? '#e2e8f0' : '#1a202c';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${percentage.toFixed(0)}%`, centerX, centerY);
+            };
+
+            // --- Save Prediction to History ---
+            savePredictionBtn.addEventListener('click', () => {
+                if (currentPredictionResult && currentPredictionProbability !== 0) {
+                    const newEntry = {
+                        id: Date.now(),
+                        date: new Date().toLocaleString(),
+                        data: getFormData(),
+                        result: currentPredictionResult,
+                        probability: currentPredictionProbability,
+                        expanded: false // New state for expand/collapse
+                    };
+                    history.push(newEntry);
+                    showMessage('success', 'Prediction saved to history!');
+                    resetForm(); // Clear form after saving
+                    renderHistory(); // Re-render history to show new entry
+                } else {
+                    showMessage('error', 'No prediction to save.');
+                }
+            });
+
+            // --- Render History with Flip-in and Expand/Collapse ---
+            const renderHistory = () => {
+                historyList.innerHTML = ''; // Clear previous history
+                if (history.length === 0) {
+                    historyList.innerHTML = `
+                        <p class="text-gray-600 dark:text-gray-400 text-center py-8">
+                            No predictions saved yet. Make a prediction and save it!
+                        </p>
+                    `;
+                    return;
+                }
+
+                history.forEach((entry, index) => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'glassmorphism glowing-border p-4 rounded-xl shadow-md flip-in cursor-pointer'; // Add glassmorphism, glowing-border, flip-in
+                    entryDiv.style.animationDelay = `${index * 0.1}s`; // Stagger animation
+
+                    let dataHtml = '';
+                    for (const key in entry.data) {
+                        const labelElement = document.querySelector(`label[for="${key}"]`);
+                        const labelText = labelElement ? labelElement.textContent.replace(/\s\(.*\)/, '') : key.replace(/([A-Z])/g, ' $1');
+                        dataHtml += `
+                            <li class="flex justify-between items-center py-1 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                                <span class="font-medium text-gray-700 dark:text-gray-300 capitalize">${labelText}:</span>
+                                <span class="text-gray-900 dark:text-gray-100">${entry.data[key]}</span>
+                            </li>
+                        `;
+                    }
+
+                    entryDiv.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">${entry.date}</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                                entry.result === 'high'
+                                    ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200'
+                                    : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
+                            }">
+                                ${entry.result === 'high' ? 'High Risk' : 'Low Risk'}
+                            </span>
+                        </div>
+                        <p class="text-sm font-medium mt-2 text-gray-600 dark:text-gray-400 mb-2">
+                            Confidence: ${entry.probability ? entry.probability.toFixed(2) : 'N/A'}%
+                        </p>
+                        <div class="history-card-content">
+                            <ul class="text-gray-700 dark:text-gray-300 text-sm mt-2 space-y-1">
+                                ${dataHtml}
+                            </ul>
+                        </div>
+                        <button class="flex items-center justify-center w-full mt-3 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold text-sm">
+                            <span class="mr-1">${entry.expanded ? 'Show Less' : 'Show More'} Details</span>
+                            <svg class="w-4 h-4 history-card-toggle-icon ${entry.expanded ? 'expanded' : ''}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    `;
+                    historyList.appendChild(entryDiv);
+
+                    // Add click listener for expand/collapse
+                    const toggleButton = entryDiv.querySelector('button');
+                    const contentDiv = entryDiv.querySelector('.history-card-content');
+                    const toggleIcon = entryDiv.querySelector('.history-card-toggle-icon');
+
+                    if (entry.expanded) {
+                        contentDiv.classList.add('expanded');
+                        toggleIcon.classList.add('expanded');
+                    }
+
+                    toggleButton.addEventListener('click', (event) => {
+                        event.stopPropagation(); // Prevent card click from propagating if a nested element is clicked
+                        entry.expanded = !entry.expanded;
+                        contentDiv.classList.toggle('expanded', entry.expanded);
+                        toggleIcon.classList.toggle('expanded', entry.expanded);
+                        toggleButton.querySelector('span').textContent = entry.expanded ? 'Show Less Details' : 'Show More Details';
+                    });
+
+                    // Trigger initial flip-in animation
+                    setTimeout(() => entryDiv.classList.add('is-visible'), 10);
+                });
+            };
+
+            // --- Scroll to Predict Button ---
+            scrollToPredictBtn.addEventListener('click', () => {
+                predictTabContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                showTab('predict'); // Ensure predict tab is active
+            });
+
+            // --- Tooltip Initialization ---
+            const formFields = predictionForm.querySelectorAll('input');
+            formFields.forEach(field => {
+                const tooltipContainer = field.closest('.tooltip-container');
+                if (tooltipContainer) {
+                    const tooltipText = tooltipContainer.querySelector('.tooltip-text');
+                    if (tooltipText) {
+                        // Optional: Show tooltip on focus for accessibility
+                        field.addEventListener('focus', () => {
+                            tooltipText.style.visibility = 'visible';
+                            tooltipText.style.opacity = '1';
+                        });
+                        field.addEventListener('blur', () => {
+                            tooltipText.style.visibility = 'hidden';
+                            tooltipText.style.opacity = '0';
+                        });
+                    }
+                }
+            });
+
+            // Initial tab display
+            showTab('predict');
         });
     </script>
 </body>
