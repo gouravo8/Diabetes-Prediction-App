@@ -1,10 +1,11 @@
 import os
-from flask import Flask, request, jsonify, render_template
 import joblib
 import numpy as np
 import pandas as pd
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-import requests # Import the requests library for making HTTP calls
+import google.generativeai as genai
+from google.generativeai.types import GenerationConfig
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
@@ -47,6 +48,11 @@ try:
 except Exception as e:
     print(f"Error loading model artifacts: {e}")
 
+# --- Configure the Gemini API client ---
+# The API key will be read from the environment variable GEMINI_API_KEY
+# If the environment variable is not set, this will fail.
+genai.configure()
+generation_config = GenerationConfig(temperature=0.7, top_p=0.9, top_k=40)
 
 # --- Frontend Route for Main App ---
 @app.route('/')
@@ -199,55 +205,28 @@ def predict():
 @app.route('/generate_insight', methods=['POST'])
 def generate_insight():
     """
-    Proxies requests to the Gemini API to generate health insights.
-    The Gemini API key is loaded from environment variables for security.
+    Generates AI-powered health insights using the Gemini API.
     """
-    gemini_api_key = os.environ.get("GEMINI_API_KEY") # Get API key from environment variable
+    data = request.get_json(force=True)
+    prompt = data.get('prompt')
 
-    if not gemini_api_key:
-        print("GEMINI_API_KEY environment variable not set. Gemini API calls will fail.")
-        return jsonify({"error": "Server configuration error: Gemini API Key missing."}), 500
+    if not prompt:
+        return jsonify({'error': 'No prompt provided.'}), 400
 
     try:
-        data = request.get_json(force=True)
-        user_prompt = data.get('prompt')
-
-        if not user_prompt:
-            return jsonify({"error": "No prompt provided for health insight."}), 400
-
-        payload = {
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": user_prompt}]
-                }
-            ]
-        }
-
-        gemini_api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_api_key}"
+        # Use the official library which automatically reads the key from the environment
+        model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20')
+        response = model.generate_content(prompt, generation_config=generation_config)
         
-        response = requests.post(gemini_api_url, json=payload, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
+        insight_text = response.text
+        return jsonify({'insight': insight_text})
 
-        gemini_result = response.json()
-
-        if gemini_result.get('candidates') and gemini_result['candidates'][0].get('content') and gemini_result['candidates'][0]['content'].get('parts'):
-            generated_text = gemini_result['candidates'][0]['content']['parts'][0]['text']
-            return jsonify({"insight": generated_text})
-        else:
-            print(f"Unexpected Gemini response structure: {gemini_result}")
-            return jsonify({"error": "Failed to get insight from AI. Unexpected response format or no candidates."}), 500
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error making request to Gemini API: {e}")
-        return jsonify({"error": f"Error contacting AI service: {str(e)}. Check network or API key."}), 500
     except Exception as e:
-        print(f"An unexpected error occurred in generate_insight: {e}")
-        return jsonify({"error": f"An unexpected server error occurred: {str(e)}."}), 500
+        print(f"Error generating insight: {e}")
+        return jsonify({'error': 'Failed to generate insight. Please try again.'}), 500
 
 
 if __name__ == '__main__':
     # Render will set the PORT environment variable.
-    # Set default to 10000 based on Render logs for consistent behavior.
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=True)

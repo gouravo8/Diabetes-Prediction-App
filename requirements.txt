@@ -4,9 +4,9 @@ pandas==2.2.2
 numpy==1.26.4
 gunicorn==21.2.0
 flask-cors==4.0.0
-requests==2.31.0
 joblib==1.4.2
-# Firebase/Google Cloud dependencies - trying specific stable versions
+google-generativeai==0.6.0  # This is the new dependency for the Gemini API
+# Optional: Firebase/Google Cloud dependencies for other functionality
 firebase-admin==6.3.0
 google-cloud-firestore==2.14.0
 python-dotenv==1.0.0
