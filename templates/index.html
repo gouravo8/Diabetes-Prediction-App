@@ -3,28 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precision Health Hub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>MediPredict AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
 </head>
 <body>
     <nav class="navbar">
         <div class="navbar-brand">
             <a href="/" class="logo-link">
-                <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#4F79A7" /> <stop offset="100%" stop-color="#80CED1" /> </linearGradient>
-                    </defs>
-                    <path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50"
-                          stroke="url(#logoGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="45" y1="40" x2="55" y2="60" stroke="#80CED1" stroke-width="8" stroke-linecap="round"/>
-                    <line x1="55" y1="40" x2="45" y2="60" stroke="#80CED1" stroke-width="8" stroke-linecap="round"/>
-                </svg>
-                <span class="app-title">Precision Health Hub</span>
+                <span class="app-title">MediPredict AI</span>
             </a>
         </div>
         <button class="hamburger-menu" aria-label="Toggle navigation">
@@ -34,92 +24,86 @@
             <li><a href="#prediction-section" class="nav-link active">Predictions</a></li>
             <li><a href="#insights-section" class="nav-link">AI Insights</a></li>
             <li><a href="#history-section" class="nav-link">History</a></li>
-            <li id="loginNavLink"><a href="#" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
-            <li id="logoutNavLink" class="hidden"><a href="#" class="nav-link logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li id="loginNavLink"><a href="#" class="nav-link nav-btn login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
+            <li id="logoutNavLink" class="hidden"><a href="#" class="nav-link nav-btn logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </nav>
 
-    <section class="hero-section">
-        <div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
-            <h1 class="animated-text" id="hero-heading">Empowering Your Health Journey</h1>
-            <p class="animated-text-sub" id="hero-subheading">Data-driven insights for a healthier future.</p>
+    <header class="hero-section">
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1200">
+            <h1>Your Health, Your Data, Our Insights</h1>
+            <p>Empowering you with early risk predictions for a healthier life.</p>
         </div>
-    </section>
+    </header>
 
-    <div class="container">
+    <main class="container">
         <section id="prediction-section" class="card-section" data-aos="fade-up" data-aos-delay="200">
-            <h2 class="section-title"><i class="fas fa-chart-line section-icon"></i> Predict Your Health Risk</h2>
+            <h2 class="section-title"><i class="fas fa-heartbeat"></i> Health Risk Prediction</h2>
             <div class="disease-selection-group">
-                <label for="diseaseType">Select Disease:</label>
+                <label for="diseaseType">Select a health predictor:</label>
                 <select id="diseaseType" name="diseaseType" required>
                     <option value="">-- Choose a Disease --</option>
-                    <option value="diabetes">Diabetes</option>
-                    <option value="heart_disease">Heart Disease</option>
+                    <option value="diabetes">Diabetes Prediction</option>
+                    <option value="heart_disease">Heart Disease Prediction</option>
                 </select>
             </div>
 
             <div id="diabetesFormSection" class="form-section card-layout">
                 <h3 class="card-title">Diabetes Prediction</h3>
                 <form id="diabetesPredictionForm">
-                    <div class="form-group">
-                        <label for="gender">Gender:</label>
-                        <select id="gender" name="gender" required>
-                            <option value="">Select Gender</option>
-                            <option value="Female">Female</option>
-                            <option value="Male">Male</option>
-                            <option value="Other">Other</option>
-                        </select>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="gender">Gender:</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="Female">Female</option>
+                                <option value="Male">Male</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Age:</label>
+                            <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="hypertension">Hypertension:</label>
+                            <select id="hypertension" name="hypertension" required>
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="heart_disease_input">Heart Disease:</label>
+                            <select id="heart_disease_input" name="heart_disease" required>
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="smoking_history">Smoking History:</label>
+                            <select id="smoking_history" name="smoking_history" required>
+                                <option value="">Select Smoking History</option>
+                                <option value="never">Never</option>
+                                <option value="No Info">No Info</option>
+                                <option value="current">Current Smoker</option>
+                                <option value="ever">Ever Smoked</option>
+                                <option value="former">Former Smoker</option>
+                                <option value="not current">Not Current Smoker</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bmi">BMI:</label>
+                            <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="HbA1c_level">HbA1c Level:</label>
+                            <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="blood_glucose_level">Blood Glucose Level:</label>
+                            <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="age">Age:</label>
-                        <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="hypertension">Hypertension:</label>
-                        <select id="hypertension" name="hypertension" required>
-                            <option value="0">No</option>
-                            <option value="1">Yes</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="heart_disease_input">Heart Disease:</label>
-                        <select id="heart_disease_input" name="heart_disease" required>
-                            <option value="0">No</option>
-                            <option value="1">Yes</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="smoking_history">Smoking History:</label>
-                        <select id="smoking_history" name="smoking_history" required>
-                            <option value="">Select Smoking History</option>
-                            <option value="never">Never</option>
-                            <option value="No Info">No Info</option>
-                            <option value="current">Current Smoker</option>
-                            <option value="ever">Ever Smoked</option>
-                            <option value="former">Former Smoker</option>
-                            <option value="not current">Not Current Smoker</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="bmi">BMI:</label>
-                        <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="HbA1c_level">HbA1c Level:</label>
-                        <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="blood_glucose_level">Blood Glucose Level:</label>
-                        <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
-                    </div>
-
                     <button type="submit" class="submit-btn">Predict Diabetes Risk</button>
                 </form>
             </div>
@@ -137,12 +121,11 @@
         </section>
 
         <section id="insights-section" class="card-section" data-aos="fade-up" data-aos-delay="400">
-            <h2 class="section-title"><i class="fas fa-brain section-icon"></i> Health Insights</h2>
+            <h2 class="section-title"><i class="fas fa-brain"></i> AI Health Insights</h2>
             <div class="form-section insight-input-card">
-                <h3 class="card-title">Ask a Question</h3>
+                <h3 class="card-title">Ask a Health Question</h3>
                 <div class="form-group">
-                    <label for="healthQuestion">Your Health Query:</label>
-                    <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
+                    <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="4"></textarea>
                 </div>
                 <button id="getInsightButton" class="submit-btn">Get Insight</button>
             </div>
@@ -154,7 +137,7 @@
         </section>
 
         <section id="history-section" class="card-section" data-aos="fade-up" data-aos-delay="500">
-            <h2 class="section-title"><i class="fas fa-history section-icon"></i> Your Prediction History</h2>
+            <h2 class="section-title"><i class="fas fa-history"></i> Your Prediction History</h2>
             <div id="loginPrompt" class="info-card">
                 <p>Please log in to view your prediction history.</p>
                 <button id="anonLoginBtn" class="submit-btn">Login Anonymously</button>
@@ -163,8 +146,9 @@
                 <p class="no-history-message hidden">No prediction history found. Make a prediction to save it!</p>
             </div>
         </section>
+    </main>
 
-    </div> <div id="authModal" class="auth-modal hidden">
+    <div id="authModal" class="auth-modal hidden">
         <div class="auth-card">
             <button class="close-auth-modal"><i class="fas fa-times"></i></button>
             <div class="auth-tabs">
@@ -173,7 +157,7 @@
             </div>
 
             <form id="loginForm" class="auth-form">
-                <h3 class="card-title">Login to Your Account</h3>
+                <h3 class="card-title">Login</h3>
                 <div class="form-group">
                     <label for="loginEmail">Email:</label>
                     <input type="email" id="loginEmail" placeholder="your.email@example.com" required>
@@ -186,7 +170,7 @@
             </form>
 
             <form id="signupForm" class="auth-form hidden">
-                <h3 class="card-title">Create New Account</h3>
+                <h3 class="card-title">Sign Up</h3>
                 <div class="form-group">
                     <label for="signupEmail">Email:</label>
                     <input type="email" id="signupEmail" placeholder="new.email@example.com" required>
