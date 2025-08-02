@@ -1,6 +1,5 @@
 import os
 import joblib
-import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
@@ -9,6 +8,20 @@ from google.generativeai.types import GenerationConfig
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
+
+# --- IMPORTANT: Configure and verify the Gemini API client ---
+gemini_api_key = os.environ.get("GEMINI_API_KEY")
+
+if gemini_api_key:
+    # If the key is found, configure the API
+    genai.configure(api_key=gemini_api_key)
+    print("Gemini API key loaded successfully.")
+else:
+    # If the key is not found, print an error message to the logs
+    # This is likely the cause of the issue!
+    print("WARNING: GEMINI_API_KEY not found in environment variables. Gemini API calls will fail.")
+    
+generation_config = GenerationConfig(temperature=0.7, top_p=0.9, top_k=40)
 
 # Define paths to model artifacts
 DIABETES_MODEL_PATH = 'model_artifacts/diabetes_rf_model_smote.joblib'
@@ -48,11 +61,6 @@ try:
 except Exception as e:
     print(f"Error loading model artifacts: {e}")
 
-# --- Configure the Gemini API client ---
-# The API key will be read from the environment variable GEMINI_API_KEY
-# If the environment variable is not set, this will fail.
-genai.configure()
-generation_config = GenerationConfig(temperature=0.7, top_p=0.9, top_k=40)
 
 # --- Frontend Route for Main App ---
 @app.route('/')
@@ -201,12 +209,16 @@ def predict():
         return jsonify({"error": f"An unexpected error occurred during prediction: {str(e)}."}), 500
 
 
-# --- Gemini API Proxy Endpoint ---
+# --- Gemini API Endpoint ---
 @app.route('/generate_insight', methods=['POST'])
 def generate_insight():
     """
     Generates AI-powered health insights using the Gemini API.
     """
+    # Check if the API key was successfully loaded at startup
+    if not genai.api_key:
+        return jsonify({'error': 'Server configuration error: Gemini API Key missing.'}), 500
+
     data = request.get_json(force=True)
     prompt = data.get('prompt')
 
@@ -214,7 +226,6 @@ def generate_insight():
         return jsonify({'error': 'No prompt provided.'}), 400
 
     try:
-        # Use the official library which automatically reads the key from the environment
         model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20')
         response = model.generate_content(prompt, generation_config=generation_config)
         
