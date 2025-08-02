@@ -4,33 +4,10 @@ import joblib
 import numpy as np
 import pandas as pd
 from flask_cors import CORS
-import requests
-import firebase_admin
-from firebase_admin import credentials, firestore
+import requests # Import the requests library for making HTTP calls
 
-# --- Flask App Initialization ---
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
-
-# --- Firebase Admin SDK Initialization ---
-# The path to your Firebase Admin SDK service account key file
-# This must be set as an environment variable in your production environment
-# On your local machine, you'll need to set up this environment variable.
-FIREBASE_CREDENTIALS_PATH = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-
-# Initialize Firebase Admin SDK
-try:
-    if FIREBASE_CREDENTIALS_PATH and not firebase_admin._apps:
-        cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
-        firebase_admin.initialize_app(cred)
-        db = firestore.client()
-        print("Firebase Admin SDK initialized successfully.")
-    else:
-        print("Warning: Firebase Admin SDK credentials path not set or SDK already initialized.")
-        db = None
-except Exception as e:
-    print(f"Error initializing Firebase Admin SDK: {e}")
-    db = None
 
 # Define paths to model artifacts
 DIABETES_MODEL_PATH = 'model_artifacts/diabetes_rf_model_smote.joblib'
@@ -218,66 +195,6 @@ def predict():
         return jsonify({"error": f"An unexpected error occurred during prediction: {str(e)}."}), 500
 
 
-# --- New API Endpoint: Save a user's prediction to Firestore ---
-@app.route('/save_prediction', methods=['POST'])
-def save_prediction():
-    """
-    Saves a user's prediction to Firestore.
-    Requires a 'user_id' in the request headers.
-    """
-    if db is None:
-        return jsonify({"error": "Database not initialized."}), 500
-
-    user_id = request.headers.get('user_id')
-    if not user_id:
-        return jsonify({"error": "User ID is missing from headers."}), 400
-
-    try:
-        data = request.get_json(force=True)
-        # Add a timestamp to the data
-        data['timestamp'] = firestore.SERVER_TIMESTAMP
-        # Use the user ID to organize data in a sub-collection
-        user_ref = db.collection('users').document(user_id).collection('predictions')
-        user_ref.add(data)
-        return jsonify({"message": "Prediction saved successfully."}), 201
-    except Exception as e:
-        print(f"Error saving prediction to Firestore: {e}")
-        return jsonify({"error": f"Failed to save prediction: {str(e)}."}), 500
-
-
-# --- New API Endpoint: Fetch a user's prediction history from Firestore ---
-@app.route('/get_predictions', methods=['GET'])
-def get_predictions():
-    """
-    Fetches a user's prediction history from Firestore.
-    Requires a 'user_id' in the request headers.
-    """
-    if db is None:
-        return jsonify({"error": "Database not initialized."}), 500
-
-    user_id = request.headers.get('user_id')
-    if not user_id:
-        return jsonify({"error": "User ID is missing from headers."}), 400
-
-    try:
-        predictions_ref = db.collection('users').document(user_id).collection('predictions').order_by('timestamp', direction=firestore.Query.DESCENDING).limit(10)
-        predictions = predictions_ref.stream()
-        
-        results = []
-        for doc in predictions:
-            prediction_data = doc.to_dict()
-            prediction_data['id'] = doc.id
-            # Convert timestamp to a more readable format if it exists
-            if 'timestamp' in prediction_data and hasattr(prediction_data['timestamp'], 'isoformat'):
-                prediction_data['timestamp'] = prediction_data['timestamp'].isoformat()
-            results.append(prediction_data)
-        
-        return jsonify(results), 200
-    except Exception as e:
-        print(f"Error fetching predictions from Firestore: {e}")
-        return jsonify({"error": f"Failed to fetch predictions: {str(e)}."}), 500
-
-
 # --- Gemini API Proxy Endpoint ---
 @app.route('/generate_insight', methods=['POST'])
 def generate_insight():
@@ -285,7 +202,7 @@ def generate_insight():
     Proxies requests to the Gemini API to generate health insights.
     The Gemini API key is loaded from environment variables for security.
     """
-    gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    gemini_api_key = os.environ.get("GEMINI_API_KEY") # Get API key from environment variable
 
     if not gemini_api_key:
         print("GEMINI_API_KEY environment variable not set. Gemini API calls will fail.")
@@ -306,8 +223,7 @@ def generate_insight():
                 }
             ]
         }
-        
-        # Use the correct API model endpoint for the latest versions
+
         gemini_api_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_api_key}"
         
         response = requests.post(gemini_api_url, json=payload, headers={'Content-Type': 'application/json'})
@@ -332,5 +248,6 @@ def generate_insight():
 
 if __name__ == '__main__':
     # Render will set the PORT environment variable.
+    # Set default to 10000 based on Render logs for consistent behavior.
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port, debug=True)

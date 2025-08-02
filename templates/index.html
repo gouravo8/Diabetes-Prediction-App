@@ -16,236 +16,213 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
 </head>
 <body>
-
-    <!-- Header & Navigation -->
-    <header class="header">
-        <div class="container-fluid">
-            <div class="logo">
-                <a href="#home">Precision Health Hub</a>
-            </div>
-            <nav class="nav-menu">
-                <ul>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#services">Services</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                    <li>
-                        <div id="authContainer" class="auth-container">
-                            <span id="userEmail" class="hidden"></span>
-                            <span id="userIdDisplay" class="hidden"></span>
-                            <button id="authButton" class="auth-btn">Login / Sign Up</button>
-                            <button id="logoutButton" class="auth-btn hidden">Logout</button>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-            <div class="hamburger-menu">
-                <i class="fas fa-bars"></i>
-            </div>
+    <!-- Responsive Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="/" class="logo-link">
+                <!-- NEW SVG Logo: Stylized Heartbeat + Plus Sign -->
+                <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#8A2BE2" /> <!-- Lavender -->
+                            <stop offset="100%" stop-color="#ADD8E6" /> <!-- Soft Blue -->
+                        </linearGradient>
+                    </defs>
+                    <!-- Heartbeat line -->
+                    <path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50"
+                          stroke="url(#logoGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Plus sign for health/medical -->
+                    <line x1="45" y1="40" x2="55" y2="60" stroke="#00CED1" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="55" y1="40" x2="45" y2="60" stroke="#00CED1" stroke-width="8" stroke-linecap="round"/>
+                </svg>
+                <span class="app-title">Precision Health Hub</span>
+            </a>
         </div>
-    </header>
+        <button class="hamburger-menu" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="nav-links">
+            <li><a href="#prediction-section" class="nav-link active">Predictions</a></li>
+            <li><a href="#insights-section" class="nav-link">AI Insights</a></li>
+            <li><a href="#history-section" class="nav-link">History</a></li>
+            <!-- Login/Logout buttons, dynamically shown/hidden by JS -->
+            <li id="loginNavLink"><a href="#" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
+            <li id="logoutNavLink" class="hidden"><a href="#" class="nav-link logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </nav>
 
-    <main>
-        <!-- Home Section -->
-        <section id="home" class="hero-section text-center">
-            <div class="container" data-aos="fade-up">
-                <h1>Your Personal Health Insights</h1>
-                <p class="lead">Predict disease risk and receive personalized AI-powered health insights.</p>
-                <div class="cta-buttons">
-                    <a href="#services" class="btn btn-primary scrollto">Get Started</a>
-                    <a href="#about" class="btn btn-secondary scrollto">Learn More</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="about-section">
-            <div class="container">
-                <div class="section-title text-center" data-aos="fade-up">
-                    <h2>About Us</h2>
-                    <p>We empower you with data-driven health insights to make informed decisions about your well-being.</p>
-                </div>
-                <div class="row about-content">
-                    <div class="col-lg-6" data-aos="fade-right">
-                        <img src="https://placehold.co/600x400/1e88e5/ffffff?text=Our+Mission" class="img-fluid" alt="About Image">
-                    </div>
-                    <div class="col-lg-6 pt-4 pt-lg-0" data-aos="fade-left">
-                        <h3>Our Commitment to Your Health</h3>
-                        <p>
-                            At Precision Health Hub, we believe that understanding your health risks is the first step towards a healthier life. Our platform uses advanced machine learning models to analyze your health data and provide accurate, actionable predictions for common conditions like diabetes and heart disease.
-                        </p>
-                        <ul>
-                            <li><i class="fas fa-check-circle"></i> **Data-Driven Insights:** We transform complex medical data into clear, easy-to-understand insights.</li>
-                            <li><i class="fas fa-check-circle"></i> **Personalized Guidance:** Our AI-powered insights are tailored to your specific results.</li>
-                            <li><i class="fas fa-check-circle"></i> **Secure and Private:** Your health data is handled with the utmost care and security.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Services Section -->
-        <section id="services" class="services-section">
-            <div class="container">
-                <div class="section-title text-center" data-aos="fade-up">
-                    <h2>Our Services</h2>
-                    <p>Leverage our predictive analytics to better understand your health risks.</p>
-                </div>
-                <div class="row">
-                    <!-- Diabetes Prediction Card -->
-                    <div class="col-lg-6 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="100">
-                        <div class="icon-box">
-                            <div class="icon"><i class="fas fa-burn"></i></div>
-                            <h4><a href="#">Diabetes Risk Prediction</a></h4>
-                            <p>An early warning system to help you assess your risk of developing diabetes based on key health metrics.</p>
-                            <button class="btn btn-predict mt-3" data-disease="diabetes">Predict Diabetes</button>
-                        </div>
-                    </div>
-                    <!-- Heart Disease Prediction Card -->
-                    <div class="col-lg-6 col-md-6 d-flex align-items-stretch" data-aos="zoom-in" data-aos-delay="200">
-                        <div class="icon-box">
-                            <div class="icon"><i class="fas fa-heartbeat"></i></div>
-                            <h4><a href="#">Heart Disease Prediction</a></h4>
-                            <p>Evaluate your potential risk for heart disease with a comprehensive analysis of your cardiovascular data.</p>
-                            <button class="btn btn-predict mt-3" data-disease="heart_disease">Predict Heart Disease</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="contact-section">
-            <div class="container">
-                <div class="section-title text-center" data-aos="fade-up">
-                    <h2>Contact Us</h2>
-                    <p>Have questions or feedback? We'd love to hear from you.</p>
-                </div>
-                <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="100">
-                    <div class="col-lg-8">
-                        <form action="#" method="post" class="contact-form">
-                            <div class="form-group">
-                                <input type="text" name="name" class="form-control" placeholder="Your Name" required>
-                            </div>
-                            <div class="form-group">
-                                <input type="email" name="email" class="form-control" placeholder="Your Email" required>
-                            </div>
-                            <div class="form-group">
-                                <textarea class="form-control" name="message" rows="5" placeholder="Your Message" required></textarea>
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-primary">Send Message</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Prediction History Section -->
-        <section id="history" class="history-section hidden">
-            <div class="container">
-                <div class="section-title text-center" data-aos="fade-up">
-                    <h2>Your Prediction History</h2>
-                    <p>A record of your past health predictions.</p>
-                </div>
-                <div id="predictionHistoryList" class="row" data-aos="fade-up" data-aos-delay="100">
-                    <!-- History items will be dynamically inserted here -->
-                    <div class="col-12 text-center" id="noHistoryMessage">
-                        <p>No prediction history found. Make a prediction to see it here!</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer id="footer">
-        <div class="container">
-            <h3>Precision Health Hub</h3>
-            <div class="social-links">
-                <a href="#" class="twitter"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="instagram"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="linkedin"><i class="fab fa-linkedin-in"></i></a>
-            </div>
-            <div class="copyright">
-                &copy; Copyright <strong><span>Precision Health Hub</span></strong>. All Rights Reserved
-            </div>
+    <!-- Hero Section with Animated Text -->
+    <section class="hero-section">
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
+            <h1 class="animated-text" id="hero-heading">Empowering Your Health Journey</h1>
+            <p class="animated-text-sub" id="hero-subheading">Data-driven insights for a healthier future.</p>
         </div>
-    </footer>
+    </section>
 
-    <!-- Modals -->
-    <div id="modalBackdrop" class="modal-backdrop hidden"></div>
+    <div class="container">
+        <!-- Prediction Section -->
+        <section id="prediction-section" class="card-section" data-aos="fade-up" data-aos-delay="200">
+            <h2 class="section-title">Predict Your Health Risk</h2>
+            <div class="disease-selection-group">
+                <label for="diseaseType">Select Disease:</label>
+                <select id="diseaseType" name="diseaseType" required>
+                    <option value="">-- Choose a Disease --</option>
+                    <option value="diabetes">Diabetes</option>
+                    <option value="heart_disease">Heart Disease</option>
+                </select>
+            </div>
 
-    <!-- Login/Sign Up Modal -->
-    <div id="authModal" class="modal auth-modal hidden">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div class="modal-body">
-                <!-- Login Form -->
-                <form id="loginForm" class="auth-form">
-                    <h3 class="card-title">Login to Your Account</h3>
+            <!-- Diabetes Prediction Form Section -->
+            <div id="diabetesFormSection" class="form-section card-layout">
+                <h3 class="card-title">Diabetes Prediction</h3>
+                <form id="diabetesPredictionForm">
                     <div class="form-group">
-                        <label for="loginEmail">Email:</label>
-                        <input type="email" id="loginEmail" placeholder="email@example.com" required>
+                        <label for="gender">Gender:</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
-                    <div class="form-group">
-                        <label for="loginPassword">Password:</label>
-                        <input type="password" id="loginPassword" placeholder="Your password" required>
-                    </div>
-                    <button type="submit" class="submit-btn">Login</button>
-                    <p class="mt-2 text-center">Don't have an account? <a href="#" id="showSignupLink">Sign Up</a></p>
-                </form>
 
-                <!-- Sign Up Form -->
-                <form id="signupForm" class="auth-form hidden">
-                    <h3 class="card-title">Create New Account</h3>
                     <div class="form-group">
-                        <label for="signupEmail">Email:</label>
-                        <input type="email" id="signupEmail" placeholder="new.email@example.com" required>
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" name="age" step="0.1" min="0" max="120" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="signupPassword">Password:</label>
-                        <input type="password" id="signupPassword" placeholder="At least 6 characters" required>
+                        <label for="hypertension">Hypertension:</label>
+                        <select id="hypertension" name="hypertension" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
                     </div>
-                    <button type="submit" class="submit-btn">Sign Up</button>
-                    <p class="mt-2 text-center">Already have an account? <a href="#" id="showLoginLink">Login</a></p>
+
+                    <div class="form-group">
+                        <label for="heart_disease_input">Heart Disease:</label> <!-- Renamed ID here -->
+                        <select id="heart_disease_input" name="heart_disease" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smoking_history">Smoking History:</label>
+                        <select id="smoking_history" name="smoking_history" required>
+                            <option value="">Select Smoking History</option>
+                            <option value="never">Never</option>
+                            <option value="No Info">No Info</option>
+                            <option value="current">Current Smoker</option>
+                            <option value="ever">Ever Smoked</option>
+                            <option value="former">Former Smoker</option>
+                            <option value="not current">Not Current Smoker</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bmi">BMI:</label>
+                        <input type="number" id="bmi" name="bmi" step="0.01" min="10" max="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="HbA1c_level">HbA1c Level:</label>
+                        <input type="number" id="HbA1c_level" name="HbA1c_level" step="0.1" min="3.0" max="10.0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="blood_glucose_level">Blood Glucose Level:</label>
+                        <input type="number" id="blood_glucose_level" name="blood_glucose_level" step="1" min="50" max="350" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Predict Diabetes Risk</button>
                 </form>
             </div>
-        </div>
-    </div>
 
-    <!-- Prediction Form Modal -->
-    <div id="predictionModal" class="modal prediction-modal hidden">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div class="modal-header">
-                <h3 id="modalTitle"></h3>
+            <!-- Heart Disease Prediction Form Section (initially hidden) -->
+            <div id="heartDiseaseFormSection" class="form-section card-layout hidden">
+                <h3 class="card-title">Heart Disease Prediction</h3>
+                <form id="heartDiseasePredictionForm">
+                    <!-- Fields will be dynamically generated by script.js -->
+                    <button type="submit" class="submit-btn">Predict Heart Disease Risk</button>
+                </form>
             </div>
-            <div class="modal-body">
-                <!-- Forms will be dynamically inserted here -->
-            </div>
-        </div>
-    </div>
 
-    <!-- Results Modal -->
-    <div id="resultsModal" class="modal results-modal hidden">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div class="modal-header">
-                <h3>Prediction Result</h3>
+            <div id="predictionResult" class="result-card hidden" data-aos="fade-up" data-aos-delay="300">
+                <!-- Prediction result will be displayed here dynamically by JavaScript -->
+                <div class="loading-spinner" style="display: none;"></div>
             </div>
-            <div class="modal-body text-center">
-                <div id="resultText"></div>
-                <div id="resultProbability" class="my-3"></div>
-                <p id="geminiInsightText" class="mt-4 text-justify"></p>
-                <div id="loadingInsight" class="hidden text-center mt-3">
-                    <div class="spinner-border" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <p>Generating personalized insight...</p>
+        </section>
+
+        <!-- Health Insights Section (Powered by Gemini AI) -->
+        <section id="insights-section" class="card-section" data-aos="fade-up" data-aos-delay="400">
+            <h2 class="section-title">Health Insights (Powered by Gemini AI)</h2>
+            <div class="form-section card-layout insight-input-card">
+                <h3 class="card-title">Ask a Question</h3>
+                <div class="form-group">
+                    <label for="healthQuestion">Your Health Query:</label>
+                    <textarea id="healthQuestion" placeholder="E.g., 'What are common symptoms of high blood sugar?' or 'Give me a healthy dinner recipe for heart health.'" rows="6"></textarea>
+                </div>
+                <button id="getInsightButton" class="submit-btn">Get Insight</button>
+            </div>
+            <!-- Insights will be displayed in this grid container -->
+            <div id="insightResultContainer" class="insight-grid-container">
+                <div id="insightResult" class="insight-card hidden" data-aos="fade-up" data-aos-delay="100">
+                    <div class="loading-spinner" style="display: none;"></div>
                 </div>
             </div>
+        </section>
+
+        <!-- Prediction History Section (Firebase Integration) -->
+        <section id="history-section" class="card-section" data-aos="fade-up" data-aos-delay="500">
+            <h2 class="section-title">Your Prediction History</h2>
+            <div id="loginPrompt" class="info-card">
+                <p>Please log in to view your prediction history.</p>
+                <button id="anonLoginBtn" class="submit-btn">Login Anonymously</button>
+            </div>
+            <div id="historyList" class="history-list-grid hidden">
+                <p class="no-history-message hidden">No prediction history found. Make a prediction to save it!</p>
+            </div>
+        </section>
+
+    </div> <!-- /container -->
+
+    <!-- Authentication Modal/Section -->
+    <div id="authModal" class="auth-modal hidden">
+        <div class="auth-card">
+            <button class="close-auth-modal"><i class="fas fa-times"></i></button>
+            <div class="auth-tabs">
+                <button id="showLoginTab" class="auth-tab active">Login</button>
+                <button id="showSignupTab" class="auth-tab">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <h3 class="card-title">Login to Your Account</h3>
+                <div class="form-group">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" placeholder="your.email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" placeholder="********" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm" class="auth-form hidden">
+                <h3 class="card-title">Create New Account</h3>
+                <div class="form-group">
+                    <label for="signupEmail">Email:</label>
+                    <input type="email" id="signupEmail" placeholder="new.email@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password:</label>
+                    <input type="password" id="signupPassword" placeholder="At least 6 characters" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
         </div>
     </div>
 
@@ -253,396 +230,11 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <!-- Chart.js for mini charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Firebase SDKs -->
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-    
-    <!-- Your custom scripts -->
-    <script type="module" src="{{ url_for('static', filename='auth.js') }}"></script>
-    <script type="module">
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-        import { getFirestore, doc, getDoc, collection, addDoc, getDocs, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-        import { app } from './auth.js';
-        
-        // Initialize Firebase services
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        let currentUser = null;
-
-        const modalBackdrop = document.getElementById('modalBackdrop');
-        const predictionModal = document.getElementById('predictionModal');
-        const resultsModal = document.getElementById('resultsModal');
-        const loadingInsight = document.getElementById('loadingInsight');
-        const geminiInsightText = document.getElementById('geminiInsightText');
-        const predictionFormModalTitle = document.getElementById('modalTitle');
-        const predictionFormBody = predictionModal.querySelector('.modal-body');
-        const historySection = document.getElementById('history');
-        const predictionHistoryList = document.getElementById('predictionHistoryList');
-        const noHistoryMessage = document.getElementById('noHistoryMessage');
-
-        // Close modal function
-        function closeModal() {
-            modalBackdrop.classList.add('hidden');
-            predictionModal.classList.add('hidden');
-            resultsModal.classList.add('hidden');
-        }
-
-        // Event listeners to close modals
-        document.querySelectorAll('.close-btn').forEach(btn => {
-            btn.addEventListener('click', closeModal);
-        });
-        modalBackdrop.addEventListener('click', closeModal);
-        
-        // --- Firebase Auth State Listener ---
-        onAuthStateChanged(auth, async (user) => {
-            currentUser = user;
-            const authContainer = document.getElementById('authContainer');
-            const userEmailDisplay = document.getElementById('userEmail');
-            const userIdDisplay = document.getElementById('userIdDisplay');
-            const authButton = document.getElementById('authButton');
-            const logoutButton = document.getElementById('logoutButton');
-
-            if (user) {
-                // User is signed in
-                userEmailDisplay.textContent = `Welcome, ${user.email}`;
-                userIdDisplay.textContent = `User ID: ${user.uid}`;
-                userEmailDisplay.classList.remove('hidden');
-                userIdDisplay.classList.remove('hidden');
-                authButton.classList.add('hidden');
-                logoutButton.classList.remove('hidden');
-                historySection.classList.remove('hidden'); // Show history section
-                fetchPredictionHistory(user.uid);
-            } else {
-                // User is signed out
-                userEmailDisplay.textContent = '';
-                userIdDisplay.textContent = '';
-                userEmailDisplay.classList.add('hidden');
-                userIdDisplay.classList.add('hidden');
-                authButton.classList.remove('hidden');
-                logoutButton.classList.add('hidden');
-                historySection.classList.add('hidden'); // Hide history section
-                predictionHistoryList.innerHTML = '';
-            }
-        });
-
-        // --- Prediction Form Logic ---
-        document.querySelectorAll('.btn-predict').forEach(button => {
-            button.addEventListener('click', () => {
-                if (!currentUser) {
-                    alert('Please log in or sign up to make a prediction.');
-                    return;
-                }
-                const diseaseType = button.getAttribute('data-disease');
-                showPredictionForm(diseaseType);
-            });
-        });
-
-        function showPredictionForm(diseaseType) {
-            predictionFormModalTitle.textContent = diseaseType === 'diabetes' ? 'Diabetes Risk Prediction' : 'Heart Disease Prediction';
-            let formHtml = '';
-
-            if (diseaseType === 'diabetes') {
-                formHtml = `
-                    <form id="diabetesForm">
-                        <input type="hidden" name="disease_type" value="diabetes">
-                        <div class="form-group">
-                            <label>Gender:</label>
-                            <select name="gender" required>
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Age:</label>
-                            <input type="number" name="age" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Hypertension:</label>
-                            <select name="hypertension" required>
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Heart Disease:</label>
-                            <select name="heart_disease" required>
-                                <option value="0">No</option>
-                                <option value="1">Yes</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Smoking History:</label>
-                            <select name="smoking_history" required>
-                                <option value="never">Never</option>
-                                <option value="current">Current</option>
-                                <option value="ever">Ever</option>
-                                <option value="former">Former</option>
-                                <option value="not current">Not Current</option>
-                                <option value="No Info">No Info</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>BMI:</label>
-                            <input type="number" name="bmi" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>HbA1c Level:</label>
-                            <input type="number" name="HbA1c_level" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Blood Glucose Level:</label>
-                            <input type="number" name="blood_glucose_level" required>
-                        </div>
-                        <button type="submit" class="submit-btn">Predict</button>
-                    </form>
-                `;
-            } else if (diseaseType === 'heart_disease') {
-                formHtml = `
-                    <form id="heartDiseaseForm">
-                        <input type="hidden" name="disease_type" value="heart_disease">
-                        <div class="form-group">
-                            <label>Age:</label>
-                            <input type="number" name="hd_age" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Sex (1=Male, 0=Female):</label>
-                            <select name="hd_sex" required>
-                                <option value="1">Male</option>
-                                <option value="0">Female</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Chest Pain Type (cp):</label>
-                            <select name="hd_cp" required>
-                                <option value="0">0 - Typical Angina</option>
-                                <option value="1">1 - Atypical Angina</option>
-                                <option value="2">2 - Non-Anginal Pain</option>
-                                <option value="3">3 - Asymptomatic</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Resting Blood Pressure (trestbps):</label>
-                            <input type="number" name="hd_trestbps" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Cholesterol (chol):</label>
-                            <input type="number" name="hd_chol" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Fasting Blood Sugar > 120 mg/dl? (fbs):</label>
-                            <select name="hd_fbs" required>
-                                <option value="0">No (0)</option>
-                                <option value="1">Yes (1)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Resting Electrocardiographic Results (restecg):</label>
-                            <select name="hd_restecg" required>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Max Heart Rate Achieved (thalach):</label>
-                            <input type="number" name="hd_thalach" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Exercise Induced Angina? (exang):</label>
-                            <select name="hd_exang" required>
-                                <option value="0">No (0)</option>
-                                <option value="1">Yes (1)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>ST depression induced by exercise (oldpeak):</label>
-                            <input type="number" name="hd_oldpeak" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Slope of the peak exercise ST segment (slope):</label>
-                            <select name="hd_slope" required>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Number of major vessels colored by flourosopy (ca):</label>
-                            <select name="hd_ca" required>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Thalium Stress Test Result (thal):</label>
-                            <select name="hd_thal" required>
-                                <option value="0">0</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="submit-btn">Predict</button>
-                    </form>
-                `;
-            }
-
-            predictionFormBody.innerHTML = formHtml;
-            modalBackdrop.classList.remove('hidden');
-            predictionModal.classList.remove('hidden');
-
-            const form = predictionFormBody.querySelector('form');
-            form.addEventListener('submit', handleFormSubmit);
-        }
-
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            const diseaseType = data.disease_type;
-            
-            // Show loading state
-            showLoading(true);
-
-            try {
-                const response = await fetch('/predict', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-
-                const result = await response.json();
-                
-                if (response.ok) {
-                    closeModal(); // Close prediction form modal
-                    showResults(result, diseaseType, data);
-                } else {
-                    alert('Error: ' + result.error);
-                    closeModal();
-                }
-            } catch (error) {
-                alert('An error occurred. Please try again.');
-                console.error('Fetch error:', error);
-                closeModal();
-            } finally {
-                showLoading(false);
-            }
-        }
-        
-        async function showResults(result, diseaseType, inputData) {
-            const resultText = document.getElementById('resultText');
-            const resultProbability = document.getElementById('resultProbability');
-            
-            resultText.textContent = result.prediction_text;
-            resultProbability.textContent = result.probability;
-            
-            // Show loading spinner for insight generation
-            loadingInsight.classList.remove('hidden');
-            geminiInsightText.textContent = '';
-            
-            modalBackdrop.classList.remove('hidden');
-            resultsModal.classList.remove('hidden');
-
-            // Save the prediction to Firestore
-            try {
-                const savePredictionResponse = await fetch('/save_prediction', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user_id': currentUser.uid // Pass user ID in the header
-                    },
-                    body: JSON.stringify({
-                        disease_type: diseaseType,
-                        input_data: inputData,
-                        prediction_text: result.prediction_text,
-                        probability: result.probability,
-                        timestamp: new Date().toISOString()
-                    })
-                });
-
-                if (savePredictionResponse.ok) {
-                    console.log("Prediction saved successfully.");
-                    // Refresh history after saving
-                    fetchPredictionHistory(currentUser.uid);
-                } else {
-                    const saveResult = await savePredictionResponse.json();
-                    console.error("Failed to save prediction:", saveResult.error);
-                }
-            } catch (error) {
-                console.error("Error saving prediction:", error);
-            }
-
-            // Generate AI insight
-            await generateInsight(result.prediction_text, diseaseType, inputData);
-        }
-
-        async function generateInsight(predictionText, diseaseType, inputData) {
-            const prompt = `Based on a patient's prediction of "${predictionText}" for ${diseaseType.replace('_', ' ')}, and the input data: ${JSON.stringify(inputData)}, provide a brief, professional, and general health insight. The advice should be for informational purposes only and encourage a consultation with a healthcare professional. Avoid making definitive statements about the patient's health.`;
-            
-            try {
-                const response = await fetch('/generate_insight', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: prompt }),
-                });
-
-                const result = await response.json();
-                
-                if (response.ok) {
-                    geminiInsightText.textContent = result.insight;
-                } else {
-                    geminiInsightText.textContent = 'Failed to generate an AI insight at this time.';
-                    console.error('AI Insight Error:', result.error);
-                }
-            } catch (error) {
-                geminiInsightText.textContent = 'An error occurred while generating the AI insight.';
-                console.error('AI Insight Fetch Error:', error);
-            } finally {
-                loadingInsight.classList.add('hidden');
-            }
-        }
-        
-        async function fetchPredictionHistory(userId) {
-            try {
-                const response = await fetch('/get_predictions', {
-                    method: 'GET',
-                    headers: { 'user_id': userId }
-                });
-                const predictions = await response.json();
-                
-                predictionHistoryList.innerHTML = '';
-                
-                if (predictions.length > 0) {
-                    noHistoryMessage.classList.add('hidden');
-                    predictions.forEach(prediction => {
-                        const historyItem = document.createElement('div');
-                        historyItem.classList.add('col-lg-4', 'col-md-6', 'col-sm-12', 'mb-4');
-                        historyItem.innerHTML = `
-                            <div class="history-card" data-aos="zoom-in">
-                                <h4>${prediction.disease_type.replace('_', ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</h4>
-                                <p>${prediction.prediction_text}</p>
-                                <p class="text-muted small">${prediction.probability}</p>
-                                <p class="timestamp">${new Date(prediction.timestamp).toLocaleString()}</p>
-                            </div>
-                        `;
-                        predictionHistoryList.appendChild(historyItem);
-                    });
-                } else {
-                    noHistoryMessage.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('Error fetching prediction history:', error);
-                predictionHistoryList.innerHTML = `<div class="col-12 text-center text-danger"><p>Failed to load history.</p></div>`;
-                noHistoryMessage.classList.add('hidden');
-            }
-        }
-
-        AOS.init();
-    </script>
+    <!-- Firebase SDKs (using compat versions for broader browser support) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Your custom JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
