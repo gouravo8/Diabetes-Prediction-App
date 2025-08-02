@@ -4,36 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Precision Health Hub</title>
-    <!-- Google Fonts: Poppins for headings, Roboto for body -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <!-- Link to your custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- AOS (Animate On Scroll) Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Font Awesome for Icons (e.g., hamburger, user, health icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Favicon placeholder (you can replace this with a real favicon later) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
 </head>
 <body>
-    <!-- Responsive Navbar -->
     <nav class="navbar">
         <div class="navbar-brand">
             <a href="/" class="logo-link">
-                <!-- NEW SVG Logo: Stylized Heartbeat + Plus Sign -->
                 <svg class="app-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#8A2BE2" /> <!-- Lavender -->
-                            <stop offset="100%" stop-color="#ADD8E6" /> <!-- Soft Blue -->
-                        </linearGradient>
+                            <stop offset="0%" stop-color="#4F79A7" /> <stop offset="100%" stop-color="#80CED1" /> </linearGradient>
                     </defs>
-                    <!-- Heartbeat line -->
                     <path d="M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50"
                           stroke="url(#logoGradient)" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <!-- Plus sign for health/medical -->
-                    <line x1="45" y1="40" x2="55" y2="60" stroke="#00CED1" stroke-width="8" stroke-linecap="round"/>
-                    <line x1="55" y1="40" x2="45" y2="60" stroke="#00CED1" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="45" y1="40" x2="55" y2="60" stroke="#80CED1" stroke-width="8" stroke-linecap="round"/>
+                    <line x1="55" y1="40" x2="45" y2="60" stroke="#80CED1" stroke-width="8" stroke-linecap="round"/>
                 </svg>
                 <span class="app-title">Precision Health Hub</span>
             </a>
@@ -45,13 +34,11 @@
             <li><a href="#prediction-section" class="nav-link active">Predictions</a></li>
             <li><a href="#insights-section" class="nav-link">AI Insights</a></li>
             <li><a href="#history-section" class="nav-link">History</a></li>
-            <!-- Login/Logout buttons, dynamically shown/hidden by JS -->
             <li id="loginNavLink"><a href="#" class="nav-link login-btn"><i class="fas fa-user-circle"></i> Login</a></li>
             <li id="logoutNavLink" class="hidden"><a href="#" class="nav-link logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </nav>
 
-    <!-- Hero Section with Animated Text -->
     <section class="hero-section">
         <div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
             <h1 class="animated-text" id="hero-heading">Empowering Your Health Journey</h1>
@@ -60,9 +47,8 @@
     </section>
 
     <div class="container">
-        <!-- Prediction Section -->
         <section id="prediction-section" class="card-section" data-aos="fade-up" data-aos-delay="200">
-            <h2 class="section-title">Predict Your Health Risk</h2>
+            <h2 class="section-title"><i class="fas fa-chart-line section-icon"></i> Predict Your Health Risk</h2>
             <div class="disease-selection-group">
                 <label for="diseaseType">Select Disease:</label>
                 <select id="diseaseType" name="diseaseType" required>
@@ -72,7 +58,6 @@
                 </select>
             </div>
 
-            <!-- Diabetes Prediction Form Section -->
             <div id="diabetesFormSection" class="form-section card-layout">
                 <h3 class="card-title">Diabetes Prediction</h3>
                 <form id="diabetesPredictionForm">
@@ -100,7 +85,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="heart_disease_input">Heart Disease:</label> <!-- Renamed ID here -->
+                        <label for="heart_disease_input">Heart Disease:</label>
                         <select id="heart_disease_input" name="heart_disease" required>
                             <option value="0">No</option>
                             <option value="1">Yes</option>
@@ -139,25 +124,21 @@
                 </form>
             </div>
 
-            <!-- Heart Disease Prediction Form Section (initially hidden) -->
             <div id="heartDiseaseFormSection" class="form-section card-layout hidden">
                 <h3 class="card-title">Heart Disease Prediction</h3>
                 <form id="heartDiseasePredictionForm">
-                    <!-- Fields will be dynamically generated by script.js -->
                     <button type="submit" class="submit-btn">Predict Heart Disease Risk</button>
                 </form>
             </div>
 
             <div id="predictionResult" class="result-card hidden" data-aos="fade-up" data-aos-delay="300">
-                <!-- Prediction result will be displayed here dynamically by JavaScript -->
                 <div class="loading-spinner" style="display: none;"></div>
             </div>
         </section>
 
-        <!-- Health Insights Section (Powered by Gemini AI) -->
         <section id="insights-section" class="card-section" data-aos="fade-up" data-aos-delay="400">
-            <h2 class="section-title">Health Insights (Powered by Gemini AI)</h2>
-            <div class="form-section card-layout insight-input-card">
+            <h2 class="section-title"><i class="fas fa-brain section-icon"></i> Health Insights</h2>
+            <div class="form-section insight-input-card">
                 <h3 class="card-title">Ask a Question</h3>
                 <div class="form-group">
                     <label for="healthQuestion">Your Health Query:</label>
@@ -165,7 +146,6 @@
                 </div>
                 <button id="getInsightButton" class="submit-btn">Get Insight</button>
             </div>
-            <!-- Insights will be displayed in this grid container -->
             <div id="insightResultContainer" class="insight-grid-container">
                 <div id="insightResult" class="insight-card hidden" data-aos="fade-up" data-aos-delay="100">
                     <div class="loading-spinner" style="display: none;"></div>
@@ -173,9 +153,8 @@
             </div>
         </section>
 
-        <!-- Prediction History Section (Firebase Integration) -->
         <section id="history-section" class="card-section" data-aos="fade-up" data-aos-delay="500">
-            <h2 class="section-title">Your Prediction History</h2>
+            <h2 class="section-title"><i class="fas fa-history section-icon"></i> Your Prediction History</h2>
             <div id="loginPrompt" class="info-card">
                 <p>Please log in to view your prediction history.</p>
                 <button id="anonLoginBtn" class="submit-btn">Login Anonymously</button>
@@ -185,10 +164,7 @@
             </div>
         </section>
 
-    </div> <!-- /container -->
-
-    <!-- Authentication Modal/Section -->
-    <div id="authModal" class="auth-modal hidden">
+    </div> <div id="authModal" class="auth-modal hidden">
         <div class="auth-card">
             <button class="close-auth-modal"><i class="fas fa-times"></i></button>
             <div class="auth-tabs">
@@ -196,7 +172,6 @@
                 <button id="showSignupTab" class="auth-tab">Sign Up</button>
             </div>
 
-            <!-- Login Form -->
             <form id="loginForm" class="auth-form">
                 <h3 class="card-title">Login to Your Account</h3>
                 <div class="form-group">
@@ -210,7 +185,6 @@
                 <button type="submit" class="submit-btn">Login</button>
             </form>
 
-            <!-- Sign Up Form -->
             <form id="signupForm" class="auth-form hidden">
                 <h3 class="card-title">Create New Account</h3>
                 <div class="form-group">
@@ -226,15 +200,11 @@
         </div>
     </div>
 
-    <!-- AOS JavaScript -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <!-- Chart.js for mini charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Firebase SDKs (using compat versions for broader browser support) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <!-- Your custom JavaScript -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -1,17 +1,17 @@
 /* Color Palette & Font Variables */
 :root {
-    --primary-color: #8A2BE2; /* Lavender */
-    --secondary-color: #00CED1; /* Dark Teal */
-    --accent-color: #ADD8E6; /* Soft Blue */
-    --bg-dark: #1A1A2E; /* Deep Purple-ish Black */
-    --card-bg: #2C2C4A; /* Slightly lighter dark for cards */
-    --text-light: #E0E0F0;
-    --text-muted: #B0B0C0;
-    --border-color: #4A4A6A;
+    --primary-color: #4F79A7; /* A professional, deep blue */
+    --secondary-color: #80CED1; /* A calming light teal/green */
+    --accent-color: #A9D1DF; /* A soft, lighter blue for highlights */
+    --bg-dark: #1F2833; /* A professional charcoal/dark blue */
+    --card-bg: #2C3E50; /* A slightly lighter dark for cards */
+    --text-light: #F0F4F8;
+    --text-muted: #BCC2CC;
+    --border-color: #4D648D;
     --shadow-color: rgba(0, 0, 0, 0.4);
 
     /* Medical Pattern SVG */
-    --medical-pattern-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stethoscope --%3E%3Cpath d='M30 20 C20 20 20 30 20 40 V50 H10 V60 H20 V70 C20 80 30 80 40 80 H60 C70 80 80 80 80 70 V60 H90 V50 H80 V40 C80 30 80 20 70 20 L60 20 Z' fill='none' stroke='%23333333' stroke-width='3'/%3E%3Ccircle cx='40' cy='50' r='5' fill='%23333333'/%3E%3Ccircle cx='60' cy='50' r='5' fill='%23333333'/%3E%3C!-- Syringe --%3E%3Cpath d='M50 5 L55 10 L55 15 C55 18 52 20 50 20 C48 20 45 18 45 15 L45 10 L50 5 Z' fill='%23333333'/%3E%3Crect x='48' y='20' width='4' height='20' fill='%23333333'/%3E%3Cpath d='M45 40 C45 45 40 45 40 50 V60 H60 V50 C60 45 55 45 55 40 Z' fill='%23333333'/%3E%3C/svg%3E");
+    --medical-pattern-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Heartbeat line --%3E%3Cpath d='M5 50 L20 50 Q25 20 35 50 T55 50 Q60 80 70 50 T95 50' fill='none' stroke='%233D5B78' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' /%3E%3C/svg%3E");
 }
 
 /* General Body Styling */
@@ -40,7 +40,7 @@ h1, h2, h3, .app-title, .card-title {
 /* Navbar Styling */
 .navbar {
     width: 100%;
-    background: linear-gradient(90deg, var(--bg-dark) 0%, #10101A 100%);
+    background: linear-gradient(90deg, var(--bg-dark) 0%, #152232 100%);
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
@@ -87,7 +87,7 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 .hamburger-menu {
-    display: none; /* Hidden by default on desktop */
+    display: none;
     background: none;
     border: none;
     font-size: 1.8em;
@@ -124,7 +124,7 @@ h1, h2, h3, .app-title, .card-title {
     position: absolute;
     width: 0;
     height: 3px;
-    background-color: var(--primary-color);
+    background-color: var(--secondary-color);
     bottom: -5px;
     left: 0;
     transition: width 0.3s ease;
@@ -141,11 +141,11 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 .nav-link.active {
-    color: var(--primary-color);
+    color: var(--secondary-color);
 }
 
-.login-btn, .logout-btn { /* Combined styles for both login and logout */
-    background: linear-gradient(45deg, var(--secondary-color), #00A0A0);
+.login-btn, .logout-btn {
+    background: linear-gradient(45deg, var(--secondary-color), #57B6B9);
     padding: 8px 18px;
     border-radius: 8px;
     color: white;
@@ -154,20 +154,20 @@ h1, h2, h3, .app-title, .card-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 3px 10px rgba(0, 206, 209, 0.3);
+    box-shadow: 0 3px 10px rgba(128, 206, 209, 0.3);
 }
 
 .login-btn:hover, .logout-btn:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 5px 15px rgba(0, 206, 209, 0.4);
+    box-shadow: 0 5px 15px rgba(128, 206, 209, 0.4);
 }
 
 /* Hero Section */
 .hero-section {
     width: 100%;
-    max-width: 900px; /* Wider hero section */
-    height: 350px; /* Fixed height */
-    background: linear-gradient(135deg, var(--card-bg) 0%, #3A3A5A 100%);
+    max-width: 900px;
+    height: 350px;
+    background: linear-gradient(135deg, var(--card-bg) 0%, #3D5B78 100%);
     margin: 30px auto;
     border-radius: 15px;
     display: flex;
@@ -200,13 +200,13 @@ h1, h2, h3, .app-title, .card-title {
 
 /* Animated Text for Hero Section */
 .animated-text, .animated-text-sub {
-    opacity: 0; /* Hidden by default, JS will reveal */
+    opacity: 0;
 }
 
 /* Container for main content */
 .container {
     width: 100%;
-    max-width: 800px; /* Adjusted max-width for content */
+    max-width: 800px;
     margin: 30px auto;
     padding: 20px;
     box-sizing: border-box;
@@ -234,13 +234,22 @@ h1, h2, h3, .app-title, .card-title {
     font-size: 2.5em;
     margin-bottom: 30px;
     padding-bottom: 15px;
-    border-bottom: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    color: var(--secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.section-icon {
+    font-size: 0.9em;
     color: var(--primary-color);
 }
 
 /* Form Sections (Cards within sections) */
 .form-section {
-    background-color: var(--card-bg); /* Use card-bg for forms too */
+    background-color: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 15px var(--shadow-color);
@@ -255,7 +264,7 @@ h1, h2, h3, .app-title, .card-title {
 
 .card-title {
     font-size: 1.8em;
-    color: var(--secondary-color);
+    color: var(--accent-color);
     text-align: center;
     margin-bottom: 25px;
 }
@@ -271,7 +280,7 @@ h1, h2, h3, .app-title, .card-title {
     margin-bottom: 12px;
     font-weight: 600;
     font-size: 1.15em;
-    color: var(--accent-color);
+    color: var(--text-light);
 }
 
 #diseaseType {
@@ -280,13 +289,13 @@ h1, h2, h3, .app-title, .card-title {
     padding: 14px 22px;
     border: 2px solid var(--primary-color);
     border-radius: 10px;
-    background-color: var(--card-bg);
+    background-color: #3D5B78;
     font-size: 1.1em;
     color: var(--text-light);
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%238A2BE2" d="M9.293 12.95l.707.707 4.243-4.243-1.414-1.414L10 11.536 6.707 8.243 5.293 9.657 9.293 13.65z"/%3E%3C/svg%3E'); /* Lavender arrow */
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="%2380CED1" d="M9.293 12.95l.707.707 4.243-4.243-1.414-1.414L10 11.536 6.707 8.243 5.293 9.657 9.293 13.65z"/%3E%3C/svg%3E');
     background-repeat: no-repeat;
     background-position: right 15px center;
     background-size: 18px;
@@ -296,7 +305,7 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 #diseaseType option {
-    background-color: var(--card-bg);
+    background-color: #3D5B78;
     color: var(--text-light);
 }
 
@@ -308,7 +317,7 @@ h1, h2, h3, .app-title, .card-title {
 #diseaseType:focus {
     outline: none;
     border-color: var(--secondary-color);
-    box-shadow: 0 0 0 4px rgba(138, 43, 226, 0.3); /* Lavender glow on focus */
+    box-shadow: 0 0 0 4px rgba(79, 121, 167, 0.3);
 }
 
 .form-group {
@@ -326,15 +335,15 @@ h1, h2, h3, .app-title, .card-title {
 .form-group input[type="number"],
 .form-group select,
 .form-group textarea,
-.auth-form input[type="email"], /* Added for auth forms */
-.auth-form input[type="password"] { /* Added for auth forms */
-    width: calc(100% - 28px); /* Account for padding and border */
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+    width: calc(100% - 28px);
     padding: 14px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1em;
     box-sizing: border-box;
-    background-color: #3A3A5A; /* Slightly darker input background */
+    background-color: #3D5B78;
     color: var(--text-light);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     resize: vertical;
@@ -346,13 +355,13 @@ h1, h2, h3, .app-title, .card-title {
 .auth-form input[type="email"]:focus,
 .auth-form input[type="password"]:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2); /* Lavender glow */
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(128, 206, 209, 0.2);
 }
 
 /* Submit Button Styling */
 .submit-btn {
-    background: linear-gradient(45deg, var(--primary-color), #A052ED); /* Lavender gradient */
+    background: linear-gradient(45deg, var(--secondary-color), #57B6B9);
     color: white;
     padding: 15px 25px;
     border: none;
@@ -362,19 +371,19 @@ h1, h2, h3, .app-title, .card-title {
     font-weight: 600;
     transition: all 0.3s ease;
     width: 100%;
-    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4);
+    box-shadow: 0 4px 15px rgba(128, 206, 209, 0.4);
     letter-spacing: 0.5px;
 }
 
 .submit-btn:hover {
-    background: linear-gradient(45deg, #A052ED, var(--primary-color));
-    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.5);
+    background: linear-gradient(45deg, #57B6B9, var(--secondary-color));
+    box-shadow: 0 6px 20px rgba(128, 206, 209, 0.5);
     transform: translateY(-2px);
 }
 
 .submit-btn:active {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(138, 43, 226, 0.2);
+    box-shadow: 0 2px 8px rgba(128, 206, 209, 0.2);
 }
 
 /* Prediction Result Card */
@@ -382,35 +391,35 @@ h1, h2, h3, .app-title, .card-title {
     margin-top: 30px;
     padding: 25px;
     border-radius: 12px;
-    background-color: #3A3A5A; /* Darker background for results */
+    background-color: #3D5B78;
     text-align: center;
     font-size: 1.2em;
     font-weight: 500;
     color: var(--accent-color);
     box-shadow: inset 0 1px 8px rgba(0,0,0,0.3);
     border: 1px solid var(--border-color);
-    opacity: 0; /* Hidden by default, JS will show */
+    opacity: 0;
     transition: opacity 0.5s ease-in-out;
-    position: relative; /* For spinner positioning */
+    position: relative;
 }
 
 .result-card.show {
     opacity: 1;
 }
 .result-card.hidden {
-    display: none; /* Use display:none for true hiding */
+    display: none;
 }
 
 /* Loading Spinner (CSS-only) */
 .loading-spinner {
     border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid var(--primary-color);
+    border-top: 4px solid var(--secondary-color);
     border-radius: 50%;
     width: 30px;
     height: 30px;
     animation: spin 1s linear infinite;
     margin: 20px auto;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
 @keyframes spin {
@@ -422,7 +431,7 @@ h1, h2, h3, .app-title, .card-title {
 .form-section {
     transition: opacity 0.5s ease-in-out, max-height 0.7s ease-in-out;
     opacity: 1;
-    max-height: 2000px; /* Large enough for content */
+    max-height: 2000px;
     overflow: hidden;
 }
 
@@ -438,7 +447,7 @@ h1, h2, h3, .app-title, .card-title {
 
 /* Info Card (for login prompt) */
 .info-card {
-    background-color: #3A3A5A;
+    background-color: #3D5B78;
     padding: 25px;
     border-radius: 12px;
     text-align: center;
@@ -455,18 +464,18 @@ h1, h2, h3, .app-title, .card-title {
 
 /* --- Health Insights Section Specific Styling --- */
 .insight-input-card {
-    margin-bottom: 30px; /* Space between input and results */
+    margin-bottom: 30px;
 }
 
 .insight-grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 25px;
     margin-top: 20px;
 }
 
 .insight-card {
-    background: linear-gradient(135deg, var(--card-bg) 0%, #3A3A5A 100%); /* Gradient background */
+    background: linear-gradient(135deg, var(--card-bg) 0%, #3D5B78 100%);
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 15px var(--shadow-color);
@@ -477,7 +486,7 @@ h1, h2, h3, .app-title, .card-title {
     color: var(--text-light);
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Align text to left */
+    align-items: flex-start;
     text-align: left;
 }
 
@@ -490,7 +499,7 @@ h1, h2, h3, .app-title, .card-title {
     font-size: 2.5em;
     color: var(--secondary-color);
     margin-bottom: 15px;
-    align-self: center; /* Center the icon */
+    align-self: center;
 }
 
 .insight-card h4 {
@@ -499,20 +508,20 @@ h1, h2, h3, .app-title, .card-title {
     color: var(--accent-color);
     margin-top: 0;
     margin-bottom: 10px;
-    align-self: center; /* Center the title */
+    align-self: center;
 }
 
 .insight-card p {
     font-size: 0.95em;
     line-height: 1.6;
     color: var(--text-muted);
-    flex-grow: 1; /* Allow content to take available space */
+    flex-grow: 1;
 }
 
 /* --- Prediction History Section Specific Styling --- */
 .history-list-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
@@ -547,12 +556,12 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 .history-card summary::-webkit-details-marker {
-    display: none; /* Hide default arrow */
+    display: none;
 }
 
 .history-card summary::after {
-    font-family: "Font Awesome 6 Free"; /* Use Font Awesome icon */
-    content: "\f078"; /* fa-chevron-down */
+    font-family: "Font Awesome 6 Free";
+    content: "\f078";
     font-weight: 900;
     transition: transform 0.3s ease;
 }
@@ -575,13 +584,13 @@ h1, h2, h3, .app-title, .card-title {
     color: var(--text-muted);
     font-style: italic;
     padding: 20px;
-    grid-column: 1 / -1; /* Span across all columns in grid */
+    grid-column: 1 / -1;
 }
 
 /* Progress Bar for Prediction Confidence */
 .confidence-bar-container {
     width: 100%;
-    background-color: #3A3A5A;
+    background-color: #3D5B78;
     border-radius: 5px;
     margin-top: 10px;
     height: 15px;
@@ -592,13 +601,13 @@ h1, h2, h3, .app-title, .card-title {
 .confidence-bar {
     height: 100%;
     background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
-    width: 0%; /* Will be set by JS */
+    width: 0%;
     border-radius: 5px;
     transition: width 1s ease-out;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--bg-dark); /* Dark text on bright bar */
+    color: var(--bg-dark);
     font-size: 0.7em;
     font-weight: bold;
 }
@@ -630,19 +639,19 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 .coming-soon-container .back-home-button {
-    background: linear-gradient(45deg, var(--secondary-color), #00A0A0);
+    background: linear-gradient(45deg, var(--secondary-color), #57B6B9);
     color: white;
     padding: 15px 30px;
     border-radius: 10px;
     text-decoration: none;
     font-weight: bold;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 206, 209, 0.3);
+    box-shadow: 0 4px 10px rgba(128, 206, 209, 0.3);
 }
 
 .coming-soon-container .back-home-button:hover {
-    background: linear-gradient(45deg, #00A0A0, var(--secondary-color));
-    box-shadow: 0 6px 15px rgba(0, 206, 209, 0.4);
+    background: linear-gradient(45deg, #57B6B9, var(--secondary-color));
+    box-shadow: 0 6px 15px rgba(128, 206, 209, 0.4);
     transform: translateY(-2px);
 }
 
@@ -653,11 +662,11 @@ h1, h2, h3, .app-title, .card-title {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1001; /* Above navbar */
+    z-index: 1001;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -677,12 +686,12 @@ h1, h2, h3, .app-title, .card-title {
     max-width: 450px;
     position: relative;
     border: 1px solid var(--border-color);
-    transform: translateY(-20px); /* Initial slight lift */
+    transform: translateY(-20px);
     transition: transform 0.3s ease;
 }
 
 .auth-modal.visible .auth-card {
-    transform: translateY(0); /* Slide in effect */
+    transform: translateY(0);
 }
 
 .close-auth-modal {
@@ -707,7 +716,7 @@ h1, h2, h3, .app-title, .card-title {
     margin-bottom: 25px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 10px;
-    gap: 5px; /* Added gap for better spacing */
+    gap: 5px;
 }
 
 .auth-tab {
@@ -721,18 +730,18 @@ h1, h2, h3, .app-title, .card-title {
     cursor: pointer;
     border-radius: 8px;
     transition: all 0.3s ease;
-    margin: 0 5px; /* Adjusted margin */
+    margin: 0 5px;
 }
 
 .auth-tab:hover {
     color: var(--text-light);
-    background-color: rgba(0, 206, 209, 0.1); /* Subtle teal hover */
+    background-color: rgba(128, 206, 209, 0.1);
 }
 
 .auth-tab.active {
     color: var(--secondary-color);
-    background-color: rgba(0, 206, 209, 0.2); /* Teal background for active tab */
-    box-shadow: 0 2px 8px rgba(0, 206, 209, 0.2);
+    background-color: rgba(128, 206, 209, 0.2);
+    box-shadow: 0 2px 8px rgba(128, 206, 209, 0.2);
 }
 
 .auth-form {
@@ -740,7 +749,7 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 .auth-form .card-title {
-    color: var(--primary-color); /* Match primary color for auth titles */
+    color: var(--primary-color);
     font-size: 1.6em;
 }
 
@@ -770,10 +779,10 @@ h1, h2, h3, .app-title, .card-title {
     border-left: 5px solid var(--secondary-color);
 }
 .message-box.error {
-    border-left: 5px solid #FF6347; /* Tomato red for errors */
+    border-left: 5px solid #E74C3C;
 }
 .message-box.success {
-    border-left: 5px solid #3CB371; /* Medium Sea Green for success */
+    border-left: 5px solid #2ECC71;
 }
 
 .message-box p {
@@ -783,7 +792,7 @@ h1, h2, h3, .app-title, .card-title {
 }
 
 .message-box .close-message {
-    background: linear-gradient(45deg, var(--primary-color), #A052ED);
+    background: linear-gradient(45deg, var(--primary-color), #3498DB);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -796,9 +805,8 @@ h1, h2, h3, .app-title, .card-title {
 
 .message-box .close-message:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(138, 43, 226, 0.4);
+    box-shadow: 0 4px 10px rgba(79, 121, 167, 0.4);
 }
-
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
@@ -814,13 +822,13 @@ h1, h2, h3, .app-title, .card-title {
     }
 
     .hamburger-menu {
-        display: block; /* Show hamburger on mobile */
+        display: block;
     }
 
     .nav-links {
         flex-direction: column;
         width: 100%;
-        display: none; /* Hidden by default */
+        display: none;
         gap: 10px;
         text-align: center;
         padding-top: 10px;
@@ -828,7 +836,7 @@ h1, h2, h3, .app-title, .card-title {
     }
 
     .nav-links.active {
-        display: flex; /* Show when active */
+        display: flex;
     }
 
     .nav-link {
@@ -843,14 +851,14 @@ h1, h2, h3, .app-title, .card-title {
 
     .login-btn, .logout-btn {
         margin-top: 10px;
-        width: 80%; /* Make button wider on mobile */
+        width: 80%;
         max-width: 250px;
         margin-left: auto;
         margin-right: auto;
     }
 
     .hero-section {
-        height: 250px; /* Shorter hero on mobile */
+        height: 250px;
         margin: 20px auto;
         padding: 15px;
     }
@@ -920,10 +928,9 @@ h1, h2, h3, .app-title, .card-title {
         font-size: 1em;
     }
 
-    /* Responsive grid adjustments */
     .insight-grid-container,
     .history-list-grid {
-        grid-template-columns: 1fr; /* Single column on small screens */
+        grid-template-columns: 1fr;
         gap: 15px;
     }
 
@@ -936,8 +943,3 @@ h1, h2, h3, .app-title, .card-title {
         font-size: 1em;
     }
 }
-
-/* Accessibility: Ensure good contrast for text on backgrounds */
-/* (Already handled by chosen palette, but keep in mind for custom changes) */
-/* Example: background-color: var(--bg-dark); color: var(--text-light); */
-/* Contrast ratio check tools can be used if colors are changed significantly */
